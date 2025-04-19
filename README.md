@@ -58,6 +58,10 @@ oldphonedeals/
 
 2. **Install dependencies**
    ```bash
+   # Install mongodb
+   brew tap mongodb/brew
+   brew install mongodb-community
+
    # Install server dependencies
    npm install
    

@@ -4,7 +4,8 @@
   "description": "eCommerce web application for COMP5347/COMP4347",
   "main": "server/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server/server.js",
+    "server": "nodemon server/server.js"
   },
   "repository": {
     "type": "git",
