@@ -58,7 +58,7 @@ oldphonedeals/
 
 2. **Install dependencies**
    ```bash
-   # Install mongodb
+   # Install mongodb on MacOS
    brew tap mongodb/brew
    brew install mongodb-community
 
@@ -93,7 +93,6 @@ oldphonedeals/
 
 4. **Initialize the database**
    ```bash
-   # Import the dataset into MongoDB
    npm run init-db
    ```
 
@@ -115,10 +114,7 @@ oldphonedeals/
 The following npm scripts are available:
 
 - `npm run server`: Start the backend server
-- `npm run client`: Start the Angular development server
-- `npm run dev`: Start both servers concurrently
 - `npm run init-db`: Initialize the database with sample data
-- `npm run build`: Build the client for production
 - `npm start`: Start the production server
 
 ## Contributing
