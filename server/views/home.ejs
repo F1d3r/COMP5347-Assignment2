@@ -3,19 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OldPhoneDeals HomePage</title>
+    <title>OldPhoneDeals</title>
+    <script src="/js/homepage.js"></script>
 </head>
 <body>
-    <h1>THIS IS THE HOME PAGE</h1>
-    <h1>HERE IS THE REDICTORY TEST</h1>
-
-    <h1>Welcome! <%= user.firstname%> <%= user.lastname%></h1>
-
-    <form method = "GET" action="/auth">
-        <input type="submit" value="Sign Up" />
-        <input type="submit" value="Log In" />
-    </form>
-
+    <h1>OldPhoneDeals Home</h1>
     
+    <div id="topbar">
+
+    </div>
+
+    <div class = "search">
+        <form class = "search" method="POST" action="/search">
+            <input type="text" id="search" placeholder="Search here" required>
+            <input type="submit" value="Search">
+            <input type="reset" value="Clear">
+        </form>
+    </div>
+
+    <div>
+        <table id = "searchResult">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Brand</th>
+                    <th>Image</th>
+                    <th>Stock</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Reviews</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
 </body>
 </html>
