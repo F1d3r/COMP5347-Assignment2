@@ -39,3 +39,20 @@ td:hover {
     position: relative;
     z-index: 1;
 }
+
+/* Form formating */
+form{
+    display: flex;
+    justify-content: space-between;
+    background-color: rgb(222, 241, 241);
+    padding: 10px;
+ }
+
+
+ /* Other formatting */
+ div.flex-row-seperate{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:space-between;
+ }

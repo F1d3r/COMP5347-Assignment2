@@ -1,13 +1,15 @@
 // Define user model.
+
+// TODO: Add the registration date for all users.
 const mongoose = require("mongoose");
 const userSchema = new mongoose.Schema({
     id: String,
-    first_name: String,
-    last_name: String,
+    firstname: String,
+    lastname: String,
     email: String,
     password: String
 });
 
-const User = mongoose.model('userlist', userSchema, 'userlist')
+const User = mongoose.model('user', userSchema, 'user')
 
 module.exports = User;
