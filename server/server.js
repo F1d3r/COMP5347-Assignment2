@@ -36,7 +36,9 @@ app.use('/assets', express.static(path.join(__dirname, '../client/src/assets')))
 // const authRoutes = require('./routes/auth.routes');
 // const userRoutes = require('./routes/user.routes');
 // const phoneRoutes = require('./routes/phone.routes');
-// const adminRoutes = require('./routes/admin.routes');
+const adminRoutes = require('./routes/admin.routes');
+const reviewRoutes = require('./routes/review.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 // API Routes
 app.get('/api/test', (req, res) => {
@@ -57,6 +59,10 @@ app.use((err, req, res, next) => {
     error: NODE_ENV === 'development' ? err : {}
   });
 });
+
+app.use('/api/admin', adminRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Connect to MongoDB and start server
 mongoose

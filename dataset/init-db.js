@@ -37,6 +37,7 @@ async function initializeDatabase() {
     // Review schema
     const reviewSchema = new mongoose.Schema({
       reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      listing: { type: mongoose.Schema.Types.ObjectId, ref: 'PhoneListing' },
       rating: Number,
       comment: String,
       hidden: Boolean
@@ -57,7 +58,8 @@ async function initializeDatabase() {
     // Create models
     const User = mongoose.model('User', userSchema);
     const PhoneListing = mongoose.model('PhoneListing', phoneListingSchema);
-    
+    const Review = mongoose.model('Review', reviewSchema);
+
     // Check if collections exist and have data
     const userCount = await User.countDocuments();
     const phoneCount = await PhoneListing.countDocuments();
