@@ -1,0 +1,15 @@
+<div *ngIf="phone; else loading">
+    <h2>{{ phone.title }}</h2>
+    <img [src]="phone.image" alt="{{ phone.title }}" width="150" />
+    <p><strong>Brand:</strong> {{ phone.brand }}</p>
+    <p><strong>Price:</strong> ${{ phone.price }}</p>
+    <p><strong>Stock:</strong> {{ phone.stock }}</p>
+    <p><strong>ID:</strong> {{ phone._id }}</p>
+    <button (click)="addToCart()">Add to Cart</button>
+    <button (click)="goBack()" style="margin-left: 10px"> Back </button>
+  </div>
+  
+  <ng-template #loading>
+    <p>Loading product...</p>
+  </ng-template>
+  

@@ -35,8 +35,10 @@ app.use('/assets', express.static(path.join(__dirname, '../client/src/assets')))
 // Import routes
 // const authRoutes = require('./routes/auth.routes');
 // const userRoutes = require('./routes/user.routes');
-// const phoneRoutes = require('./routes/phone.routes');
+const phoneRoutes = require('./routes/phoneRoutes');
 // const adminRoutes = require('./routes/admin.routes');
+const orderRoutes = require('./routes/orderRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 
 // API Routes
 app.get('/api/test', (req, res) => {
@@ -46,8 +48,10 @@ app.get('/api/test', (req, res) => {
 // TODO: Uncomment these routes when they're implemented
 // app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
-// app.use('/api/phones', phoneRoutes);
+app.use('/api/phones', phoneRoutes);
 // app.use('/api/admin', adminRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
