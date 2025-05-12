@@ -1,4 +1,3 @@
-
 /**
  * Main server file for OldPhoneDeals application
  */
@@ -13,6 +12,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const session = require('express-session');
 
 // Create Express app
 const app = express();
@@ -29,6 +29,17 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Session middleware (needed for admin auth)
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'your-secret-key-here',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: false, // Set to true if using HTTPS
+    maxAge: 15 * 60 * 1000 // 15 minutes
+  }
+}));
+
 // Static files (for image assets)
 app.use('/assets', express.static(path.join(__dirname, '../client/src/assets')));
 
@@ -38,9 +49,9 @@ app.use('/assets', express.static(path.join(__dirname, '../client/src/assets')))
 // const phoneRoutes = require('./routes/phone.routes');
 const adminRoutes = require('./routes/admin.routes');
 const reviewRoutes = require('./routes/review.routes');
-const notificationRoutes = require('./routes/notification.routes');
+const notificationRoutes = require('./routes/notifications.routes');
 
-// API Routes
+// API Routes (MUST come before static file serving and catch-all)
 app.get('/api/test', (req, res) => {
   res.json({ message: 'API is working!' });
 });
@@ -49,7 +60,19 @@ app.get('/api/test', (req, res) => {
 // app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
 // app.use('/api/phones', phoneRoutes);
-// app.use('/api/admin', adminRoutes);
+
+app.use('/api/admin', adminRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/notifications', notificationRoutes);
+
+// Serve static files from Angular build
+app.use(express.static(path.join(__dirname, '../client/dist/oldphonedeals-client/browser')));
+
+// Catch-all handler: send back Angular's index.html file for any non-API routes
+// THIS MUST BE THE LAST ROUTE
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/oldphonedeals-client/browser/index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -59,10 +82,6 @@ app.use((err, req, res, next) => {
     error: NODE_ENV === 'development' ? err : {}
   });
 });
-
-app.use('/api/admin', adminRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/notifications', notificationRoutes);
 
 // Connect to MongoDB and start server
 mongoose
