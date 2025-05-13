@@ -16,8 +16,63 @@ const PhoneSchema = new mongoose.Schema({
     stock: Number,
     seller: String,
     price: Number,
-    reviews:[reviewSchema]
+    reviews:[reviewSchema],
+    disabled: Boolean
 });
+
+
+// Find the 5 phons with highest rating.
+PhoneSchema.statics.getBestSeller = async function(){
+    // Using the pipeline to calculate the average rating for each phone.
+    const topPhones =  await this.aggregate([
+        // Filter the phones disabled.
+        { $match: { 
+            disabled: { $exists: true },
+            disabled: { $eq: false },
+        }},
+
+        // Add a field for average rating.
+        { $addFields: {
+            avgRating: { 
+                $cond: {
+                    // 0 If no review.
+                    if: { $eq: [{ $size: "$reviews" }, 0] },
+                    then: 0,
+                    // Else the average of all revies.
+                    else: { $avg: "$reviews.rating" }
+                }
+            },
+        }},
+
+        // Sort on averageRating by descending order.
+        { $sort: { averageRating: -1} },
+        
+        // Get top 5.
+        { $limit: 5 }
+    ]);
+    return topPhones;
+}
+
+// Find the 5 phons with lowest stock.
+PhoneSchema.statics.getSoldOutSoon = async function(){
+    // Using the pipeline to calculate the average rating for each phone.
+    const soldOutSoonPhones =  await this.aggregate([
+        // Filter the phones disabled.
+        { $match: { 
+            disabled: { $exists: true },
+            disabled: { $eq: false },
+            stock: {$ne: 0}
+        }},
+        // Sort on stock
+        { $sort: { stock: 1} },
+        
+        // Get top 5.
+        { $limit: 5 }
+    ]);
+
+    return soldOutSoonPhones;
+}
+
 
 // Static function used to find the phone by key words search.
 PhoneSchema.statics.findPhones = function(keywrod, brand){

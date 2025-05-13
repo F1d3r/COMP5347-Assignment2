@@ -1,5 +1,18 @@
-var loggedIn = false;
-
+const loggedIn = fetch('/isLoggedIn', {
+    method: 'GET'
+})
+  .then(response => response.json())
+  .then(response => {
+    console.log(response);
+    console.log(response.user.role);
+    if (response.user.role == 'user') {
+      console.log('Has already logged in.');
+      return true;
+    } else {
+      console.log('Access as guest.');
+      return false;
+    }
+  });
 
 setSearchForm = function(){
     const searchForm = document.querySelector('form.search');
@@ -128,11 +141,18 @@ setupSigninBtn = function(){
 
     signInBtn.addEventListener('click', ()=>{
         console.log("Login Button Clicked.");
-        // Ask server for all brand list.
+        window.location.href = '/auth';
+    })
+}
+
+
+setupProfileBtn = function(){
+    const profileBtn = document.getElementById('profileBtn');
+
+    profileBtn.addEventListener('click', ()=>{
+        console.log("Profile Button Clicked.");
         if(loggedIn){
-            alert('You have logged in.');
-        }else{
-            window.location.href = '/auth';
+            window.location.href = '/profile';
         }
     })
 }
@@ -147,6 +167,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
     setSearchForm();
 
     setupSigninBtn();
+
+    setupProfileBtn();
 
     
 });

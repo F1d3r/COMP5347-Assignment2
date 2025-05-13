@@ -6,14 +6,14 @@ module.exports.showAuthPage = function(req, res){
 }
 
 module.exports.verifyUser = async function(req, res){
-    username = req.body.emailInput;
+    email = req.body.emailInput;
     pwd = req.body.pwdInput;
-    console.log(username);
+    console.log(email);
     console.log(pwd);
     
     try{
         // Find user in the database.
-        const user = await User.findOne({email: username});
+        const user = await User.findOne({email: email});
         // Check user existence.
         if(!user){
             // return res.redirect('/auth');
@@ -29,8 +29,12 @@ module.exports.verifyUser = async function(req, res){
 
         // Now the login detail is correct. Record the login and send response.
         // TODO RECORD LOGIN HISTORY.
-        // TODO HANDLE LOGIN SESSION.
-        req.session.userFirstName = user.firstname;
+        req.session.user = {
+            role: 'user',
+            firstname: user.firstname,
+            lastname: user.lastname,
+            email: user.email
+        }
         return res.redirect('/');
 
     }catch(error){

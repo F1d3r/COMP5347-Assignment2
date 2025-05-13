@@ -13,8 +13,8 @@
         <h1>OldPhoneDeals Home</h1>
         <!--TODO Dynamically show the login detail-->
         <!--Say hello, XXX-->
-        <% if (userFirstName) { %>
-            <h2>Welcome, <%= userFirstName %>!</h2>
+        <% if (user) { %>
+            <h2>Welcome back, <%= user.firstname %>!</h2>
         <% } else { %>
             <h2>Welcome, please login</h2>
         <% } %>
