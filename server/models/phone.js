@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
  
 // Review schema
-const reviewSchema = new mongoose.Schema({
+const ReviewSchema = new mongoose.Schema({
     reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     rating: Number,
     comment: String,
@@ -16,7 +16,7 @@ const PhoneSchema = new mongoose.Schema({
     stock: Number,
     seller: String,
     price: Number,
-    reviews:[reviewSchema],
+    reviews:[ReviewSchema],
     disabled: Boolean
 });
 
@@ -95,7 +95,6 @@ PhoneSchema.statics.getAllBrand = function(){
     .sort({'brand':1});
 }
 
-const Phone = mongoose.model('Phone', PhoneSchema, 'phone');
-
 // Exports the model.
+const Phone = mongoose.model('Phone', PhoneSchema, 'phone');
 module.exports = Phone;

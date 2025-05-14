@@ -2,7 +2,7 @@
 
 // TODO: Add the registration date for all users.
 const mongoose = require("mongoose");
-const userSchema = new mongoose.Schema({
+const UserSchema = new mongoose.Schema({
     id: String,
     firstname: String,
     lastname: String,
@@ -10,6 +10,13 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
-const User = mongoose.model('user', userSchema, 'user')
 
+UserSchema.statics.findUser = async function(email, password){
+    let user = this.find({'email': email, 'password':password})
+    return user;
+}
+
+
+// Export the model
+const User = mongoose.model('User', UserSchema, 'user')
 module.exports = User;

@@ -16,6 +16,10 @@ import { MatCardModule } from '@angular/material/card';
       table{
         width: 100%;
       }
+      img{
+        width: 100px;
+        height: auto;
+      }
     `,
   ],
 
@@ -41,6 +45,10 @@ import { MatCardModule } from '@angular/material/card';
                 <td mat-cell *matCellDef="let element">{{ element.avgRating || 'No Rating' }}</td>
               </ng-container>
 
+              <!-- Add header and row definitions -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
             </table>
         </mat-card-content>
 
@@ -48,9 +56,6 @@ import { MatCardModule } from '@angular/material/card';
             <!-- <button mat-button (click)="onAction1">Action1</button> -->
             
         </mat-card-actions>
-        <mat-card-footer>
-            Footer
-        </mat-card-footer>
     </mat-card>
   `
 })
@@ -77,20 +82,20 @@ export class TopSellerComponent implements OnInit {
   }
 
   private brandImageMap: { [key: string]: string } = {
-    "Apple": "assets/images/Apple.jpeg",
-    "BlackBerry": "assets/images/BlackBerry.jpeg",
-    "HTC": "assets/images/HTC.jpeg",
-    "Huawei": "assets/images/Huawei.jpeg",
-    "LG": "assets/images/LG.jpeg",
-    "Motorola": "assets/images/Motorola.jpeg",
-    "Nokia": "assets/images/Nokia.jpeg",
-    "Samsung": "assets/images/Samsung.jpeg",
-    "Sony": "assets/images/Sopy.jpeg"
+    "Apple": "./assets/images/Apple.jpeg",
+    "BlackBerry": "./assets/images/BlackBerry.jpeg",
+    "HTC": "./assets/images/HTC.jpeg",
+    "Huawei": "./assets/images/Huawei.jpeg",
+    "LG": "./assets/images/LG.jpeg",
+    "Motorola": "./assets/images/Motorola.jpeg",
+    "Nokia": "./assets/images/Nokia.jpeg",
+    "Samsung": "./assets/images/Samsung.jpeg",
+    "Sony": "./assets/images/Sopy.jpeg"
   };
 
   // Get the image path for the brand.
   getBrandImages(brand: string){
-    let img_url = this.brandImageMap[brand] || "assets/images/default.png";
+    let img_url = this.brandImageMap[brand] || "./assets/images/default.png";
     console.log(img_url);
     return img_url;
   }

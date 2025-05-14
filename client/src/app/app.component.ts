@@ -1,24 +1,30 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+
 import { MatToolbarModule } from '@angular/material/toolbar';
 
-import { TopSellerComponent } from './top-seller/top-seller.component';
-// import { SoldOutSoonComponent } from './sold-out-soon/sold-out-soon.component';
+import {UserService} from './user.service'
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, TopSellerComponent, MatToolbarModule],
+  imports: [RouterOutlet, MatToolbarModule],
+
+  styles: [
+    `
+    `
+  ],
+
   template: `
     <mat-toolbar>
-      <span>Welcome to {{title}}</span>
+      <span>OldPhoneDeals</span>
     </mat-toolbar>
-
     <main>
+      <!-- Show the component given by the router -->
       <router-outlet></router-outlet>
     </main>
-  `,
-  styles: [],
+  `
 })
 export class AppComponent {
   title = 'OldPhoneDeals';
+
 }

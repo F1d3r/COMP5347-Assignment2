@@ -1,15 +1,17 @@
 const express = require('express');
-const controller = require('../controllers/user.controller');
+const phoneController = require('../controllers/phone.controller');
+const userController = require('../controllers/user.controller');
 const userRouter = express.Router();
 
 
 
 // Get the bestSeller in the dataset.
-userRouter.get('/bestSeller', controller.getBestSeller);
-userRouter.get('/soldOutSoon', controller.getSoldOutSoon);
-userRouter.get('/search', controller.searchResult);
-userRouter.get('/allBrand', controller.getAllBrand);
+userRouter.get('/bestSeller', phoneController.getBestSeller);
+userRouter.get('/soldOutSoon', phoneController.getSoldOutSoon);
+userRouter.get('/search', phoneController.searchResult);
+userRouter.get('/allBrand', phoneController.getAllBrand);
 
+userRouter.post('/user', userController.authenticateUser);
 
 
 

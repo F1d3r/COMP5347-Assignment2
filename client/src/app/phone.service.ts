@@ -8,9 +8,9 @@ import { Phone } from './phone';
 export class PhoneService {
   private url = 'http://localhost:3000';
   
-
   topPhones$ = signal<Phone[]>([]);
   soldOutSoonPhones$ = signal<Phone[]>([]);
+  searchedPhones$ = signal<Phone[]>([]);
 
   constructor(private httpClient:HttpClient) { }
 
@@ -38,4 +38,13 @@ export class PhoneService {
     this.refreshSoldout();
     return this.soldOutSoonPhones$;
   }
+
+  getAllBrand(){
+    return this.httpClient.get<string[]>(`${this.url}/allBrand`);
+  }
+
+  getPhones(keyword:string, brand:string){
+    return this.httpClient.get<Phone[]>(`${this.url}/search?keyword=${keyword}&brand=${brand}`)
+  }
+
 }

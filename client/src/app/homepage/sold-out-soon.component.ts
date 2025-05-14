@@ -10,11 +10,24 @@ import { MatCardModule } from '@angular/material/card';
 @Component({
   selector: 'app-sold-out-soon',
   imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule],
+
+  styles: [
+    `
+      table{
+        width: 100%;
+      }
+      img{
+        width: 100px;
+        height: auto;
+      }
+    `,
+  ],
+
   template: `
     <mat-card>
         <mat-card-header>
-            <mat-card-title>Best Sellers</mat-card-title>
-            <mat-card-subtitle>Top 5 Phones</mat-card-subtitle>
+            <mat-card-title>Sold Out Soon</mat-card-title>
+            <mat-card-subtitle>Lowest 5 stocks</mat-card-subtitle>
         </mat-card-header>
         
         <mat-card-content>
@@ -27,10 +40,14 @@ import { MatCardModule } from '@angular/material/card';
                 </td>
               </ng-container>
               <!-- For rating -->
-              <ng-container matColumnDef="col-rating">
+              <ng-container matColumnDef="col-price">
                 <th mat-header-cell *matHeaderCellDef>Price</th>
                 <td mat-cell *matCellDef="let element">{{ element.price}}</td>
               </ng-container>
+
+              <!-- Add header and row definitions -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
             </table>
         </mat-card-content>
@@ -43,8 +60,7 @@ import { MatCardModule } from '@angular/material/card';
             Footer
         </mat-card-footer>
     </mat-card>
-  `,
-  styles: ``
+  `
 })
 export class SoldOutSoonComponent { 
   soldOutSoonPhones$ = {} as WritableSignal<Phone[]>;
@@ -60,7 +76,7 @@ export class SoldOutSoonComponent {
     "Sony": "assets/images/Sopy.jpeg"
   };
 
-  displayColumns:string[] = [
+  displayedColumns:string[] = [
     'col-img',
     'col-price'
   ]
