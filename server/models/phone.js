@@ -39,7 +39,7 @@ PhoneSchema.statics.getBestSeller = async function(){
                     if: { $eq: [{ $size: "$reviews" }, 0] },
                     then: 0,
                     // Else the average of all revies.
-                    else: { $avg: "$reviews.rating" }
+                    else: { $round:[{$avg: "$reviews.rating"}, 2]}
                 }
             },
         }},

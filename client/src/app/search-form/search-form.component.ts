@@ -41,7 +41,7 @@ import { PhoneService } from '../phone.service';
 
       <div id='selectBrand'>
         <label>Select Brand</label>
-        <mat-select formControlName="brand" >
+        <mat-select formControlName="brand" placeholder="Select Brand">
             <mat-option *ngFor='let brand of phoneBrands' [value]="brand">
               {{brand}}
             </mat-option>

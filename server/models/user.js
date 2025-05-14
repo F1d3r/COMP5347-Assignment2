@@ -12,8 +12,32 @@ const UserSchema = new mongoose.Schema({
 
 
 UserSchema.statics.findUser = async function(email, password){
-    let user = this.find({'email': email, 'password':password})
+    let user = this.findOne({'email': email, 'password':password})
     return user;
+}
+
+UserSchema.statics.findUser = async function(email){
+    let user = this.findOne({'email': email})
+    return user;
+}
+
+UserSchema.statics.createUser = async function(email, firstname, lastname, password){
+    const existUser = await this.findOne({email});
+    if(existUser){
+        throw new Error("User already exists");
+    }
+
+    const userID = new mongoose.Types.ObjectId().toString();
+    const newUser = new this({
+        id: userID,
+        firstname,
+        lastname,
+        email,
+        password
+    });
+
+    await newUser.save();
+    return newUser;
 }
 
 

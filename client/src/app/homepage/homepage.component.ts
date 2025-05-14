@@ -1,19 +1,16 @@
-import { Component, OnInit, WritableSignal, computed, effect } from '@angular/core';
+import { Component, OnInit, WritableSignal, computed, effect, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
-import { TopSellerComponent } from './top-seller.component';
-import { SoldOutSoonComponent } from './sold-out-soon.component';
-import { SearchFormComponent } from '../search-form/search-form.component';
-
 import { UserService } from './../user.service';
 import { User } from '../user';
+import { PhoneListComponent } from "../phone-list/phone-list.component";
+import { SearchFormComponent } from '../search-form/search-form.component';
 
 @Component({
   selector: 'app-homepage',
-  imports: [CommonModule, RouterModule, MatToolbarModule,
-    TopSellerComponent, SoldOutSoonComponent, SearchFormComponent],
+  imports: [CommonModule, RouterModule, MatToolbarModule, PhoneListComponent, SearchFormComponent],
 
   styles: [
     `
@@ -21,6 +18,12 @@ import { User } from '../user';
         display: flex;
         justify-content: space-between;
         align-items: center;
+      }
+
+      #suggest{
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
       }
     `
   ],
@@ -30,6 +33,7 @@ import { User } from '../user';
       <div>
         <span span>Welcome to {{title}}</span>
       </div>
+
       <div>
         <ng-container *ngIf='!this.user()'>
           <button id='loginBtn' [routerLink]="['login']">Login</button>
@@ -44,10 +48,28 @@ import { User } from '../user';
     </mat-toolbar>
 
     <main>
-      <!-- Constructed by the best seller component and sold out soon component -->
-      <app-search-form></app-search-form>
-      <app-top-seller></app-top-seller>
-      <app-sold-out-soon></app-sold-out-soon>
+      <!-- The page framework for home state -->
+      <div id='homeState' *ngIf="pageState() == 'home'">
+        <app-search-form></app-search-form>
+        <div id='suggest'>
+          <app-phone-list [phoneSource]="'bestSeller'"></app-phone-list>
+          <app-phone-list [phoneSource]="'soldOutSoon'"></app-phone-list>
+        </div>
+      </div>
+
+      <!-- <div *ngIf="pageState() === 'home'">
+        <app-search-form></app-search-form>
+        <app-top-seller></app-top-seller>
+        <app-sold-out-soon></app-sold-out-soon>
+      </div>
+
+      <div *ngIf="pageState() === 'search'">
+        <app-search-form></app-search-form>
+      </div>
+
+      <div *ngIf="pageState() === 'item'">
+        
+      </div> -->
     </main>
   `
 })
@@ -56,25 +78,21 @@ export class HomepageComponent implements OnInit {
   // Use the signal to track the current user state.
   // Initialized as null, indicating a guest user.
   user = computed(() => this.userService.user$());
+  // State signal used to indicate the state of home page.
+  // Initialized as home state.
+  pageState: WritableSignal<'home'|'search'|'item'> = signal('home');
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private userService: UserService
-  ) {
-    effect(() => {
-      console.log('User Updated:', this.user());
-      console.log('Lastname: ', this.user()?.lastname);
-        console.log(Array.isArray(this.user()));
-    });
-  }
+  ) {}
 
   ngOnInit() {
     this.user  = computed(() => this.userService.user$());
   }
 
   logout(){
-    // this.user.set(null);
-    // this.userService.clearUser();
+    this.userService.user$.set(null);
   }
 }

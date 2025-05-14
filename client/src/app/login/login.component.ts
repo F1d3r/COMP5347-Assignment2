@@ -59,6 +59,7 @@ export class LoginComponent {
     const password = this.loginForm.value.password ?? '';
     
     this.userService.getUser(email, password).subscribe(user =>{
+      console.log('User:',user);
       if(!user || Object.keys(user).length === 0){
         console.log("Authentication failed");
         this.userService.user$.set(null);

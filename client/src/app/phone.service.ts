@@ -8,7 +8,7 @@ import { Phone } from './phone';
 export class PhoneService {
   private url = 'http://localhost:3000';
   
-  topPhones$ = signal<Phone[]>([]);
+  bestSeller$ = signal<Phone[]>([]);
   soldOutSoonPhones$ = signal<Phone[]>([]);
   searchedPhones$ = signal<Phone[]>([]);
 
@@ -18,11 +18,12 @@ export class PhoneService {
     console.log("Updating top sellers");
     this.httpClient.get<Phone[]>(`${this.url}/bestSeller`)
       .subscribe(result =>{
-        this.topPhones$.set(result);
+        this.bestSeller$.set(result);
       })
   }
 
   private refreshSoldout(){
+    console.log("Updating sold out soon");
     this.httpClient.get<Phone[]>(`${this.url}/bestSeller`)
       .subscribe(result =>{
         this.soldOutSoonPhones$.set(result);
@@ -31,7 +32,7 @@ export class PhoneService {
 
   getBestSellerPhones(){
     this.refreshTopSeller();
-    return this.topPhones$;
+    return this.bestSeller$;
   }
 
   getSoldOutSoonPhones(){

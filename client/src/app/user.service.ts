@@ -17,8 +17,9 @@ export class UserService {
     return this.httpClient.post<User>(`${this.url}/user`, {email, password});
   }
 
-  signup(){
-
+  createUser(email: string, firstname: string, 
+    lastname:string, password:string){
+      return this.httpClient.post<User>(`${this.url}/user/create`, {email, firstname, lastname, password});
   }
 
   // Check if the user loggedin by checking if the user$ is null.

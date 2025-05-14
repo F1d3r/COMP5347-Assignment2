@@ -12,6 +12,7 @@ userRouter.get('/search', phoneController.searchResult);
 userRouter.get('/allBrand', phoneController.getAllBrand);
 
 userRouter.post('/user', userController.authenticateUser);
+userRouter.post('/user/create', userController.createUser);
 
 
 
