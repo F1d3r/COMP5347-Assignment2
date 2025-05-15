@@ -1,4 +1,4 @@
-import { Component, OnInit, WritableSignal, computed, effect, signal } from '@angular/core';
+import { Component, OnInit, WritableSignal, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -7,6 +7,7 @@ import { UserService } from './../user.service';
 import { User } from '../user';
 import { PhoneListComponent } from "../phone-list/phone-list.component";
 import { SearchFormComponent } from '../search-form/search-form.component';
+import { PhoneService } from '../phone.service';
 
 @Component({
   selector: 'app-homepage',
@@ -35,13 +36,16 @@ import { SearchFormComponent } from '../search-form/search-form.component';
       </div>
 
       <div>
-        <ng-container *ngIf='!this.user()'>
+        <!-- If the user is not logged in -->
+        <ng-container *ngIf='!this.user$()'>
           <button id='loginBtn' [routerLink]="['login']">Login</button>
           <button id='loginBtn' [routerLink]="['signup']">Sign Up</button>
         </ng-container>
 
-        <ng-container *ngIf="this.user()">
-          <span>Hello, {{ user()?.lastname }}</span>
+        <!-- If the user logged in -->
+        <ng-container *ngIf="this.user$()">
+          <span>Hello, {{ user$()?.lastname }}</span>
+          <button id='profileBtn' [routerLink]="['profile']">Profile</button>
           <button id="logoutBtn" (click)="logout()">Logout</button>
         </ng-container>
       </div>
@@ -56,20 +60,6 @@ import { SearchFormComponent } from '../search-form/search-form.component';
           <app-phone-list [phoneSource]="'soldOutSoon'"></app-phone-list>
         </div>
       </div>
-
-      <!-- <div *ngIf="pageState() === 'home'">
-        <app-search-form></app-search-form>
-        <app-top-seller></app-top-seller>
-        <app-sold-out-soon></app-sold-out-soon>
-      </div>
-
-      <div *ngIf="pageState() === 'search'">
-        <app-search-form></app-search-form>
-      </div>
-
-      <div *ngIf="pageState() === 'item'">
-        
-      </div> -->
     </main>
   `
 })
@@ -77,7 +67,9 @@ export class HomepageComponent implements OnInit {
   title = 'OldPhoneDeals';
   // Use the signal to track the current user state.
   // Initialized as null, indicating a guest user.
-  user = computed(() => this.userService.user$());
+  // user = computed(() => this.userService.user$());
+  user$ = inject(UserService).user$;
+
   // State signal used to indicate the state of home page.
   // Initialized as home state.
   pageState: WritableSignal<'home'|'search'|'item'> = signal('home');
@@ -89,26 +81,10 @@ export class HomepageComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    const storedToken = localStorage.getItem('authToken');
-    if(storedToken){
-      console.log(storedToken);
-      this.userService.setUserFromToken(storedToken);
-    }
-
-    this.route.queryParams.subscribe(params => {
-      const token = params['token'];
-      if(token){
-        localStorage.setItem('authToken', token);
-        this.userService.setUserFromToken(token);
-      }
-    })
-
-    this.user  = computed(() => this.userService.user$());
-    console.log("Current user:",this.user());
+    console.log("Current user:",this.user$());
   }
 
   logout(){
-    localStorage.removeItem('authToken');
-    this.userService.user$.set(null);
+    this.userService.logOut();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, WritableSignal, Input} from '@angular/core';
+import { Component, OnInit, WritableSignal, Input, inject} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PhoneService } from '../phone.service';
 import { RouterModule } from '@angular/router';
@@ -40,7 +40,7 @@ import { Phone } from '../phone';
         </mat-card-header>
         
         <mat-card-content>
-            <table mat-table [dataSource]="phoneList$()">
+            <table mat-table [dataSource]="phoneList$()? phoneList$() : []">
               <!-- For image -->
               <ng-container matColumnDef="col-image">
                 <th mat-header-cell *matHeaderCellDef>Image</th>
@@ -109,21 +109,21 @@ export class PhoneListComponent implements OnInit {
   ngOnInit(): void {
     console.log("Phone Source:",this.phoneSource);
     if(this.phoneSource === 'bestSeller'){
+      this.phoneService.getBestSeller();
       this.phoneList$ = this.phoneService.bestSeller$;
-      this.phoneService.getBestSellerPhones();
       this.displayedColumns = [
         'col-image',
         'col-rating'
       ]
     }else if(this.phoneSource === 'soldOutSoon'){
-      this.phoneList$ = this.phoneService.soldOutSoonPhones$;
-      this.phoneService.getSoldOutSoonPhones();
+      this.phoneService.getSoldOutSoon();
+      this.phoneList$ = this.phoneService.soldOutSoon$;
       this.displayedColumns = [
         'col-image',
         'col-price'
       ]
     }else if(this.phoneSource === 'search'){
-      this.phoneList$ = this.phoneService.searchedPhones$;
+      this.phoneList$ = this.phoneService.searched$;
     }
   }
 
@@ -132,40 +132,4 @@ export class PhoneListComponent implements OnInit {
     return this.brandImageMap[brand] || "assets/images/default.png";
   }
 
-
-  // // Signal used to track the phones.
-  // phones$ = {} as WritableSignal<Phone[]>;
-  // // Map brand to image path.
-  // private brandImageMap: { [key: string]: string } = {
-  //   "Apple": "assets/images/Apple.jpeg",
-  //   "BlackBerry": "assets/images/BlackBerry.jpeg",
-  //   "HTC": "assets/images/HTC.jpeg",
-  //   "Huawei": "assets/images/Huawei.jpeg",
-  //   "LG": "assets/images/LG.jpeg",
-  //   "Motorola": "assets/images/Motorola.jpeg",
-  //   "Nokia": "assets/images/Nokia.jpeg",
-  //   "Samsung": "assets/images/Samsung.jpeg",
-  //   "Sony": "assets/images/Sopy.jpeg"
-  // };
-
-  // displayedColumns:string[] = [
-  //   'col-img',
-  //   'col-price'
-  // ]
-
-  // // Get the image path for the brand.
-  // getBrandImages(brand: string){
-  //   return this.brandImageMap[brand] || "assets/images/default.png";
-  // }
-
-  // constructor(private phoneService:PhoneService){}
-
-  // ngOnInit() {
-  //   this.fetchPhone();
-  // }
-
-  // private fetchPhone(): void {
-  //   this.phones$ = this.phoneService.soldOutSoonPhones$;
-  //   this.phoneService.getSoldOutSoonPhones();
-  // }
 }

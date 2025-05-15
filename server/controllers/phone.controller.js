@@ -7,15 +7,10 @@ module.exports.getBestSeller = async function(req, res){
 
 	Phone.getBestSeller()
 		.then(result => {
-            console.log(result.length);
+            // console.log(result.length);
             // console.log(result);
             // Send the result to the client.
 			res.status(200).send(result);
-            // res.status(200).json({
-            //     message: "Success!",
-            //     count: result.length,
-            //     data: result
-            // });
 		})
 		.catch(err => {
 			console.log("Cannot find best seller");
@@ -29,14 +24,10 @@ module.exports.getSoldOutSoon = async function(req, res){
 
 	Phone.getSoldOutSoon()
 		.then(result => {
-            console.log(result);
-            console.log(result.length);
+            // console.log(result.length);
+            // console.log(result);
             // Send the result to the client.
-            res.status(200).json({
-                message: "Success!",
-                count: result.length,
-                data: result
-            });
+            res.status(200).send(result);
 		})
 		.catch(err => {
 			console.log("Cannot find low stock phones");
@@ -61,11 +52,7 @@ module.exports.searchResult = function(req,res){
             console.log(result);
             console.log(result.length);
             // Send the result to the client.
-            res.status(200).json({
-                message: "Success!",
-                count: result.length,
-                data: result
-            });
+            res.status(200).send(result);
 		})
 		.catch(err => {
 			console.log("Cannot find phone with keyword: " + keyword + "!");
@@ -78,15 +65,8 @@ module.exports.searchResult = function(req,res){
 module.exports.getAllBrand = function(req, res){
 	Phone.getAllBrand()
 		.then(result =>{
-			console.log(result);
-			console.log(result.length);
-			
-            // Send the result to the client.
-            // res.status(200).json({
-            //     message: "Success!",
-            //     count: result.length,
-            //     data: result
-            // });
+			// console.log(result);
+			// console.log(result.length);
 			res.status(200).send(result);
 		})
 		.catch(err => {

@@ -1,3 +1,4 @@
+import { catchError } from 'rxjs';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl} from '@angular/forms';
@@ -58,17 +59,30 @@ export class LoginComponent {
     const email = this.loginForm.value.email ?? '';
     const password = this.loginForm.value.password ?? '';
     
-    this.userService.getUser(email, password).subscribe(user =>{
-      console.log('User:',user);
-      if(!user || Object.keys(user).length === 0){
-        console.log("Authentication failed");
-        this.userService.user$.set(null);
-        console.log(user);
-      }else{
-        console.log("Login Success");
-        this.userService.user$.set(user);
-        console.log(user);
-        this.router.navigate(['']);
+    this.userService.getUser(email, password).subscribe({
+      next: (user) =>{
+        console.log('User:',user);
+        if(!user || Object.keys(user).length == 0){
+          alert("Authentication failed");
+          this.userService.user$.set(null);
+          console.log(user);
+        }else{
+          console.log("Login Success");
+          this.userService.user$.set(user);
+          console.log(user);
+          this.router.navigate(['']);
+        }
+      },
+      // Handle error
+      error: (error)=>{
+        if(error.status === 401){
+          alert("Password incorrect, please try again");
+        }else if(error.status === 404){
+          alert("User does not exist, please try again");
+        }else{
+          console.error("Unexpected error", error);
+        }
+        this.loginForm.reset();
       }
     })
 

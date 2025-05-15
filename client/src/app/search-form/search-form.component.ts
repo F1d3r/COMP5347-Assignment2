@@ -81,15 +81,17 @@ export class SearchFormComponent implements OnInit {
   searchPhones(){
     const keyword = this.searchForm.value.keyword ?? '';
     const brand = this.searchForm.value.brand ?? '';
+    console.log("Got keyword:", keyword);
+    console.log("Got brand:", brand);
 
     this.phoneService.getPhones(keyword, brand).subscribe(phones =>{
       if(!phones || Object.keys(phones).length === 0){
         console.log("No result found");
-        this.phoneService.searchedPhones$.set([]);
+        this.phoneService.searched$.set([]);
         console.log(phones);
       }else{
-        console.log("Login Success");
-        this.phoneService.searchedPhones$.set(phones);
+        console.log("Found Result");
+        this.phoneService.searched$.set(phones);
         console.log(phones);
         this.router.navigate(['']);
       }

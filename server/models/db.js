@@ -7,6 +7,7 @@ const path = require('path');
 // Models to initialize.
 const User = require('../models/user');
 const Phone = require('../models/phone');
+const Activity = require('../models/activity');
 
 // Default password hashing config.
 require('dotenv').config();
@@ -35,21 +36,24 @@ module.exports.initializeDatabase = async function() {
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB successfully');
 
+
     // Check if collections exist and have data
     const userCount = await User.countDocuments();
     const phoneCount = await Phone.countDocuments();
+    const activityCount = await Activity.countDocuments();
     // Drop the collection if already exists.
     if (userCount > 0 || phoneCount > 0) {
       console.log('Database already contains data. Dropping collections...');
       await mongoose.connection.db.dropCollection('user');
       await mongoose.connection.db.dropCollection('phone');
+      await mongoose.connection.db.dropCollection('activity');
       console.log('Collections dropped');
     }
     
+
     // Load data from JSON files
     console.log('Loading data from JSON files...');
     let phoneListingsData, usersData;
-    
     try {
       usersData = JSON.parse(fs.readFileSync(path.join(user_path), 'utf8'));
       phoneListingsData = JSON.parse(fs.readFileSync(phone_path), 'utf8');
@@ -59,6 +63,7 @@ module.exports.initializeDatabase = async function() {
       process.exit(1);
     }
     
+
     // Hash a default password for all users
     console.log('Default password: ' + defaultPassword);
     console.log('Creating users with hashed passwords...');
@@ -79,15 +84,32 @@ module.exports.initializeDatabase = async function() {
         email: user.email,
         password: hashedPassword,
         isVerified: true, // For initial data, consider users already verified
-        verifyToken: null
+        verifyToken: null,
       };
     });
-
-    // TODO: Add the registration date for all users.
-    
+    // Insert users.
     await User.insertMany(processedUsers);
     console.log(`${processedUsers.length} users inserted`);
+
+    // Create admin user if it doesn't exist
+    console.log('Creating admin user...');
+    const adminEmail = 'tut07g04.comp5347@gmail.com';
+    const adminPassword = await bcrypt.hash('Admin123!', saltRounds);
     
+    admin = await User.findOneAndUpdate(
+      { email: adminEmail },
+      {
+        firstname: 'Admin',
+        lastname: 'User',
+        email: adminEmail,
+        password: adminPassword,
+        isAdmin: true,
+        isVerified: true
+      },
+      { upsert: true, new: true }
+    );
+    
+
     // Process and insert phone listings
     console.log('Inserting phone listings...');
     const processedListings = phoneListingsData.map(listing => {
@@ -97,6 +119,7 @@ module.exports.initializeDatabase = async function() {
       
       // Process reviews
       const processedReviews = (listing.reviews || []).map(review => {
+        // Convert string IDs to ObjectIDs if necessary
         let reviewerId = review.reviewer;
         if (typeof reviewerId === 'string') {
           reviewerId = new mongoose.Types.ObjectId(reviewerId);
@@ -131,23 +154,26 @@ module.exports.initializeDatabase = async function() {
     await Phone.insertMany(processedListings);
     console.log(`${processedListings.length} phone listings inserted`);
     
-    // Create admin user if it doesn't exist
-    console.log('Creating admin user...');
-    const adminEmail = 'admin@oldphonedeals.com';
-    const adminPassword = await bcrypt.hash('Admin123!', saltRounds);
-    
-    await User.findOneAndUpdate(
-      { email: adminEmail },
-      {
-        firstname: 'Admin',
-        lastname: 'User',
-        email: adminEmail,
-        password: adminPassword,
-        isAdmin: true,
-        isVerified: true
-      },
-      { upsert: true, new: true }
-    );
+    // Create activity collection.
+    let adminId = admin._id;
+    if (typeof adminId === 'object' && adminId.$oid) {
+      adminId = new mongoose.Types.ObjectId(adminId.$oid);
+    }
+    const activity1 = new Activity({
+      _id: new mongoose.Types.ObjectId(),
+      userId: adminId,
+      activity: 'login'
+    })
+    const activity2 = new Activity({
+      _id: new mongoose.Types.ObjectId(),
+      userId: adminId,
+      activity: 'logout'
+    })
+    await activity1.save();
+    await activity2.save();
+    console.log("Activity collection created.");
+
+
     
     console.log('\nDatabase initialization completed successfully!');
     console.log('\nDefault login credentials:');

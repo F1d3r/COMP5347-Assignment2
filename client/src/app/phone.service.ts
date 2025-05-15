@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Phone } from './phone';
 
@@ -9,35 +9,23 @@ export class PhoneService {
   private url = 'http://localhost:3000';
   
   bestSeller$ = signal<Phone[]>([]);
-  soldOutSoonPhones$ = signal<Phone[]>([]);
-  searchedPhones$ = signal<Phone[]>([]);
+  soldOutSoon$ = signal<Phone[]>([]);
+  searched$ = signal<Phone[]>([]);
 
-  constructor(private httpClient:HttpClient) { }
+  constructor(private httpClient:HttpClient) {}
 
-  private refreshTopSeller(){
-    console.log("Updating top sellers");
-    this.httpClient.get<Phone[]>(`${this.url}/bestSeller`)
-      .subscribe(result =>{
-        this.bestSeller$.set(result);
-      })
-  }
-
-  private refreshSoldout(){
-    console.log("Updating sold out soon");
-    this.httpClient.get<Phone[]>(`${this.url}/bestSeller`)
-      .subscribe(result =>{
-        this.soldOutSoonPhones$.set(result);
-      })
-  }
-
-  getBestSellerPhones(){
-    this.refreshTopSeller();
+  getBestSeller(){
+    this.httpClient.get<Phone[]>(`${this.url}/bestSeller`).subscribe(phones =>{
+      this.bestSeller$.set(phones);
+    })
     return this.bestSeller$;
   }
 
-  getSoldOutSoonPhones(){
-    this.refreshSoldout();
-    return this.soldOutSoonPhones$;
+  getSoldOutSoon(){
+    this.httpClient.get<Phone[]>(`${this.url}/soldOutSoon`).subscribe(phones => {
+      this.soldOutSoon$.set(phones);
+    })
+    return this.soldOutSoon$;
   }
 
   getAllBrand(){

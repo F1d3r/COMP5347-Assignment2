@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
  
 // Review schema
 const ReviewSchema = new mongoose.Schema({
+    _id: mongoose.Types.ObjectId,
     reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     rating: Number,
     comment: String,
@@ -9,7 +10,7 @@ const ReviewSchema = new mongoose.Schema({
 });
 
 const PhoneSchema = new mongoose.Schema({
-    id: String,
+    _id: mongoose.Types.ObjectId,
     title: String,
     brand: String,
     imageURL: String,
@@ -17,7 +18,7 @@ const PhoneSchema = new mongoose.Schema({
     seller: String,
     price: Number,
     reviews:[ReviewSchema],
-    disabled: Boolean
+    disabled: {type: Boolean, default: false }
 });
 
 

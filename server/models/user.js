@@ -1,27 +1,16 @@
 // Define user model.
 
-// TODO: Add the registration date for all users.
 const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema({
-    id: String,
-    firstname: String,
-    lastname: String,
-    email: String,
-    password: String,
-    isVerified: Boolean,
-    verifyToken: String
+    _id: mongoose.Types.ObjectId,
+    firstname: { type: String, default: 'Unknown' },
+    lastname: { type: String, default: 'Unknown' },
+    email: { type: String, required: true},
+    password: { type: String, required: true},
+    isVerified: { type: Boolean, default: false },
+    verifyToken: String,
+    registDate: { type: Date, default: Date.now }
 });
-
-
-UserSchema.statics.findUser = async function(email, password){
-    let user = this.findOne({'email': email, 'password':password})
-    return user;
-}
-
-UserSchema.statics.findUser = async function(email){
-    let user = this.findOne({'email': email})
-    return user;
-}
 
 UserSchema.statics.createUser = async function(email, firstname, lastname, password, verifyToken){
     const existUser = await this.findOne({email});
@@ -29,9 +18,9 @@ UserSchema.statics.createUser = async function(email, firstname, lastname, passw
         throw new Error("User already exists");
     }
 
-    const userID = new mongoose.Types.ObjectId().toString();
+    const userID = new mongoose.Types.ObjectId();
     const newUser = new this({
-        id: userID,
+        _id: userID,
         firstname,
         lastname,
         email,
@@ -45,10 +34,6 @@ UserSchema.statics.createUser = async function(email, firstname, lastname, passw
     return newUser;
 }
 
-// Verify the user.
-UserSchema.statics.verifyUser = async function(token){
-
-}
 
 
 // Export the model

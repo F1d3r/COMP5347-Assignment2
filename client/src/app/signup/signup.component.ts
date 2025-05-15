@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormGroup, FormControl} from '@angular/forms';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
@@ -9,7 +10,7 @@ import { catchError, throwError } from 'rxjs';
 
 @Component({
   selector: 'app-signup',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
 
   styles: 
   `
@@ -20,6 +21,17 @@ import { catchError, throwError } from 'rxjs';
       align-items: center;
       gap:10px;
     }
+    .invalid-input {
+      border: 2px solid red;
+      background-color: #ffe6e6;
+    }
+    .error-message {
+      color: red;
+      font-size: 12px;
+      margin-top: 4px;
+      max-width: 300px;
+      white-space: normal;
+    }
   `,
 
   template: `
@@ -29,8 +41,14 @@ import { catchError, throwError } from 'rxjs';
       </h1>
       <div>
         <label>Email
-          <input type="email" formControlName="email" name="email"/>
+          <input type="email" formControlName="email" name="email" 
+            [ngClass]="{'invalid-input': signupForm.controls.email.invalid 
+            && signupForm.controls.email.touched}"/>
         </label>
+        <div class='error-message' *ngIf="signupForm.controls.email.invalid 
+          && signupForm.controls.email.touched">
+          This field must be a valid email address.
+        </div>
       </div>
 
       
@@ -48,8 +66,14 @@ import { catchError, throwError } from 'rxjs';
 
       <div>
         <label>Password
-          <input type="text" formControlName="password" name="password"/>
+          <input type="text" formControlName="password" name="password" 
+            [ngClass]="{'invalid-input': signupForm.controls.password.invalid 
+            && signupForm.controls.email.touched}"/>
         </label>
+        <div class='error-message' *ngIf="signupForm.controls.password.invalid 
+          && signupForm.controls.password.touched">
+          The password must contain at least 8 characters, at least one uppercase letter, one lowercase letter, and a symbol. 
+        </div>
       </div>
 
       <div>
@@ -64,7 +88,10 @@ export class SignupComponent {
     email: new FormControl('', [Validators.required, Validators.email]),
     firstname: new FormControl(''),
     lastname: new FormControl(''),
-    password: new FormControl('', Validators.required),
+    password: new FormControl('',
+      [ Validators.required,
+        Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/)
+      ]),
   });
 
   constructor(private userService: UserService, private router:Router) {}
