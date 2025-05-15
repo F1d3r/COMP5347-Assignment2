@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OldPhoneDeals</title>
+    <link rel="stylesheet" href="css/search.css" />
+    <script src="/js/homepage.js"></script>
+</head>
+<body>
+    
+    <div id="topbar" class="flex-row-seperate">
+        <h1>OldPhoneDeals Home</h1>
+        <!--TODO Dynamically show the login detail-->
+        <!--Say hello, XXX-->
+        <% if (user) { %>
+            <h2>Welcome back, <%= user.firstname %>!</h2>
+        <% } else { %>
+            <h2>Welcome, please login</h2>
+        <% } %>
+          
+        
+        <div>
+            <input type="button" id="profileBtn" value="Profile">
+            <input type="button" id="signinBtn" value="Log In">
+            <input type="button" id="checkoutBtn" value="Checkout">
+        </div>
+    </div>
+
+    <div class = "search">
+        <form class = "search" method="POST" action="/search">
+            <input type="text" id="searchInput" placeholder="Search here" required>
+            
+            <select id="brandSelect">
+            </select>
+
+            <!--TODO Price range here. Make a two direction slider to adjust the price range of searching result-->
+            <label for="priceRange">Price Range:</label>
+            <input type="range" id="priceMin" name="priceRangeMin" min="0" step="1">
+            <input type="range" id="priceMax" name="priceRangeMax" min="0" step="1">
+            <!--TODO lables to dynamically show the result of slider range.-->
+            <span id="minValue">200</span>
+            <span id="maxValue">1000</span>
+
+            <input type="submit" value="Search">
+            <input type="reset" value="Clear">
+        </form>
+    </div>
+
+
+    <div class = "soldOutSoon">
+        <table id = "bestSellers">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Brand</th>
+                    <th>Image</th>
+                    <th>Stock</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Reviews</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class = "bestSellers">
+        <table id = "bestSellers">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Brand</th>
+                    <th>Image</th>
+                    <th>Stock</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Reviews</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+    <div class = "searchResult">
+        <table id = "searchResult">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Brand</th>
+                    <th>Image</th>
+                    <th>Stock</th>
+                    <th>Seller</th>
+                    <th>Price</th>
+                    <th>Reviews</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>
