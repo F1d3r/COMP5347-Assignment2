@@ -89,10 +89,26 @@ export class HomepageComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    const storedToken = localStorage.getItem('authToken');
+    if(storedToken){
+      console.log(storedToken);
+      this.userService.setUserFromToken(storedToken);
+    }
+
+    this.route.queryParams.subscribe(params => {
+      const token = params['token'];
+      if(token){
+        localStorage.setItem('authToken', token);
+        this.userService.setUserFromToken(token);
+      }
+    })
+
     this.user  = computed(() => this.userService.user$());
+    console.log("Current user:",this.user());
   }
 
   logout(){
+    localStorage.removeItem('authToken');
     this.userService.user$.set(null);
   }
 }

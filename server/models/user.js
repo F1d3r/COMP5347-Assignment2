@@ -7,7 +7,9 @@ const UserSchema = new mongoose.Schema({
     firstname: String,
     lastname: String,
     email: String,
-    password: String
+    password: String,
+    isVerified: Boolean,
+    verifyToken: String
 });
 
 
@@ -21,7 +23,7 @@ UserSchema.statics.findUser = async function(email){
     return user;
 }
 
-UserSchema.statics.createUser = async function(email, firstname, lastname, password){
+UserSchema.statics.createUser = async function(email, firstname, lastname, password, verifyToken){
     const existUser = await this.findOne({email});
     if(existUser){
         throw new Error("User already exists");
@@ -33,11 +35,19 @@ UserSchema.statics.createUser = async function(email, firstname, lastname, passw
         firstname,
         lastname,
         email,
-        password
+        password,
+        // Default set unverified.
+        isVerified: false,
+        verifyToken
     });
 
     await newUser.save();
     return newUser;
+}
+
+// Verify the user.
+UserSchema.statics.verifyUser = async function(token){
+
 }
 
 

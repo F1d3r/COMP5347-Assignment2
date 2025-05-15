@@ -10,6 +10,8 @@ userRouter.get('/bestSeller', phoneController.getBestSeller);
 userRouter.get('/soldOutSoon', phoneController.getSoldOutSoon);
 userRouter.get('/search', phoneController.searchResult);
 userRouter.get('/allBrand', phoneController.getAllBrand);
+userRouter.get('/verify/:token', userController.verifyUser);
+userRouter.get('/test/:token', userController.test);
 
 userRouter.post('/user', userController.authenticateUser);
 userRouter.post('/user/create', userController.createUser);

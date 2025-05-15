@@ -1,5 +1,8 @@
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+
+import { jwtDecode } from 'jwt-decode';
+
 import {User} from './user'
 
 @Injectable({
@@ -25,5 +28,20 @@ export class UserService {
   // Check if the user loggedin by checking if the user$ is null.
   isUserLoggedIn(): boolean{
     return this.user$ !== null;
+  }
+
+  setUserFromToken(token:string):void {
+    try{
+      const decoded: any = jwtDecode(token);
+      console.log("Decoded:",decoded.user);
+      console.log("Token firstname:",decoded.user.firstname);
+      console.log("Token lastname:",decoded.user.lastname);
+      console.log("Token email:",decoded.user.email);
+      this.user$.set({firstname: decoded.user.firstname, 
+                      lastname: decoded.user.lastname,
+                      email: decoded.user.email})
+    }catch(err){
+      console.error("Failed parsing token:", token, err);
+    }
   }
 }

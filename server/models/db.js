@@ -78,7 +78,8 @@ module.exports.initializeDatabase = async function() {
         lastname: user.lastname,
         email: user.email,
         password: hashedPassword,
-        isVerified: true // For initial data, consider users already verified
+        isVerified: true, // For initial data, consider users already verified
+        verifyToken: null
       };
     });
 

@@ -81,6 +81,9 @@ export class SignupComponent {
         if(error.status === 409) {
           console.error("User already exists");
           alert("User exists, please login or signup with other email.")
+        }else if(error.status === 500) {
+          console.error("The server error", error);
+          alert("The server has some error.")
         }
         return throwError(() => error)
       })
@@ -89,11 +92,11 @@ export class SignupComponent {
       console.log("User created:", user);
 
       if(!user || Object.keys(user).length === 0){
-        console.log("Authentication failed");
+        console.log("Signup failed");
         this.userService.user$.set(null);
         console.log(user);
       }else{
-        console.log("Login Success");
+        console.log("Signup Success");
         this.userService.user$.set(user);
         console.log(user);
         this.router.navigate(['']);

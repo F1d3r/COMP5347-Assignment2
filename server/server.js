@@ -2,9 +2,6 @@
  * Main server file for OldPhoneDeals application
  */
 
-// Load environment variables
-require('dotenv').config();
-const PORT = parseInt(process.env.PORT, 10) || 3000;
 
 // Import dependencies
 const express = require('express');
@@ -13,8 +10,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const mongoose = require('mongoose');
-const session = require('express-session')
+const session = require('express-session');
 
+// Load environment variables
+require('dotenv').config();
+const PORT = parseInt(process.env.PORT, 10) || 3000;
 
 // Create Express server
 const app = express();
@@ -75,16 +75,25 @@ app.use((err, req, res, next) => {
 });
 
 
-// Initialize the database.
-// db.initializeDatabase();
 
 // Connect to MongoDB and start server
 try{
+  // // Initialize the database.
+  // db.initializeDatabase().
+  // then(()=>{
+  //   db.connectDB();
+  //   app.listen(PORT, () => {
+  //     console.log(`Server running on port ${PORT}`);
+  //   });
+  // })
+
+  // Lauch server withouth initializing.
   db.connectDB();
-  
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
+  
+  
 }catch(dbError){
   console.log("Failed to connect to database.")
 }
