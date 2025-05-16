@@ -1,19 +1,16 @@
-import { Component, OnInit, WritableSignal, computed, effect, inject, signal, Injectable } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { Injectable } from '@angular/core';
 
 import { UserService } from './../user.service';
-import { User } from '../user';
 import { PhoneListComponent } from "../phone-list/phone-list.component";
 import { SearchFormComponent } from '../search-form/search-form.component';
-import { PhoneService } from '../phone.service';
-
-import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-homepage',
-  imports: [CommonModule, RouterModule, MatToolbarModule, PhoneListComponent, SearchFormComponent, MatSelectModule],
+  imports: [CommonModule, RouterModule, MatToolbarModule, PhoneListComponent, SearchFormComponent],
 
   styles: [
     `
@@ -25,12 +22,21 @@ import { MatSelectModule } from '@angular/material/select';
 
       #suggest{
         display: flex;
-        flex-direction: row;
-        justify-content: space-between;
+        justify-content: center;
+        gap: 0px;
+      }
+
+      app-phone-list{
+        margin: 10px;
+        border: 2px, solid #000;
+      }
+
+      button{
+        margin: 5px;
       }
 
       #search-bar-container {
-        width: fit-content; /* 或具体宽度，如 600px */
+        width: fit-content;
         margin: 0 auto;
         display: flex;
         flex-direction: row;
@@ -39,7 +45,7 @@ import { MatSelectModule } from '@angular/material/select';
       }
 
       #form-wrapper {
-        display: inline-block; /* 防止它撑满整行 */
+        display: inline-block;
       }
     `
   ],
@@ -101,7 +107,7 @@ export class HomepageComponent implements OnInit {
 
   // State signal used to indicate the state of home page.
   // Initialized as home state.
-  pageState: WritableSignal<'home'|'search'|'item'> = signal('home');
+  pageState = inject(UserService).homeState$;
 
   constructor(
     private router: Router,

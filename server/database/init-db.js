@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
 
+
 // Models to initialize.
 const User = require('../models/user');
 const Phone = require('../models/phone');
@@ -14,22 +15,15 @@ const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
 const defaultPassword = process.env.DEFAULT_PASSWORD || 'Password123!'; 
 // MongoDB connection URI.
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/OldPhoneDeals';
-
+console.log("URI: ", MONGODB_URI);
 
 // JSON File path.
-const user_path = path.join(process.cwd(), '/Dataset/userlist.json');
-const phone_path = path.join(process.cwd(), '/Dataset/phonelisting.json');
+const user_path = path.join(process.cwd(), 'server/database/userlist.json');
+const phone_path = path.join(process.cwd(), 'server/database/phonelisting.json');
 
-
-// Connect to MongoDB with URI
-module.exports.connectDB = async function(){
-  mongoose.connect(MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
-}
 
 // Initialize the MongoDB with server's local json file.
-module.exports.initializeDatabase = async function() {
+initializeDatabase = async function() {
   try {
     console.log('Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI);
@@ -41,7 +35,7 @@ module.exports.initializeDatabase = async function() {
     const phoneCount = await Phone.countDocuments();
     const activityCount = await Activity.countDocuments();
     // Drop the collection if already exists.
-    if (userCount > 0 || phoneCount > 0) {
+    if (userCount > 0 || phoneCount > 0 || activityCount > 0) {
       console.log('Database already contains data. Dropping collections...');
       await mongoose.connection.db.dropCollection('user');
       await mongoose.connection.db.dropCollection('phone');
@@ -191,4 +185,4 @@ module.exports.initializeDatabase = async function() {
 }
 
 
-
+initializeDatabase();

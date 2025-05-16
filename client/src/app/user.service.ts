@@ -13,6 +13,7 @@ export class UserService {
   // Using the signal to track the login state of the user.
   // Initialized as null as guest.
   user$ : WritableSignal<User | null> = signal(null);
+  homeState$: WritableSignal<'home'|'search'|'item'> = signal('home');
 
   constructor(private httpClient: HttpClient) { }
 
@@ -23,7 +24,7 @@ export class UserService {
 
 
   logOut(){
-    this.httpClient.post(`${this.url}/logout`, {userId: this.user$()?._id}, { observe: 'response' }).subscribe(response =>{
+    this.httpClient.post(`${this.url}/user/logout`, {userId: this.user$()?._id}, { observe: 'response' }).subscribe(response =>{
       if(response.status == 200){
         console.log('logout success.')
         this.user$.set(null);
@@ -45,10 +46,10 @@ export class UserService {
 
 
   updateUser(email: string, newEmail: string, firstname: string, lastname:string){
-    console.log("Old email:",email);
-    console.log("New email:", newEmail);
-    console.log("First name:", firstname)
-    console.log("Last name:", lastname);
+    // console.log("Old email:",email);
+    // console.log("New email:", newEmail);
+    // console.log("First name:", firstname)
+    // console.log("Last name:", lastname);
     return this.httpClient.post<User>(`${this.url}/user/update`, {email, newEmail, firstname, lastname});
   }
 
@@ -63,26 +64,4 @@ export class UserService {
     return this.httpClient.post<User>(`${this.url}/user/resetRequest`, {_id:userId});
   }
 
-
-  setUserFromToken(token:string):void {
-    try{
-      // Decode local token.
-      const decoded: any = jwtDecode(token);
-      console.log("Decoded:",decoded.user);
-      console.log("Token firstname:",decoded.user.firstname);
-      console.log("Token lastname:",decoded.user.lastname);
-      console.log("Token email:",decoded.user.email);
-      // Try to login with the information.
-      this.getUser(decoded.user.email, decoded.user.password).subscribe(user=>{
-        if(!user){
-          // The login failed.
-          this.user$.set(null);
-        }else{
-          this.user$.set(user);
-        }
-      })
-    }catch(err){
-      console.error("Failed parsing token:", token, err);
-    }
-  }
 }

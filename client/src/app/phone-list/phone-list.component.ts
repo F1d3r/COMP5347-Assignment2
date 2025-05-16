@@ -1,7 +1,9 @@
-import { Component, OnInit, WritableSignal, Input, inject, signal, effect} from '@angular/core';
+import { UserService } from './../user.service';
+import { Component, OnInit, WritableSignal, Input } from '@angular/core';
+import { signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PhoneService } from '../phone.service';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,7 +22,7 @@ import { MatSelectModule } from '@angular/material/select';
         width: 100%;
       }
       img{
-        width: 100px;
+        width: 35%;
         height: auto;
       }
     `,
@@ -52,7 +54,7 @@ import { MatSelectModule } from '@angular/material/select';
         </mat-card-header>
         
         <mat-card-content>
-            <table mat-table [dataSource]="phoneSource === 'search' ? sortedPhoneList$() : phoneList$()">
+            <table mat-table [dataSource]="phoneList$() || []">
               <!-- For image -->
               <ng-container matColumnDef="col-image">
                 <th mat-header-cell *matHeaderCellDef>Image</th>
@@ -98,7 +100,7 @@ import { MatSelectModule } from '@angular/material/select';
 
               <!-- Add header and row definitions -->
               <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="itemClicked(row)"></tr>
             </table>
         </mat-card-content>
     </mat-card>
@@ -111,26 +113,11 @@ export class PhoneListComponent implements OnInit {
   sortedPhoneList$ = signal<Phone[]>([]); // list storing sorted phones
   displayedColumns:string[] = [];
 
-  private brandImageMap: { [key: string]: string } = {
-    "Apple": "assets/images/Apple.jpeg",
-    "BlackBerry": "assets/images/BlackBerry.jpeg",
-    "HTC": "assets/images/HTC.jpeg",
-    "Huawei": "assets/images/Huawei.jpeg",
-    "LG": "assets/images/LG.jpeg",
-    "Motorola": "assets/images/Motorola.jpeg",
-    "Nokia": "assets/images/Nokia.jpeg",
-    "Samsung": "assets/images/Samsung.jpeg",
-    "Sony": "assets/images/Sony.jpeg"
-  };
-
-  constructor(private phoneService:PhoneService){
-    effect(() => {
-      const list = this.phoneList$(); // monitor change of phoneList$
-      if (list) {
-        this.sortedPhoneList$.set([...list]); // update sortedPhoneList$ (a copy) when phoneList$ changes
-      }
-    });
-  }
+  constructor(
+    private phoneService:PhoneService,
+    private userService: UserService,
+    private router: Router
+  ){}
 
   ngOnInit(): void {
     console.log("Phone Source:",this.phoneSource);
@@ -163,7 +150,15 @@ export class PhoneListComponent implements OnInit {
 
   // Get the image path for the brand.
   getBrandImages(brand: string){
-    return this.brandImageMap[brand] || "assets/images/default.png";
+    return this.phoneService.brandImageMap[brand] || "assets/images/default.png";
+  }
+
+
+  // Handle click on selected phone.
+  itemClicked(phone: any): void{
+    console.log("The phone is selected:",phone._id);
+    this.userService.homeState$.set('item');
+    this.router.navigate(['item', phone._id]);
   }
 
   // sort differently when select different options

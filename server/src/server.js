@@ -8,15 +8,19 @@ require('dotenv').config();
 
 // Import dependencies
 const express = require('express');
-const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
-const db = require('./models/db');
+const mongoose = require('mongoose');
+const session = require('express-session');
 
-// Create Express app
+// Load environment variables
+require('dotenv').config();
+// Create Express server
 const app = express();
+// Import database operations.
+const db = require('./models/db');
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -30,25 +34,35 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static files (for image assets)
-app.use('/assets', express.static(path.join(__dirname, '../client/src/assets')));
+// Use session.
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  cookie: {maxAge: 360000},
+  resave: true,
+  saveUninitialized: true
+}));
+// Initialize the sessions if the session is not.
+app.use((req, res, next) => {
+  if(!req.session.user){
+    req.session.user = {
+      role: 'guest',
+      firstname: null,
+      lastname: null,
+      email: null
+    }
+  }
+  next();
+})
 
-// Import routes
-// const authRoutes = require('./routes/auth.routes');
-// const userRoutes = require('./routes/user.routes');
-const phoneRoutes = require('./routes/phone.routes');
-// const adminRoutes = require('./routes/admin.routes');
+// Router
+const userRouter = require('./routes/user.routes');
+const authRouter = require('./routes/auth.routes');
+const phoneRouter = require('./routes/phone.routes');
+app.use('/user', userRouter);
+app.use('/phone', phoneRouter);
+app.use('/auth', authRouter);
 
-// API Routes
-app.get('/api/test', (req, res) => {
-  res.json({ message: 'API is working!' });
-});
 
-// TODO: Uncomment these routes when they're implemented
-// app.use('/api/auth', authRoutes);
-// app.use('/api/users', userRoutes);
-app.use('/phones', phoneRoutes);
-// app.use('/api/admin', adminRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -60,9 +74,8 @@ app.use((err, req, res, next) => {
 });
 
 // Connect to MongoDB and start server
-mongoose
-.connect(MONGODB_URI)
-.then(async () => {
+try{
+  
   // // Initialize the database.
   // db.initializeDatabase().
   // then(()=>{
@@ -77,8 +90,8 @@ mongoose
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
-})
-.catch((error) => {
+}
+catch(error){
   console.error('MongoDB connection error:', error);
   process.exit(1);
-});
+};
