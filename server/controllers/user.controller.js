@@ -7,19 +7,24 @@ const mongoose = require('mongoose')
 const SECRET_KEY = process.env.JWT_SECRET || 'top_secret';
 const DEFAULT_PASSWORD = process.env.DEFAULT_PASSWORD || 'Password123!'
 const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
+const EMAIL_SERVICE = process.env.EMAIL_SERVICE || 'gmail';
+const EMAIL_HOST = process.env.EMAIL_HOST || 'smtp.gmail.com';
+const EMAIL_PORT = parseInt(process.env.EMAIL_PORT, 10) || 465;
+const EMAIL_USER = process.env.EMAIL_USER || 'tut07g04.comp5347@gmail.com';
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD || 'ahxsrummwfkabydg';
 
 const User = require('../models/user');
 const Activity = require('../models/activity');
 
 // Mail service
 const transporter = nodemailer.createTransport({
-	host: 'smtp.gmail.com',
-	port: 465,
+	host: EMAIL_HOST,
+	port: EMAIL_PORT,
 	secure: true,
-	service: 'Gmail',
+	service: EMAIL_SERVICE,
 	auth: {
-	user: 'tut07g04.comp5347@gmail.com',
-	pass: 'ahxsrummwfkabydg'
+	user: EMAIL_USER,
+	pass: EMAIL_PASSWORD
 	}
 })
 

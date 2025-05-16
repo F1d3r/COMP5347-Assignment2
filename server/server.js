@@ -15,6 +15,8 @@ const session = require('express-session');
 // Load environment variables
 require('dotenv').config();
 const PORT = parseInt(process.env.PORT, 10) || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/oldphonedeals';
+const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // Create Express server
 const app = express();
@@ -78,20 +80,20 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB and start server
 try{
-  // Initialize the database.
-  db.initializeDatabase().
-  then(()=>{
-    db.connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
+  // // Initialize the database.
+  // db.initializeDatabase().
+  // then(()=>{
+  //   db.connectDB();
+  //   app.listen(PORT, () => {
+  //     console.log(`Server running on port ${PORT}`);
+  //   });
+  // })
 
-  // // Lauch server withouth initializing.
-  // db.connectDB();
-  // app.listen(PORT, () => {
-  //   console.log(`Server running on port ${PORT}`);
-  // });
+  // Lauch server withouth initializing.
+  db.connectDB();
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
   
   
 }catch(dbError){
