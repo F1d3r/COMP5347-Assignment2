@@ -61,6 +61,7 @@ export class LoginComponent {
 
   constructor(private userService: UserService, private router:Router) {}
 
+  
   async authenticateUser() {
     console.log("Submit");
     const email = this.loginForm.value.email ?? '';

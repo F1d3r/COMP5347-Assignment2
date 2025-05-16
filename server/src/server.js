@@ -62,8 +62,6 @@ app.use('/user', userRouter);
 app.use('/phone', phoneRouter);
 app.use('/auth', authRouter);
 
-
-
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -94,4 +92,4 @@ try{
 catch(error){
   console.error('MongoDB connection error:', error);
   process.exit(1);
-};
+}

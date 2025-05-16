@@ -1,0 +1,58 @@
+/* Table formatting */
+table {
+    border: solid; 
+    border-spacing: 0;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 2px;
+    border-color: #95BEF0; 
+}
+
+thead {
+    background-color: #c3daeb;
+}
+
+th{
+    text-align: left;
+    padding: 0.25em 0.75em; 
+}
+
+td{
+    border-top: 1pt solid #95BEF0;   
+    line-height: 1.5em;
+    vertical-align: middle;
+    padding: 0.5em 0.75em;
+
+    /* Set the maximum width of a data. Hide the longer data by ellipsis.*/
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Show the complete content when the mouse hover*/
+td:hover {
+    overflow: visible;
+    overflow-wrap: break-word;
+    white-space: normal;
+    background-color: #f0f0f0;
+    position: relative;
+    z-index: 1;
+}
+
+/* Form formating */
+form{
+    display: flex;
+    justify-content: space-between;
+    background-color: rgb(222, 241, 241);
+    padding: 10px;
+ }
+
+
+ /* Other formatting */
+ div.flex-row-seperate{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content:space-between;
+ }
