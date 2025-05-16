@@ -57,10 +57,6 @@ import { UserService } from '../user.service';
             </mat-option>
         </mat-select>
       </div>
-      
-      <div>
-        <input type="keyword" formControlName="keyword" name="keyword" placeholder="Search phone title"/>
-      </div>
 
       <div>
         <button type="submit" [disabled]="!searchForm.valid">Search</button>
@@ -74,8 +70,9 @@ export class SearchFormComponent implements OnInit {
     // keyword: new FormControl('', [Validators.required]),
     // brand: new FormControl('', Validators.required),
     keyword: new FormControl(''),
-    brand: new FormControl('All brands'),
+    brand: new FormControl('All'),
   });
+  
   phoneBrands:string[] = [];
   pageState = inject(UserService).homeState$;
 
@@ -92,7 +89,7 @@ export class SearchFormComponent implements OnInit {
       (data) => {
         // this.phoneBrands = data;
         // this.phoneBrands.push('All');
-        this.phoneBrands = ['All brands', ...data];
+        this.phoneBrands = ['All', ...data];
       },
       (error)=>{
         console.log(error);
@@ -103,7 +100,7 @@ export class SearchFormComponent implements OnInit {
   // On submit of the form.
   searchPhones(){
     const keyword = this.searchForm.value.keyword ?? '';
-    const brand = this.searchForm.value.brand ?? 'All brands';
+    const brand = this.searchForm.value.brand ?? '';
     console.log("Got keyword:", keyword);
     console.log("Got brand:", brand);
 

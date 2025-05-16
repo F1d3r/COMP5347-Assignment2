@@ -73,11 +73,12 @@ import { SearchFormComponent } from '../search-form/search-form.component';
     </mat-toolbar>
 
     <main>
-        <div id='search-bar-container'>
-          <div id="form-wrapper">
-            <app-search-form></app-search-form>
-          </div>
+      <button *ngIf="pageState() == 'search'" (click)="backHome()">Back</button>
+      <div id='search-bar-container'>
+        <div id="form-wrapper">
+          <app-search-form></app-search-form>
         </div>
+      </div>
         
 
       <!-- The page framework for home state -->

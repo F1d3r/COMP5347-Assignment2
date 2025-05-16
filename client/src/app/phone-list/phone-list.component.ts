@@ -1,5 +1,5 @@
 import { UserService } from './../user.service';
-import { Component, OnInit, WritableSignal, Input } from '@angular/core';
+import { Component, OnInit, WritableSignal, Input, inject } from '@angular/core';
 import { signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PhoneService } from '../phone.service';
@@ -29,16 +29,6 @@ import { MatSelectModule } from '@angular/material/select';
   ],
 
   template: `
-    <div *ngIf="phoneSource === 'search'">
-      <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
-        <mat-option value="titleAsc">Title: A -> Z</mat-option>
-        <mat-option value="titleDesc">Title: Z -> A</mat-option>
-        <mat-option value="priceAsc">Price: Low to High</mat-option>
-        <mat-option value="priceDesc">Price: High to Low</mat-option>
-        <mat-option value="stockAsc">Stock: Low to High</mat-option>
-        <mat-option value="stockDesc">Stock: High to Low</mat-option>
-      </mat-select>
-    </div>
     <mat-card>
         <mat-card-header>
           <!-- The card title for best seller -->
@@ -54,6 +44,17 @@ import { MatSelectModule } from '@angular/material/select';
         </mat-card-header>
         
         <mat-card-content>
+            <div *ngIf="phoneSource === 'search'">
+              <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
+                <mat-option value="titleAsc">Title: A -> Z</mat-option>
+                <mat-option value="titleDesc">Title: Z -> A</mat-option>
+                <mat-option value="priceAsc">Price: Low to High</mat-option>
+                <mat-option value="priceDesc">Price: High to Low</mat-option>
+                <mat-option value="stockAsc">Stock: Low to High</mat-option>
+                <mat-option value="stockDesc">Stock: High to Low</mat-option>
+              </mat-select>
+            </div>
+
             <table mat-table [dataSource]="phoneList$() || []">
               <!-- For image -->
               <ng-container matColumnDef="col-image">
@@ -110,7 +111,6 @@ export class PhoneListComponent implements OnInit {
   @Input() phoneSource?: string;
   
   phoneList$ = {} as WritableSignal<Phone[]>;
-  sortedPhoneList$ = signal<Phone[]>([]); // list storing sorted phones
   displayedColumns:string[] = [];
 
   constructor(
@@ -163,7 +163,7 @@ export class PhoneListComponent implements OnInit {
 
   // sort differently when select different options
   onSortChange(sortKey: string){
-    const list = [...this.sortedPhoneList$()];
+    const list = [...this.phoneList$()];
 
     if (sortKey === 'priceAsc') {
       list.sort((a, b) => a.price - b.price);
@@ -179,6 +179,6 @@ export class PhoneListComponent implements OnInit {
       list.sort((a, b) => b.stock - a.stock);
     } 
 
-    this.sortedPhoneList$.set(list);
+    this.phoneList$.set(list);
   }
 }

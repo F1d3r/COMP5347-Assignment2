@@ -69,7 +69,7 @@ module.exports.logOut = async function(req, res){
 		userId: user.id,
 		activity: 'logout'
 	})
-	return res.status(200).send("Logout success");
+	return res.status(200).json({ message: "Logout Success" });
 }
 
 
