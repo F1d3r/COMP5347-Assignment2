@@ -9,8 +9,8 @@ userRouter.get('/test/:token', userController.test);
 userRouter.get('/resetPassword/:_id/:token', userController.resetPassword);
 
 // User login. Get user detail.
+userRouter.post('/', userController.authenticateLogin);
 userRouter.post('/logout', userController.logOut);
-userRouter.post('/user', userController.authenticateLogin);
 userRouter.post('/create', userController.createUser);
 userRouter.post('/update', userController.updateUser);
 userRouter.post('/resetRequest', userController.handleResetRequest)

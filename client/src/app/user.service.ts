@@ -24,10 +24,13 @@ export class UserService {
 
 
   logOut(){
+    console.log("Logging out.");
     this.httpClient.post(`${this.url}/user/logout`, {userId: this.user$()?._id}, { observe: 'response' }).subscribe(response =>{
       if(response.status == 200){
         console.log('logout success.')
         this.user$.set(null);
+      }else{
+        console.error("Server error");
       }
     })
   }
