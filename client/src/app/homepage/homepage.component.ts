@@ -1,4 +1,4 @@
-import { Component, OnInit, WritableSignal, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, WritableSignal, computed, effect, inject, signal, Injectable } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -9,9 +9,11 @@ import { PhoneListComponent } from "../phone-list/phone-list.component";
 import { SearchFormComponent } from '../search-form/search-form.component';
 import { PhoneService } from '../phone.service';
 
+import { MatSelectModule } from '@angular/material/select';
+
 @Component({
   selector: 'app-homepage',
-  imports: [CommonModule, RouterModule, MatToolbarModule, PhoneListComponent, SearchFormComponent],
+  imports: [CommonModule, RouterModule, MatToolbarModule, PhoneListComponent, SearchFormComponent, MatSelectModule],
 
   styles: [
     `
@@ -26,12 +28,25 @@ import { PhoneService } from '../phone.service';
         flex-direction: row;
         justify-content: space-between;
       }
+
+      #search-bar-container {
+        width: fit-content; /* 或具体宽度，如 600px */
+        margin: 0 auto;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 50px;
+      }
+
+      #form-wrapper {
+        display: inline-block; /* 防止它撑满整行 */
+      }
     `
   ],
   
   template: `
     <mat-toolbar class='toolbar'>
-      <div>
+      <div (click)="backHome()">
         <span span>Welcome to {{title}}</span>
       </div>
 
@@ -52,16 +67,30 @@ import { PhoneService } from '../phone.service';
     </mat-toolbar>
 
     <main>
+        <div id='search-bar-container'>
+          <div id="form-wrapper">
+            <app-search-form></app-search-form>
+          </div>
+        </div>
+        
+
       <!-- The page framework for home state -->
       <div id='homeState' *ngIf="pageState() == 'home'">
-        <app-search-form></app-search-form>
+        
         <div id='suggest'>
           <app-phone-list [phoneSource]="'bestSeller'"></app-phone-list>
           <app-phone-list [phoneSource]="'soldOutSoon'"></app-phone-list>
         </div>
       </div>
+      <!-- The page framework for search state -->
+      <div id='searchState' *ngIf="pageState() == 'search'">
+        <app-phone-list [phoneSource]="'search'"></app-phone-list>
+      </div>
     </main>
   `
+})
+@Injectable({
+  providedIn: 'root'
 })
 export class HomepageComponent implements OnInit {
   title = 'OldPhoneDeals';
@@ -86,5 +115,9 @@ export class HomepageComponent implements OnInit {
 
   logout(){
     this.userService.logOut();
+  }
+
+  backHome(){
+    this.pageState.set('home');
   }
 }

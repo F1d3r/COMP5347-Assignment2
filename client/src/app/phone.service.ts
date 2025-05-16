@@ -6,7 +6,7 @@ import { Phone } from './phone';
   providedIn: 'root'
 })
 export class PhoneService {
-  private url = 'http://localhost:3000';
+  private url = 'http://localhost:3000/phones';
   
   bestSeller$ = signal<Phone[]>([]);
   soldOutSoon$ = signal<Phone[]>([]);
@@ -15,7 +15,7 @@ export class PhoneService {
   constructor(private httpClient:HttpClient) {}
 
   getBestSeller(){
-    this.httpClient.get<Phone[]>(`${this.url}/bestSeller`).subscribe(phones =>{
+    this.httpClient.get<Phone[]>(`${this.url}/bestSellers`).subscribe(phones =>{
       this.bestSeller$.set(phones);
     })
     return this.bestSeller$;
@@ -29,11 +29,10 @@ export class PhoneService {
   }
 
   getAllBrand(){
-    return this.httpClient.get<string[]>(`${this.url}/allBrand`);
+    return this.httpClient.get<string[]>(`${this.url}/allBrands`);
   }
 
   getPhones(keyword:string, brand:string){
     return this.httpClient.get<Phone[]>(`${this.url}/search?keyword=${keyword}&brand=${brand}`)
   }
-
 }

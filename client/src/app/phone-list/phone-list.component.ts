@@ -1,4 +1,4 @@
-import { Component, OnInit, WritableSignal, Input, inject} from '@angular/core';
+import { Component, OnInit, WritableSignal, Input, inject, signal, effect} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PhoneService } from '../phone.service';
 import { RouterModule } from '@angular/router';
@@ -8,9 +8,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { Phone } from '../phone';
 
+import { MatSelectModule } from '@angular/material/select';
+
 @Component({
   selector: 'app-phone-list',
-  imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule, CommonModule],
+  imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule, CommonModule, MatSelectModule],
 
   styles: [
     `
@@ -25,11 +27,21 @@ import { Phone } from '../phone';
   ],
 
   template: `
+    <div *ngIf="phoneSource === 'search'">
+      <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
+        <mat-option value="titleAsc">Title: A -> Z</mat-option>
+        <mat-option value="titleDesc">Title: Z -> A</mat-option>
+        <mat-option value="priceAsc">Price: Low to High</mat-option>
+        <mat-option value="priceDesc">Price: High to Low</mat-option>
+        <mat-option value="stockAsc">Stock: Low to High</mat-option>
+        <mat-option value="stockDesc">Stock: High to Low</mat-option>
+      </mat-select>
+    </div>
     <mat-card>
         <mat-card-header>
           <!-- The card title for best seller -->
           <span *ngIf="phoneSource === 'bestSeller'">
-            <mat-card-title>Bese Seller</mat-card-title>
+            <mat-card-title>Best Sellers</mat-card-title>
             <mat-card-subtitle>Highest Rating</mat-card-subtitle>
           </span>
           <!-- The card title for sold out soon -->
@@ -40,7 +52,7 @@ import { Phone } from '../phone';
         </mat-card-header>
         
         <mat-card-content>
-            <table mat-table [dataSource]="phoneList$()? phoneList$() : []">
+            <table mat-table [dataSource]="phoneSource === 'search' ? sortedPhoneList$() : phoneList$()">
               <!-- For image -->
               <ng-container matColumnDef="col-image">
                 <th mat-header-cell *matHeaderCellDef>Image</th>
@@ -52,6 +64,11 @@ import { Phone } from '../phone';
               <ng-container matColumnDef="col-title">
                 <th mat-header-cell *matHeaderCellDef>Title</th>
                 <td mat-cell *matCellDef="let phone">{{phone.title}}</td>
+              </ng-container>
+              <!-- For brand -->
+              <ng-container matColumnDef="col-brand">
+                <th mat-header-cell *matHeaderCellDef>Brand</th>
+                <td mat-cell *matCellDef="let phone">{{phone.brand}}</td>
               </ng-container>
               <!-- For price -->
               <ng-container matColumnDef="col-price">
@@ -89,8 +106,11 @@ import { Phone } from '../phone';
 })
 export class PhoneListComponent implements OnInit { 
   @Input() phoneSource?: string;
+  
   phoneList$ = {} as WritableSignal<Phone[]>;
+  sortedPhoneList$ = signal<Phone[]>([]); // list storing sorted phones
   displayedColumns:string[] = [];
+
   private brandImageMap: { [key: string]: string } = {
     "Apple": "assets/images/Apple.jpeg",
     "BlackBerry": "assets/images/BlackBerry.jpeg",
@@ -100,11 +120,17 @@ export class PhoneListComponent implements OnInit {
     "Motorola": "assets/images/Motorola.jpeg",
     "Nokia": "assets/images/Nokia.jpeg",
     "Samsung": "assets/images/Samsung.jpeg",
-    "Sony": "assets/images/Sopy.jpeg"
+    "Sony": "assets/images/Sony.jpeg"
   };
 
-
-  constructor(private phoneService:PhoneService){}
+  constructor(private phoneService:PhoneService){
+    effect(() => {
+      const list = this.phoneList$(); // monitor change of phoneList$
+      if (list) {
+        this.sortedPhoneList$.set([...list]); // update sortedPhoneList$ (a copy) when phoneList$ changes
+      }
+    });
+  }
 
   ngOnInit(): void {
     console.log("Phone Source:",this.phoneSource);
@@ -124,6 +150,14 @@ export class PhoneListComponent implements OnInit {
       ]
     }else if(this.phoneSource === 'search'){
       this.phoneList$ = this.phoneService.searched$;
+      this.displayedColumns = [
+        'col-image',
+        'col-title',
+        'col-brand',
+        'col-stock',
+        'col-seller',
+        'col-price'
+      ];
     }
   }
 
@@ -132,4 +166,24 @@ export class PhoneListComponent implements OnInit {
     return this.brandImageMap[brand] || "assets/images/default.png";
   }
 
+  // sort differently when select different options
+  onSortChange(sortKey: string){
+    const list = [...this.sortedPhoneList$()];
+
+    if (sortKey === 'priceAsc') {
+      list.sort((a, b) => a.price - b.price);
+    } else if (sortKey === 'priceDesc') {
+      list.sort((a, b) => b.price - a.price);
+    } else if (sortKey === 'titleAsc') {
+      list.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortKey === 'titleDesc') {
+      list.sort((a, b) => b.title.localeCompare(a.title));
+    } else if (sortKey === 'stockAsc') {
+      list.sort((a, b) => a.stock - b.stock);
+    } else if (sortKey === 'stockDesc') {
+      list.sort((a, b) => b.stock - a.stock);
+    } 
+
+    this.sortedPhoneList$.set(list);
+  }
 }
