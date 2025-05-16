@@ -1,15 +1,14 @@
-import { catchError } from 'rxjs';
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl} from '@angular/forms';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { User } from '../user';
 import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
 
   styles: 
   `
@@ -35,7 +34,14 @@ import { UserService } from '../user.service';
 
       <div>
         <label>Password
-          <input type="text" formControlName="password" name="password"/>
+          <input [type]="showPassword?'text':'password'" 
+          formControlName="password" name="paswword" require
+          [ngClass]="{'invalid-input': loginForm.controls.password.invalid 
+          && loginForm.controls.password.touched}"/>
+        </label>
+        <label>
+          <input type="checkbox" (change)="togglePasswordShow()">
+          Show Password
         </label>
       </div>
 
@@ -51,6 +57,7 @@ export class LoginComponent {
     email: new FormControl('', [Validators.required, Validators.email]),
     password: new FormControl('', Validators.required),
   });
+  showPassword = false;
 
   constructor(private userService: UserService, private router:Router) {}
 
@@ -86,6 +93,10 @@ export class LoginComponent {
       }
     })
 
+  }
+
+  togglePasswordShow(){
+    this.showPassword = !this.showPassword;
   }
 
   goBack(){

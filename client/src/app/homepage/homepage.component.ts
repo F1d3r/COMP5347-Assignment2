@@ -1,13 +1,11 @@
-import { Component, OnInit, WritableSignal, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnInit, WritableSignal, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 
 import { UserService } from './../user.service';
-import { User } from '../user';
 import { PhoneListComponent } from "../phone-list/phone-list.component";
 import { SearchFormComponent } from '../search-form/search-form.component';
-import { PhoneService } from '../phone.service';
 
 @Component({
   selector: 'app-homepage',
@@ -23,8 +21,17 @@ import { PhoneService } from '../phone.service';
 
       #suggest{
         display: flex;
-        flex-direction: row;
-        justify-content: space-between;
+        justify-content: center;
+        gap: 0px;
+      }
+
+      app-phone-list{
+        margin: 10px;
+        border: 2px, solid #000;
+      }
+
+      button{
+        margin: 5px;
       }
     `
   ],
@@ -72,7 +79,7 @@ export class HomepageComponent implements OnInit {
 
   // State signal used to indicate the state of home page.
   // Initialized as home state.
-  pageState: WritableSignal<'home'|'search'|'item'> = signal('home');
+  pageState = inject(UserService).homeState$;
 
   constructor(
     private router: Router,

@@ -1,4 +1,26 @@
 const Phone = require('../models/phone');
+const mongoose = require('mongoose')
+
+
+// Find one phone by its id.
+module.exports.getPhone = async function(req, res){
+	phone_id = req.params._id;
+	Phone.getPhone(phone_id)
+		.then(result => {
+			if(!result){
+				console.log("Cannot find phone");
+				res.status(404).send("The phone does not exist");
+			}
+            // console.log(result.length);
+            // console.log(result);
+            // Send the result to the client.
+			res.status(200).send(result);
+		})
+		.catch(err => {
+			console.log("Database error", err);
+			res.status(500).send("Server error");
+		});
+}
 
 
 // Find the five phone listings (image and rating) that have the 
@@ -14,7 +36,7 @@ module.exports.getBestSeller = async function(req, res){
 		})
 		.catch(err => {
 			console.log("Cannot find best seller");
-			res.status(404).send("Cannot find best seller");
+			res.status(500).send("Cannot find best seller");
 		});
 }
 

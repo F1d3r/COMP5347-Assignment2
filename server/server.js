@@ -62,7 +62,9 @@ app.use((req, res, next) => {
 // Router
 const userRouter = require('./routes/user.routes');
 const authRouter = require('./routes/auth.routes');
-app.use('/', userRouter);
+const phoneRouter = require('./routes/phone.routes');
+app.use('/user', userRouter);
+app.use('/phone', phoneRouter);
 app.use('/auth', authRouter);
 
 
@@ -80,15 +82,6 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB and start server
 try{
-  // // Initialize the database.
-  // db.initializeDatabase().
-  // then(()=>{
-  //   db.connectDB();
-  //   app.listen(PORT, () => {
-  //     console.log(`Server running on port ${PORT}`);
-  //   });
-  // })
-
   // Lauch server withouth initializing.
   db.connectDB();
   app.listen(PORT, () => {

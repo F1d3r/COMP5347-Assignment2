@@ -1,3 +1,4 @@
+import { WidthType } from './../../../node_modules/get-east-asian-width/index.d';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } 
@@ -7,6 +8,7 @@ import { Router } from '@angular/router';
 import { MatSelectModule } from '@angular/material/select';
 
 import { PhoneService } from '../phone.service';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-search-form',
@@ -26,22 +28,31 @@ import { PhoneService } from '../phone.service';
       display: flex;
       flex-direction: row;
     }
-    .mat-select-value {
-      max-width: max-content !important;
+
+    mat-select {
+      width: 150px;
+    }
+
+    .mat-select-trigger {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .fixed-width-panel {
+      min-width: 150px !important;
+      max-width: 150px !important;
     }
   `,
 
   template: `
     <form [formGroup]="searchForm" (ngSubmit)="searchPhones()">
       <div>
-        <label>Keyword
-          <input type="keyword" formControlName="keyword" name="keyword"/>
-        </label>
+        <input type="keyword" formControlName="keyword" name="keyword" placeholder="Search here"/>
       </div>
 
       <div id='selectBrand'>
-        <label>Select Brand</label>
-        <mat-select formControlName="brand" placeholder="Select Brand">
+        <mat-select formControlName="brand" placeholder="Select Brand" panelClass="fixed-width-panel">
             <mat-option *ngFor='let brand of phoneBrands' [value]="brand">
               {{brand}}
             </mat-option>
@@ -55,7 +66,6 @@ import { PhoneService } from '../phone.service';
   `
 })
 export class SearchFormComponent implements OnInit {
-
   searchForm = new FormGroup({
     keyword: new FormControl('', [Validators.required]),
     brand: new FormControl('', Validators.required),
@@ -63,9 +73,13 @@ export class SearchFormComponent implements OnInit {
 
   phoneBrands:string[] = [];
 
-  constructor(private phoneService:PhoneService, private router:Router){}
+
+  constructor(private phoneService: PhoneService, 
+              private router: Router, 
+              private userService: UserService){}
 
   ngOnInit(){
+    // Get all brand info through the service.
     this.phoneService.getAllBrand().subscribe(
       (data) => {
         this.phoneBrands = data;
@@ -77,7 +91,7 @@ export class SearchFormComponent implements OnInit {
     )
   }
 
-
+  // On submit of the form.
   searchPhones(){
     const keyword = this.searchForm.value.keyword ?? '';
     const brand = this.searchForm.value.brand ?? '';
@@ -86,14 +100,18 @@ export class SearchFormComponent implements OnInit {
 
     this.phoneService.getPhones(keyword, brand).subscribe(phones =>{
       if(!phones || Object.keys(phones).length === 0){
+        // Not found result, set saerched result to empty.
         console.log("No result found");
         this.phoneService.searched$.set([]);
         console.log(phones);
       }else{
+        // Result found.
         console.log("Found Result");
         this.phoneService.searched$.set(phones);
         console.log(phones);
         this.router.navigate(['']);
+        // Set the home state to search.
+        this.userService.homeState$.set('search');
       }
     })
   }

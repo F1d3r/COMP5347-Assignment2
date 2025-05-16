@@ -21,35 +21,48 @@ const PhoneSchema = new mongoose.Schema({
     disabled: {type: Boolean, default: false }
 });
 
+PhoneSchema.statics.getPhone = async function(_id){
+	phone_id = new mongoose.Types.ObjectId(_id);
+    const phone = await Phone.aggregate([
+    { $match: 
+        {
+            _id: {$eq: phone_id}
+        }
+    },
+    // Calculate the average rating for each phone
+    { 
+        $addFields: {
+            avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
+        }
+    }
+    ]);
+    return phone[0];
+}
+
 
 // Find the 5 phons with highest rating.
 PhoneSchema.statics.getBestSeller = async function(){
-    // Using the pipeline to calculate the average rating for each phone.
-    const topPhones =  await this.aggregate([
-        // Filter the phones disabled.
-        { $match: { 
-            disabled: { $exists: true },
-            disabled: { $eq: false },
-        }},
-
-        // Add a field for average rating.
-        { $addFields: {
-            avgRating: { 
-                $cond: {
-                    // 0 If no review.
-                    if: { $eq: [{ $size: "$reviews" }, 0] },
-                    then: 0,
-                    // Else the average of all revies.
-                    else: { $round:[{$avg: "$reviews.rating"}, 2]}
-                }
-            },
-        }},
-
-        // Sort on averageRating by descending order.
-        { $sort: { averageRating: -1} },
-        
-        // Get top 5.
-        { $limit: 5 }
+    const topPhones = await Phone.aggregate([
+    { $match: 
+        {
+            // Only consider phones available
+            disabled: false,
+            // Only consider phone with stock.
+            stock: { $gt: 0 },
+            // Only consider phones with at least 2 review
+            $expr: { $gte: [{ $size: "$reviews" }, 2]}
+        }
+    },
+    // Calculate the average rating for each phone
+    { 
+        $addFields: {
+            avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
+        }
+    },
+    // Sort by average rating (highest first)
+    { $sort: { avgRating: -1 } },
+    // Return only the top result
+    { $limit: 5 }
     ]);
     return topPhones;
 }
