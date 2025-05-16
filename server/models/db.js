@@ -15,6 +15,7 @@ const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
 const defaultPassword = process.env.DEFAULT_PASSWORD || 'Password123!'; 
 // MongoDB connection URI.
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/OldPhoneDeals';
+console.log("URI: ", MONGODB_URI);
 
 // JSON File path.
 const user_path = path.join(process.cwd(), '/Dataset/userlist.json');

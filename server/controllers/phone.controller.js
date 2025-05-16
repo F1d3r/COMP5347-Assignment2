@@ -65,8 +65,8 @@ module.exports.searchResult = function(req,res){
 module.exports.getAllBrand = function(req, res){
 	Phone.getAllBrand()
 		.then(result =>{
-			// console.log(result);
-			// console.log(result.length);
+			console.log(result);
+			console.log(result.length);
 			res.status(200).send(result);
 		})
 		.catch(err => {

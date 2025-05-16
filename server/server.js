@@ -78,20 +78,20 @@ app.use((err, req, res, next) => {
 
 // Connect to MongoDB and start server
 try{
-  // // Initialize the database.
-  // db.initializeDatabase().
-  // then(()=>{
-  //   db.connectDB();
-  //   app.listen(PORT, () => {
-  //     console.log(`Server running on port ${PORT}`);
-  //   });
-  // })
+  // Initialize the database.
+  db.initializeDatabase().
+  then(()=>{
+    db.connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
 
-  // Lauch server withouth initializing.
-  db.connectDB();
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+  // // Lauch server withouth initializing.
+  // db.connectDB();
+  // app.listen(PORT, () => {
+  //   console.log(`Server running on port ${PORT}`);
+  // });
   
   
 }catch(dbError){
