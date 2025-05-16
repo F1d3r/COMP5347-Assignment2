@@ -1,4 +1,9 @@
-[{"_id":{"$oid":"5f5237a4c1beb1523fa3da02"},"firstname":"Anita","lastname":"Simpson","email":"anita.simpson@hooli.com","password":"<put the encrypted password here>"},
+[
+    {"_id":{"$oid":"5f5237a4c1beb1523fa3da02"},
+    "firstname":"Anita",
+    "lastname":"Simpson",
+    "email":"anita.simpson@hooli.com",
+    "password":"<put the encrypted password here>"},
 {"_id":{"$oid":"5f5237a4c1beb1523fa3da03"},"firstname":"Holli","lastname":"Moore","email":"holli.moore@outlook.com","password":"<put the encrypted password here>"},
 {"_id":{"$oid":"5f5237a4c1beb1523fa3da04"},"firstname":"Robert","lastname":"Vasques","email":"robert.vasques@piedpiper.com","password":"<put the encrypted password here>"},
 {"_id":{"$oid":"5f5237a4c1beb1523fa3da05"},"firstname":"Jimmy","lastname":"Sagedahl","email":"jimmy.sagedahl@hooli.com","password":"<put the encrypted password here>"},

@@ -1,93 +1,67 @@
-/**
- * Database Initialization Script for OldPhoneDeals
- * 
- * This script initializes the MongoDB database with:
- * - User data (with encrypted passwords)
- * - Phone listings (with updated image URLs)
- */
-
-require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
 const path = require('path');
 
-// MongoDB connection string from environment variables
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/oldphonedeals';
 
-// Connect to MongoDB
-async function initializeDatabase() {
+// Models to initialize.
+const User = require('../models/user');
+const Phone = require('../models/phone');
+const Activity = require('../models/activity');
+
+// Default password hashing config.
+require('dotenv').config();
+const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
+const defaultPassword = process.env.DEFAULT_PASSWORD || 'Password123!'; 
+// MongoDB connection URI.
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/OldPhoneDeals';
+console.log("URI: ", MONGODB_URI);
+
+// JSON File path.
+const user_path = path.join(process.cwd(), 'server/database/userlist.json');
+const phone_path = path.join(process.cwd(), 'server/database/phonelisting.json');
+
+
+// Initialize the MongoDB with server's local json file.
+initializeDatabase = async function() {
   try {
     console.log('Connecting to MongoDB...');
     await mongoose.connect(MONGODB_URI);
     console.log('Connected to MongoDB successfully');
 
-    // Define schemas
-    console.log('Setting up schemas...');
-    
-    // User schema
-    const userSchema = new mongoose.Schema({
-      firstname: String,
-      lastname: String,
-      email: { type: String, unique: true },
-      password: String,
-      isVerified: { type: Boolean, default: true }
-    });
-    
-    // Review schema
-    const reviewSchema = new mongoose.Schema({
-      reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      rating: Number,
-      comment: String,
-      hidden: Boolean
-    });
-    
-    // Phone listing schema
-    const phoneListingSchema = new mongoose.Schema({
-      title: String,
-      brand: String,
-      image: String,
-      stock: Number,
-      seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      price: Number,
-      reviews: [reviewSchema],
-      disabled: Boolean
-    });
-    
-    // Create models
-    const User = mongoose.model('User', userSchema);
-    const PhoneListing = mongoose.model('PhoneListing', phoneListingSchema);
-    
+
     // Check if collections exist and have data
     const userCount = await User.countDocuments();
-    const phoneCount = await PhoneListing.countDocuments();
-    
-    if (userCount > 0 || phoneCount > 0) {
+    const phoneCount = await Phone.countDocuments();
+    const activityCount = await Activity.countDocuments();
+    // Drop the collection if already exists.
+    if (userCount > 0 || phoneCount > 0 || activityCount > 0) {
       console.log('Database already contains data. Dropping collections...');
-      await mongoose.connection.db.dropCollection('users');
-      await mongoose.connection.db.dropCollection('phonelistings');
+      await mongoose.connection.db.dropCollection('user');
+      await mongoose.connection.db.dropCollection('phone');
+      await mongoose.connection.db.dropCollection('activity');
       console.log('Collections dropped');
     }
     
+
     // Load data from JSON files
     console.log('Loading data from JSON files...');
     let phoneListingsData, usersData;
-    
     try {
-      phoneListingsData = JSON.parse(fs.readFileSync(path.join(__dirname, 'phonelisting.json'), 'utf8'));
-      usersData = JSON.parse(fs.readFileSync(path.join(__dirname, 'userlist.json'), 'utf8'));
+      usersData = JSON.parse(fs.readFileSync(path.join(user_path), 'utf8'));
+      phoneListingsData = JSON.parse(fs.readFileSync(phone_path), 'utf8');
     } catch (error) {
       console.error('Error reading JSON files:', error.message);
       console.log('Make sure the JSON files (phonelisting.json and userlist.json) exist in the dataset directory.');
       process.exit(1);
     }
     
+
     // Hash a default password for all users
+    console.log('Default password: ' + defaultPassword);
     console.log('Creating users with hashed passwords...');
-    const saltRounds = 10;
-    const defaultPassword = 'Password123!'; // Strong password with capital, lowercase, number, symbol
     const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
-    
+    console.log('Default hash: '+ hashedPassword);
     // Process and insert users
     const processedUsers = usersData.map(user => {
       // Convert string IDs to ObjectIDs if necessary
@@ -102,13 +76,33 @@ async function initializeDatabase() {
         lastname: user.lastname,
         email: user.email,
         password: hashedPassword,
-        isVerified: true // For initial data, consider users already verified
+        isVerified: true, // For initial data, consider users already verified
+        verifyToken: null,
       };
     });
-    
+    // Insert users.
     await User.insertMany(processedUsers);
     console.log(`${processedUsers.length} users inserted`);
+
+    // Create admin user if it doesn't exist
+    console.log('Creating admin user...');
+    const adminEmail = 'tut07g04.comp5347@gmail.com';
+    const adminPassword = await bcrypt.hash('Admin123!', saltRounds);
     
+    admin = await User.findOneAndUpdate(
+      { email: adminEmail },
+      {
+        firstname: 'Admin',
+        lastname: 'User',
+        email: adminEmail,
+        password: adminPassword,
+        isAdmin: true,
+        isVerified: true
+      },
+      { upsert: true, new: true }
+    );
+    
+
     // Process and insert phone listings
     console.log('Inserting phone listings...');
     const processedListings = phoneListingsData.map(listing => {
@@ -118,6 +112,7 @@ async function initializeDatabase() {
       
       // Process reviews
       const processedReviews = (listing.reviews || []).map(review => {
+        // Convert string IDs to ObjectIDs if necessary
         let reviewerId = review.reviewer;
         if (typeof reviewerId === 'string') {
           reviewerId = new mongoose.Types.ObjectId(reviewerId);
@@ -149,26 +144,29 @@ async function initializeDatabase() {
       };
     });
     
-    await PhoneListing.insertMany(processedListings);
+    await Phone.insertMany(processedListings);
     console.log(`${processedListings.length} phone listings inserted`);
     
-    // Create admin user if it doesn't exist
-    console.log('Creating admin user...');
-    const adminEmail = 'admin@oldphonedeals.com';
-    const adminPassword = await bcrypt.hash('Admin123!', saltRounds);
-    
-    await User.findOneAndUpdate(
-      { email: adminEmail },
-      {
-        firstname: 'Admin',
-        lastname: 'User',
-        email: adminEmail,
-        password: adminPassword,
-        isAdmin: true,
-        isVerified: true
-      },
-      { upsert: true, new: true }
-    );
+    // Create activity collection.
+    let adminId = admin._id;
+    if (typeof adminId === 'object' && adminId.$oid) {
+      adminId = new mongoose.Types.ObjectId(adminId.$oid);
+    }
+    const activity1 = new Activity({
+      _id: new mongoose.Types.ObjectId(),
+      userId: adminId,
+      activity: 'login'
+    })
+    const activity2 = new Activity({
+      _id: new mongoose.Types.ObjectId(),
+      userId: adminId,
+      activity: 'logout'
+    })
+    await activity1.save();
+    await activity2.save();
+    console.log("Activity collection created.");
+
+
     
     console.log('\nDatabase initialization completed successfully!');
     console.log('\nDefault login credentials:');
@@ -186,5 +184,5 @@ async function initializeDatabase() {
   }
 }
 
-// Run the initialization
+
 initializeDatabase();

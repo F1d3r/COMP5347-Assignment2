@@ -1,6 +1,8 @@
 import { Review } from "./review";
 
+
 export interface Phone {
+    _id: string,
     title: string;
     brand: string;
     stock: number;
