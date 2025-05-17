@@ -13,6 +13,7 @@ interface User {
   isAdmin: boolean;
   createdAt: string;
   lastLogin?: string;
+  disabled: boolean;
 }
 
 interface PhoneListing {
@@ -42,7 +43,11 @@ export class AdminDashboardComponent implements OnInit {
   activeTab = 'users';
   users: User[] = [];
   listings: PhoneListing[] = [];
-  
+  reviews: any[] = [];
+  reviewSearchTerm = '';
+  reviewSearchFilter = 'content'; // 'content', 'user', or 'listing'
+  filteredReviews: any[] = [];
+
   // Search and filter
   userSearchTerm = '';
   listingSearchTerm = '';
@@ -93,12 +98,157 @@ export class AdminDashboardComponent implements OnInit {
     // Load initial data
     this.loadUsers();
     this.loadListings();
+    this.loadReviews();
+  }
+
+  loadReviews(): void {
+    this.loading = true;
+    this.http.get<any[]>('/api/admin/reviews').subscribe({
+      next: (reviews) => {
+        this.reviews = reviews;
+        this.filteredReviews = reviews;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading reviews:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+    // Delete review
+  deleteReview(review: any): void {
+    // Ask for confirmation
+    if (!confirm('Are you sure you want to delete this review? This action cannot be undone.')) {
+      return;
+    }
+    
+    this.http.delete(`/api/admin/reviews/${review.listing._id}/${review._id}`)
+      .subscribe({
+        next: () => {
+          // Remove the review from both arrays
+          this.reviews = this.reviews.filter(r => 
+            !(r._id === review._id && r.listing._id === review.listing._id)
+          );
+          
+          this.filteredReviews = this.filteredReviews.filter(r => 
+            !(r._id === review._id && r.listing._id === review.listing._id)
+          );
+          
+          // Show success message
+          alert('Review deleted successfully');
+        },
+        error: (error) => {
+          console.error('Error deleting review:', error);
+          alert('Error deleting review: ' + (error.error?.message || 'Unknown error'));
+        }
+      });
+  }
+
+  // Component method for searching reviews across all fields
+  searchReviews(): void {
+    if (!this.reviewSearchTerm) {
+      this.filteredReviews = this.reviews;
+      return;
+    }
+    
+    const term = this.reviewSearchTerm.toLowerCase();
+    
+    this.filteredReviews = this.reviews.filter(review => {
+      // Search in listing title
+      const listingMatch = review.listing && review.listing.title && 
+        review.listing.title.toLowerCase().includes(term);
+      
+      // Search in review content
+      const commentMatch = review.comment && 
+        review.comment.toLowerCase().includes(term);
+      
+      // Search in reviewer name
+      const reviewerMatch = review.reviewer && (
+        (review.reviewer.firstname && review.reviewer.firstname.toLowerCase().includes(term)) ||
+        (review.reviewer.lastname && review.reviewer.lastname.toLowerCase().includes(term)) ||
+        (review.reviewer.email && review.reviewer.email.toLowerCase().includes(term))
+      );
+      
+      // Search by rating (if the search term is a number 1-5)
+      const ratingMatch = !isNaN(parseInt(term)) && 
+        parseInt(term) >= 1 && 
+        parseInt(term) <= 5 && 
+        review.rating === parseInt(term);
+      
+      // Return true if any field matches
+      return listingMatch || commentMatch || reviewerMatch || ratingMatch;
+    });
+  }
+  
+  // Toggle review visibility
+  toggleReviewVisibility(review: any): void {
+    this.http.patch(`/api/admin/reviews/${review.listing._id}/${review._id}/toggle-visibility`, {})
+      .subscribe({
+        next: (response: any) => {
+          // Update the review in both arrays
+          review.hidden = response.hidden;
+          
+          // Show success message
+          alert(`Review ${response.hidden ? 'hidden' : 'shown'} successfully`);
+        },
+        error: (error) => {
+          console.error('Error toggling review visibility:', error);
+          alert('Error updating review');
+        }
+      });
+  }
+  
+  // Get the formatted name of a user
+  getUserName(user: any): string {
+    if (!user) return 'Unknown User';
+    return `${user.firstname || ''} ${user.lastname || ''}`.trim() || user.email || 'Unknown User';
+  }
+  
+
+  getStatusText(listing: any): string {
+    return listing.disabled === true ? 'DISABLED' : 'ACTIVE';
+  }
+
+  getStatusClass(listing: any): string {
+    return listing.disabled === true ? 'badge disabled' : 'badge active';
+  }
+
+  getSellerName(listing: any): string {
+    if (!listing.seller) return 'Unknown';
+    return `${listing.seller.firstname || ''} ${listing.seller.lastname || ''}`.trim() || 'Unknown';
+  }
+
+  formatPrice(price: any): string {
+    if (price === undefined || price === null) return 'N/A';
+    return `$${parseFloat(price).toFixed(2)}`;
+  }
+
+  private clickStartTarget: EventTarget | null = null;
+
+  startClick(event: MouseEvent): void {
+    this.clickStartTarget = event.target;
+  }
+
+  finishClick(event: MouseEvent): void {
+    // Only close if both mousedown and mouseup occurred on the overlay itself
+    if (this.clickStartTarget === event.target && event.target === event.currentTarget) {
+      this.cancelEdit();
+    }
+    this.clickStartTarget = null;
   }
 
   switchTab(tab: string): void {
     this.activeTab = tab;
     // Cancel any ongoing edits when switching tabs
     this.cancelEdit();
+    if (tab === 'users') {
+      this.loadUsers();
+    } else if (tab === 'listings') {
+      this.loadListings();
+    } else if (tab === 'reviews') {
+      this.loadReviews();
+    }
   }
 
   logout(): void {
@@ -200,6 +350,30 @@ export class AdminDashboardComponent implements OnInit {
     });
   }
 
+  toggleUserDisabled(user: any): void {
+    this.http.patch(`/api/admin/users/${user._id}/toggle-disabled`, {}).subscribe({
+      next: (response: any) => {
+        // Update user's disabled status in local arrays
+        const userIndex = this.users.findIndex(u => u._id === user._id);
+        if (userIndex !== -1) {
+          this.users[userIndex].disabled = response.disabled;
+        }
+        
+        const filteredIndex = this.filteredUsers.findIndex(u => u._id === user._id);
+        if (filteredIndex !== -1) {
+          this.filteredUsers[filteredIndex].disabled = response.disabled;
+        }
+        
+        // Show success message
+        alert(`User ${response.disabled ? 'disabled' : 'enabled'} successfully`);
+      },
+      error: (error) => {
+        console.error('Error toggling user disabled status:', error);
+        alert('Error updating user: ' + (error.error?.message || 'Unknown error'));
+      }
+    });
+  }
+  
   // Edit Listing Functions
   startEditListing(listing: PhoneListing): void {
     this.editingListing = listing;
@@ -238,19 +412,23 @@ export class AdminDashboardComponent implements OnInit {
 
   // Existing functions (delete, toggle, etc.)
   deleteUser(userId: string): void {
-    if (confirm('Are you sure you want to delete this user?')) {
+    if (confirm('Are you sure you want to delete this user? This will also delete all their listings and remove all their reviews.')) {
       this.http.delete(`/api/admin/users/${userId}`).subscribe({
-        next: () => {
-          this.loadUsers();
+        next: (response: any) => {
+          // Update UI by removing the user from both arrays
+          this.users = this.users.filter(user => user._id !== userId);
+          this.filteredUsers = this.filteredUsers.filter(user => user._id !== userId);
+          
+          // Show confirmation with details of what was deleted
+          alert(`User deleted successfully.\nAlso deleted: ${response.deletedListings} listings and removed reviews from ${response.modifiedListings} listings.`);
         },
         error: (error) => {
           console.error('Error deleting user:', error);
-          alert('Error deleting user');
+          alert(`Error deleting user: ${error.error?.message || 'Unknown error'}`);
         }
       });
     }
   }
-
   toggleUserAdmin(user: User): void {
     this.http.patch(`/api/admin/users/${user._id}/toggle-admin`, {}).subscribe({
       next: (response: any) => {
