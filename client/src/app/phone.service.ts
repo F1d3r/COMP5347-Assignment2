@@ -27,6 +27,7 @@ export class PhoneService {
 
   constructor(private httpClient:HttpClient) {}
 
+  // Get the 5 best sellers.
   getBestSeller(){
     this.httpClient.get<Phone[]>(`${this.url}/phone/bestSeller`).subscribe(phones =>{
       this.bestSeller$.set(phones);
@@ -34,6 +35,7 @@ export class PhoneService {
     return this.bestSeller$;
   }
 
+  // Get the 5 sold out soon.
   getSoldOutSoon(){
     this.httpClient.get<Phone[]>(`${this.url}/phone/soldOutSoon`).subscribe(phones => {
       this.soldOutSoon$.set(phones);
@@ -50,18 +52,26 @@ export class PhoneService {
       if(!phone){
         return console.error("Phone does not exist");
       }
-      console.log(phone);
+      console.log("Got phone:", phone);
       this.selected$.set(phone);
     })
     return this.selected$;
   }
 
+  // Get all avialable brands in the database.
   getAllBrand(){
     return this.httpClient.get<string[]>(`${this.url}/phone/allBrand`);
   }
 
+  // Get phones with title keyword and brand.
   getPhones(keyword:string, brand:string){
     return this.httpClient.get<Phone[]>(`${this.url}/phone/search?keyword=${keyword}&brand=${brand}`);
+  }
+
+  // Add a review to current selected phone.
+  // And return the updated phone.
+  addReview(userId:string, comment: string, rating: number){
+    return this.httpClient.post<Phone>(`${this.url}/phone/addReview`, {phone_id: this.selected$()?._id, reviewer: userId, comment: comment, rating: rating});
   }
 
 

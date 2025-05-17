@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { FormGroup, FormControl} from '@angular/forms';
+import { FormGroup, FormControl } from '@angular/forms';
 import { ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ RouterModule, ReactiveFormsModule, CommonModule ],
 
   styles: 
   `
@@ -47,7 +47,8 @@ import { UserService } from '../user.service';
 
       <div>
         <button type="submit" [disabled]="!loginForm.valid">Submit</button>
-        <button (click)="goBack()">Go Back</button>
+        <button type='button' [routerLink]="['forgot']">Forgot Password</button>
+        <button type='button' [routerLink]="['']">Go Back</button>
       </div>
     </form>
   `,
@@ -59,7 +60,11 @@ export class LoginComponent {
   });
   showPassword = false;
 
-  constructor(private userService: UserService, private router:Router) {}
+  constructor(
+    private userService: UserService, 
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {}
 
   
   async authenticateUser() {
@@ -98,9 +103,5 @@ export class LoginComponent {
 
   togglePasswordShow(){
     this.showPassword = !this.showPassword;
-  }
-
-  goBack(){
-    this.router.navigate(['']);
   }
 }

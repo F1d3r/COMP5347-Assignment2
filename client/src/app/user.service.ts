@@ -63,7 +63,11 @@ export class UserService {
   }
 
 
-  resetPassword(){
+  resetPassword(email: string|null){
+    if(email){
+      console.log(email);
+      return this.httpClient.post<User>(`${this.url}/user/resetRequest`, {email:email});
+    }
     const userId = this.user$()?._id;
     return this.httpClient.post<User>(`${this.url}/user/resetRequest`, {_id:userId});
   }

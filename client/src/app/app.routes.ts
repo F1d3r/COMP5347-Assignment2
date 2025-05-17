@@ -5,6 +5,7 @@ import { SignupComponent } from './signup/signup.component';
 import { ProfileComponent } from './profile/profile.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { ItemComponent } from './item/item.component';
+import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 
 export const routes: Routes = [
   { path: '', component:HomepageComponent, title: 'OldPhoneDeals' },
@@ -12,5 +13,6 @@ export const routes: Routes = [
   { path: 'signup', component:SignupComponent, title: 'Signup' },
   { path: 'profile', component:ProfileComponent, title: 'Profile' },
   { path: 'item/:id', component:ItemComponent, title: 'Item' },
+  { path: 'login/forgot', component:ForgotPasswordComponent, title: 'Forgot' },
   { path: 'profile/changePassword', component:ChangePasswordComponent, title: 'ChangePassword' },
 ];
