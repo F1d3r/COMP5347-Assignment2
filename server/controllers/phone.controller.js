@@ -1,5 +1,7 @@
 const Phone = require('../models/phone');
+const Review = require('../models/review');
 const { ObjectId } = require('mongodb');
+const mongoose = require('mongoose');
 
 // get all phones
 module.exports.getAllPhones = async function(req, res) {
@@ -70,7 +72,7 @@ module.exports.getBestSeller = async function(req, res){
 
 
 // Send all brand to the request.
-module.exports.getAllBrand = function(req, res){
+module.exports.getAllBrand = async function(req, res){
 	Phone.getAllBrand()
 		.then(result =>{
 			console.log(result);
@@ -84,7 +86,7 @@ module.exports.getAllBrand = function(req, res){
 }
 
 // Send the search result data to the request.
-module.exports.searchResult = function(req,res){
+module.exports.searchResult = async function(req,res){
     // Get the search keyword.
 	keyword = req.query.keyword;
 	brand = req.query.brand;
@@ -105,4 +107,45 @@ module.exports.searchResult = function(req,res){
 			console.log("Cannot find phone with keyword: " + keyword + "!");
 			res.status(404).send("Cannot find phone with keyword: " + keyword + "!");
 		});
+}
+
+
+module.exports.addReview = async function(req, res){
+	phone_id = req.body.phone_id;
+	reviewer = req.body.reviewer;
+	comment = req.body.comment;
+	rating = req.body.rating;
+	// Convert id string to id object.
+	phone_id = new mongoose.Types.ObjectId(phone_id),
+	reviewer = new mongoose.Types.ObjectId(reviewer),
+
+
+	console.log("Got review:", reviewer, phone_id, comment, rating);
+
+	// First Add the review
+	Review.create({
+		reviewer: reviewer,
+		rating: rating,
+		comment: comment,
+		hidden: false
+	}).then(review =>{
+		// Then insert the review id into the phone list.
+		Phone.findByIdAndUpdate(
+			phone_id,
+			{ $push:{ reviews: review.id } },
+			{ new: true, useFindAndModify:false }
+		).then(phone =>{
+			res.status(200).send(phone);
+		}).catch(error =>{
+			console.log("Failed insert review into phone",error);
+			res.status(500).send("Server Error. Failed to add review to phone list.");
+		})
+	}).catch(error =>{
+		console.log("Failed create review", error);
+		// Delete the review just created.
+		Review.findByIdAndDelete(review._id);
+		res.status(500).send("Server error. Failed to add review.");
+	})
+	
+	
 }

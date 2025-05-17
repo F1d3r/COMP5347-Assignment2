@@ -9,4 +9,6 @@ phoneRouter.get('/search', phoneController.searchResult);
 phoneRouter.get('/allBrand', phoneController.getAllBrand);
 phoneRouter.get('/:_id', phoneController.getPhone)
 
+phoneRouter.post('/addReview', phoneController.addReview);
+
 module.exports = phoneRouter;
