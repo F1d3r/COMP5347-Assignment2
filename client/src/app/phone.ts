@@ -1,3 +1,4 @@
+import { User } from './user';
 import { Review } from "./review";
 
 export interface Phone {
@@ -5,7 +6,7 @@ export interface Phone {
     title: string;
     brand: string;
     stock: number;
-    seller: string;
+    seller: User;
     price: number;
     reviews: Review[];
     disabled: boolean;

@@ -60,7 +60,7 @@ import { SearchFormComponent } from '../search-form/search-form.component';
 
     <main>
       <!-- The page framework for home state -->
-      <div id='homeState' *ngIf="pageState() == 'home'">
+      <div id='homeState' *ngIf="pageState$() == 'home'">
         <app-search-form></app-search-form>
         <div id='suggest'>
           <app-phone-list [phoneSource]="'bestSeller'"></app-phone-list>
@@ -79,7 +79,7 @@ export class HomepageComponent implements OnInit {
 
   // State signal used to indicate the state of home page.
   // Initialized as home state.
-  pageState = inject(UserService).homeState$;
+  pageState$ = inject(UserService).homeState$;
 
   constructor(
     private router: Router,
@@ -89,6 +89,7 @@ export class HomepageComponent implements OnInit {
 
   ngOnInit() {
     console.log("Current user:",this.user$());
+    console.log("Homepage state:",this.pageState$());
   }
 
   logout(){

@@ -101,7 +101,7 @@ export class SearchFormComponent implements OnInit {
     this.phoneService.getPhones(keyword, brand).subscribe(phones =>{
       if(!phones || Object.keys(phones).length === 0){
         // Not found result, set saerched result to empty.
-        console.log("No result found");
+        alert("No result found");
         this.phoneService.searched$.set([]);
         console.log(phones);
       }else{

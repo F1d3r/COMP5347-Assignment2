@@ -5,6 +5,7 @@ const mongoose = require('mongoose')
 // Find one phone by its id.
 module.exports.getPhone = async function(req, res){
 	phone_id = req.params._id;
+	console.log("Got id:",phone_id);
 	Phone.getPhone(phone_id)
 		.then(result => {
 			if(!result){
@@ -12,7 +13,7 @@ module.exports.getPhone = async function(req, res){
 				res.status(404).send("The phone does not exist");
 			}
             console.log(result);
-            console.log(result.length);
+            // console.log(result.length);
             // Send the result to the client.
 			res.status(200).send(result);
 		})
@@ -69,7 +70,7 @@ module.exports.searchResult = function(req,res){
 	Phone.findPhones(keyword, brand)
 		.then(result => {
 			if (result.length < 1) {
-				throw("Cannot find any phone with keyword", keyword);
+				console.log("Cannot find any phone with keyword", keyword);
 			}
             console.log(result);
             console.log(result.length);
