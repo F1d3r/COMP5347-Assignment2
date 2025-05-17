@@ -5,7 +5,22 @@
     <p><strong>Price:</strong> ${{ phone.price }}</p>
     <p><strong>Stock:</strong> {{ phone.stock }}</p>
     <p><strong>ID:</strong> {{ phone._id }}</p>
-    <button (click)="addToCart()">Add to Cart</button>
+    <p><strong>Current Added Quantity:</strong> {{ currentQuantity }}</p>
+
+    <div *ngIf="!showQuantityInput; else quantityInput">
+        <button (click)="triggerAddToCart()">Add to Cart</button>
+    </div>
+  
+    <ng-template #quantityInput>
+        <div style="margin-top: 10px;">
+        <label>Enter Quantity: </label>
+        <input type="number" [(ngModel)]="quantity" min="1" style="width: 60px;" />
+        <button (click)="confirmAddToCart()">✔ Confirm</button>
+        <button (click)="cancelAdd()">✖ Cancel</button>
+        </div>
+    </ng-template>
+  
+    <button (click)="addToWishlist()">Add to Wishlist</button>
     <button (click)="goBack()" style="margin-left: 10px"> Back </button>
   </div>
   

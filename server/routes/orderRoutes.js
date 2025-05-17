@@ -6,7 +6,11 @@ const Phone = require('../models/phone');
 // Create new order and update stock
 router.post('/', async (req, res) => {
   try {
-    const { items, total } = req.body;
+    const { userId, items, total } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'Missing userId in request' });
+    }
 
     // Check and update stock
     for (let entry of items) {
@@ -23,8 +27,8 @@ router.post('/', async (req, res) => {
       await phone.save();
     }
 
-    // Save order
-    const order = new Order({ items, total });
+    // Save order with userId
+    const order = new Order({ userId, items, total });
     await order.save();
     res.status(201).json(order);
 

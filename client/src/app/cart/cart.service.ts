@@ -13,8 +13,20 @@ export interface CartItem {
 })
 export class CartService {
   private items: { [id: string]: CartItem } = {};
+  private storageKey = 'cartItems';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    this.loadFromStorage();
+  }
+
+  private saveToStorage(): void {
+    localStorage.setItem(this.storageKey, JSON.stringify(this.items));
+  }
+
+  private loadFromStorage(): void {
+    const stored = localStorage.getItem(this.storageKey);
+    this.items = stored ? JSON.parse(stored) : {};
+  }
 
   addToCart(phone: Phone): void {
     if (this.items[phone._id]) {
@@ -23,15 +35,25 @@ export class CartService {
       this.items[phone._id] = { phone, quantity: 1 };
     }
     console.log(`✅ Added to cart: ${phone.title}`);
+    this.saveToStorage();
   }
 
   getItems(): CartItem[] {
-    return Object.values(this.items);
+    const stored = localStorage.getItem(this.storageKey);
+    const data: { [id: string]: CartItem } = stored ? JSON.parse(stored) : {};
+    return Object.values(data);
   }
+  
+  getQuantity(phoneId: string): number {
+    this.loadFromStorage();
+    return this.items[phoneId]?.quantity || 0;
+  }
+  
 
   increaseQuantity(phoneId: string): void {
     if (this.items[phoneId]) {
       this.items[phoneId].quantity += 1;
+      this.saveToStorage();
     }
   }
 
@@ -41,11 +63,13 @@ export class CartService {
       if (this.items[phoneId].quantity <= 0) {
         delete this.items[phoneId];
       }
+      this.saveToStorage();
     }
   }
 
   removeFromCart(phoneId: string): void {
     delete this.items[phoneId];
+    this.saveToStorage();
     console.log('🗑️ Removed from cart:', phoneId);
   }
 
@@ -54,9 +78,11 @@ export class CartService {
   }
 
   createOrder(): Observable<any> {
-    const cartArray = Object.values(this.items);  // ✅ 转换为数组
+    const cartArray = Object.values(this.items);
+    const userId = 'demo-user-id';
   
     const orderPayload = {
+      userId,
       items: cartArray.map((item: CartItem) => ({
         productId: item.phone._id,
         quantity: item.quantity
@@ -66,5 +92,6 @@ export class CartService {
   
     return this.http.post('http://localhost:3000/api/orders', orderPayload);
   }
+  
   
 }

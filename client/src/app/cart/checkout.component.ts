@@ -1,22 +1,19 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { CartService, CartItem } from './cart.service';
-import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-cart',
+  selector: 'app-checkout',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './cart.component.html',
-  styleUrls: ['./cart.component.css']
+  templateUrl: './checkout.component.html',
+  styleUrls: ['./checkout.component.css']
 })
-export class CartComponent implements OnInit {
+export class CheckoutComponent implements OnInit {
   cartItems: CartItem[] = [];
 
-  constructor(
-    private cartService: CartService,
-    private router: Router
-  ) {}
+  constructor(private cartService: CartService, private router: Router) {}
 
   ngOnInit(): void {
     this.cartItems = this.cartService.getItems();
@@ -43,15 +40,22 @@ export class CartComponent implements OnInit {
 
   getTotal(): number {
     return this.cartItems.reduce((total, item) => total + item.phone.price * item.quantity, 0);
-  }  
-  
-  goToCheckout(): void {
-    this.router.navigate(['/checkout']);
   }
-  
-  
+
+  confirmOrder(): void {
+    this.cartService.createOrder().subscribe({
+      next: () => {
+        alert('✅ Order placed successfully!');
+        this.cartService.clearCart();
+        this.router.navigate(['/shop']);
+      },
+      error: () => {
+        alert('❌ Failed to place order. Please try again.');
+      }
+    });
+  }
+
   goBack(): void {
     this.router.navigate(['/shop']);
   }
-  
 }
