@@ -1,6 +1,6 @@
 import { UserService } from './../user.service';
-import { Component, OnInit, WritableSignal, Input, inject } from '@angular/core';
-import { signal } from '@angular/core';
+import { Component, OnInit, WritableSignal, Input, inject, signal } from '@angular/core';
+import { computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PhoneService } from '../phone.service';
 import { RouterModule, Router } from '@angular/router';
@@ -12,9 +12,11 @@ import { Phone } from '../phone';
 
 import { MatSelectModule } from '@angular/material/select';
 
+import { MatSliderModule } from '@angular/material/slider';
+
 @Component({
   selector: 'app-phone-list',
-  imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule, CommonModule, MatSelectModule],
+  imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule, CommonModule, MatSelectModule, MatSliderModule],
 
   styles: [
     `
@@ -25,12 +27,22 @@ import { MatSelectModule } from '@angular/material/select';
         width: 35%;
         height: auto;
       }
+
+      #sort_slider{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 16px;
+        height: 40px;
+        font-size: 0.85rem;
+      }
+
     `,
   ],
 
   template: `
     <mat-card>
-        <mat-card-header>
+        <mat-card-header *ngIf="phoneSource !== 'search'">
           <!-- The card title for best seller -->
           <span *ngIf="phoneSource === 'bestSeller'">
             <mat-card-title>Best Sellers</mat-card-title>
@@ -44,18 +56,29 @@ import { MatSelectModule } from '@angular/material/select';
         </mat-card-header>
         
         <mat-card-content>
-            <div *ngIf="phoneSource === 'search'">
-              <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
-                <mat-option value="titleAsc">Title: A -> Z</mat-option>
-                <mat-option value="titleDesc">Title: Z -> A</mat-option>
-                <mat-option value="priceAsc">Price: Low to High</mat-option>
-                <mat-option value="priceDesc">Price: High to Low</mat-option>
-                <mat-option value="stockAsc">Stock: Low to High</mat-option>
-                <mat-option value="stockDesc">Stock: High to Low</mat-option>
-              </mat-select>
+            <div *ngIf="phoneSource === 'search'" id='sort_slider'>
+              <mat-form-field>
+                <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
+                  <mat-option value="titleAsc">Title: A -> Z</mat-option>
+                  <mat-option value="titleDesc">Title: Z -> A</mat-option>
+                  <mat-option value="priceAsc">Price: Low to High</mat-option>
+                  <mat-option value="priceDesc">Price: High to Low</mat-option>
+                  <mat-option value="stockAsc">Stock: Low to High</mat-option>
+                  <mat-option value="stockDesc">Stock: High to Low</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <label>Price: </label>
+              <mat-slider discrete min=0 [max]="maxPrice$()" step=1>
+                <!-- <input #startInput matSliderStartThumb (input)="onInputChange(startInput.value, endInput.value)" />
+                <input #endInput matSliderEndThumb (input)="onInputChange(startInput.value, endInput.value)" /> -->
+                
+                <input #startInput matSliderStartThumb [value]="priceMin$()" (input)="priceMin$.set($any($event.target).value || 0)" />
+                <input #endInput matSliderEndThumb [value]="priceMax$()" (input)="priceMax$.set($any($event.target).value || 100)" />
+              </mat-slider>
             </div>
 
-            <table mat-table [dataSource]="phoneList$() || []">
+            <table mat-table [dataSource]="filteredPhoneList$()">
               <!-- For image -->
               <ng-container matColumnDef="col-image">
                 <th mat-header-cell *matHeaderCellDef>Image</th>
@@ -109,9 +132,15 @@ import { MatSelectModule } from '@angular/material/select';
 })
 export class PhoneListComponent implements OnInit { 
   @Input() phoneSource?: string;
-  
+
+  priceMin$ = signal(0);
+  priceMax$ = signal(10000);
   phoneList$ = {} as WritableSignal<Phone[]>;
+  maxPrice$: any;
+  filteredPhoneList$: any;
   displayedColumns:string[] = [];
+
+  allPhones: Phone[] = []; // completed phone list
 
   constructor(
     private phoneService:PhoneService,
@@ -146,6 +175,15 @@ export class PhoneListComponent implements OnInit {
         'col-price'
       ];
     }
+    // Compute filteredPhoneList dynamically.
+    this.filteredPhoneList$ = computed(() =>
+      this.phoneList$().filter(phone => phone.price >= this.priceMin$() && phone.price <= this.priceMax$())
+    );
+    // Compute maxPrice dynamically.
+    this.maxPrice$ = computed(() => {
+      const phones = this.phoneList$();
+      return phones.length ? Math.max(...phones.map(phone => phone.price)) : 100;
+    });
   }
 
   // Get the image path for the brand.
@@ -177,8 +215,17 @@ export class PhoneListComponent implements OnInit {
       list.sort((a, b) => a.stock - b.stock);
     } else if (sortKey === 'stockDesc') {
       list.sort((a, b) => b.stock - a.stock);
-    } 
+    }
 
     this.phoneList$.set(list);
   }
+
+  // // filter phones under max price
+  // onInputChange(startVal: string, endVal: string) {
+  //   console.log('Start:', startVal, 'End:', endVal);
+  //   this.currentMin = Number(startVal);
+  //   this.currentMax = Number(endVal);
+  // }
+  
+
 }
