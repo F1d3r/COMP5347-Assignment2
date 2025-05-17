@@ -182,23 +182,32 @@ module.exports.updateUser = async function(req, res){
 // When user request to reset password, send a email with link.
 module.exports.handleResetRequest = async function(req, res){
 	const _id = req.body._id;
+	const email = req.body.email;
 	console.log("Get reset request from:",_id);
+	console.log("Get reset request from:",email);
 
 	try{
+		// If the user request with an email.
 		// Find the user.
-		user = await User.findOne({_id:_id});
+		if(email){
+			user = await User.findOne({email:email});
+		}else{
+			user = await User.findOne({_id:_id});
+		}
 		// Check user exist.
 		if(!user){
 			console.log("User does not exist");
 			return res.status(404).send("User not find");
 		}
+		console.log(user);
 		
 		// Generate a token for the user.
 		const verifyToken = crypto.randomBytes(32).toString('hex');
-		const verificationLink = `http://localhost:3000/resetPassword/${_id}/${verifyToken}`;
+		const verificationLink = `http://localhost:3000/user/resetPassword/${_id}/${verifyToken}`;
 		// Set the token of the user.
 		user.verifyToken = verifyToken;
 		await user.save();
+		res.status(200).send(user);
 
 
 		// Send verification email to the user. 

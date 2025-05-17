@@ -13,16 +13,21 @@ import { catchError, last, throwError } from 'rxjs';
 
   styles: 
   `
-    form{
+    form {
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
       gap:10px;
+    }
+
+    button {
+      margin: 5px;
     }
   `,
 
   template: `
+  
+    <button [routerLink]="['']">Go Back</button>
     <form [formGroup]="profileForm" (ngSubmit)="updateUser()">
       <h1>
         User Profile
@@ -50,7 +55,6 @@ import { catchError, last, throwError } from 'rxjs';
         <button type="submit" [disabled]="!profileForm.valid">Update</button>
         <button (click)="resetPassword()">Reset Password</button>
         <button type = 'button' [routerLink]="['changePassword']">Change Password</button>
-        <button (click)="goBack()">Go Back</button>
       </div>
     </form>
   `,
@@ -84,7 +88,7 @@ export class ProfileComponent implements OnInit{
 
 
   resetPassword(){
-    this.userService.resetPassword().subscribe(user=>{
+    this.userService.resetPassword(null).subscribe(user=>{
       console.log("New user:", user);
       if(!user){
         console.error("No user returned.");
@@ -133,9 +137,5 @@ export class ProfileComponent implements OnInit{
         this.router.navigate(['']);
       }
     })
-  }
-
-  goBack(){
-    this.router.navigate(['']);
   }
 }
