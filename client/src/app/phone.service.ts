@@ -41,6 +41,7 @@ export class PhoneService {
     return this.soldOutSoon$;
   }
   
+  // Get the phone by id.
   getPhone(phone_id: string|null){
     if(!phone_id){
       return console.error('The phone id is not passed correctly');
@@ -49,6 +50,7 @@ export class PhoneService {
       if(!phone){
         return console.error("Phone does not exist");
       }
+      console.log(phone);
       this.selected$.set(phone);
     })
     return this.selected$;

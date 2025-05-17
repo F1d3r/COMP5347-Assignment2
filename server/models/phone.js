@@ -1,43 +1,95 @@
 const mongoose = require('mongoose');
 
-// Review schema
-const ReviewSchema = new mongoose.Schema({
-    _id: mongoose.Types.ObjectId,
-    reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    rating: Number,
-    comment: String,
-    hidden: Boolean
-});
-
 const PhoneSchema = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     title: String,
     brand: String,
-    imageURL: String,
+    imagePath: String,
     stock: Number,
-    seller: String,
+    seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     price: Number,
-    reviews:[ReviewSchema],
+    reviews:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
     disabled: {type: Boolean, default: false }
 });
 
+// Get the complete information for certain phone.
+// Including the seller info, and the reviews info.
 PhoneSchema.statics.getPhone = async function(_id){
 	phone_id = new mongoose.Types.ObjectId(_id);
     const phone = await Phone.aggregate([
-    { $match: 
+        { $match: { _id: phone_id }},
+
+        // Get the seller complete info.
         {
-            _id: {$eq: phone_id}
-        }
-    },
-    // Calculate the average rating for each phone
-    { 
-        $addFields: {
-            avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
-        }
-    }
-    ]);
+            $lookup: {
+                from:"user",
+                localField: "seller",
+                foreignField: "_id",
+                as: "seller"
+            }
+        },
+        {
+            $unwind: "$seller"
+        },
+
+        // Get the complete information fo the review.
+        {
+            $unwind: { path: "$reviews", preserveNullAndEmptyArrays: true }
+        },
+        {
+            $lookup: {
+                from: "review",
+                localField: "reviews",
+                foreignField: "_id",
+                as: "reviews"
+            }
+        },
+        {
+            $unwind: { path: "$reviews", preserveNullAndEmptyArrays: true }
+        },
+
+        // Get the complete information of the reviewers.
+        {
+            $lookup: {
+                from: "user",
+                localField: "reviews.reviewer",
+                foreignField: "_id",
+                as: "reviews.reviewer"
+            }
+        },
+        {
+            $unwind: { path: "$reviews.reviewer", preserveNullAndEmptyArrays: true }
+        },
+        
+        // Group the review
+        {
+            $group: {
+                _id: "$_id",
+                title: { $first: "$title"},
+                brand: { $first: "$brand" },
+                imagePath: { $first: "imagePath"},
+                stock: { $first: "$stock" },
+                seller: { $first: "$seller" },
+                price: { $first: "$price" },
+                reviews: { $push: "$reviews" },
+                disabled: { $first: "disabled"}
+            }
+        },
+
+        // Calculate the average rating for each phone
+        { 
+            $addFields: {
+                avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
+            }
+        },
+        
+    ])
     return phone[0];
 }
+
+
+
+
 
 
 // Find the 5 phons with highest rating.

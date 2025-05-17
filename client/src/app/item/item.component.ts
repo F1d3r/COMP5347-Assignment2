@@ -1,6 +1,6 @@
 import { UserService } from './../user.service';
 import { PhoneService } from './../phone.service';
-import { Component, inject, OnInit, WritableSignal } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,8 +10,6 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-
-import { Phone } from '../phone';
 
 
 @Component({
@@ -29,7 +27,7 @@ import { Phone } from '../phone';
       justify-content: space-between;
     }
 
-    #goBack{
+    .goBack{
       order: -1;
     }
 
@@ -58,7 +56,7 @@ import { Phone } from '../phone';
   template: `
     <mat-card>
         <mat-card-header>
-          <button id='goBack' (click)='goBack()'>Back</button>
+          <button class='goBack' (click)='goBackHome()'>Back Home</button>
           <mat-card-title>{{this.selectedPhone$()?.brand}} Phone</mat-card-title>
         </mat-card-header>
 
@@ -69,6 +67,7 @@ import { Phone } from '../phone';
             <div class='flex-col'>
               <!-- Title -->
               <label>\${{selectedPhone$()?.title}}</label>
+              <label>Seller: {{selectedPhone$()?.seller?.firstname}} {{selectedPhone$()?.seller?.lastname}}</label>
 
               <div class='flex-row'>
                 <!-- Product details -->
@@ -109,24 +108,32 @@ import { Phone } from '../phone';
 
           <!-- Comment table -->
           <table mat-table [dataSource]="(selectedPhone$()?.reviews || []).slice(0, displayCount)">
+            <!-- Rating -->
             <ng-container matColumnDef="col-rating">
               <th mat-header-cell *matHeaderCellDef>Rating</th>
               <td mat-cell *matCellDef="let review">
                 {{review.rating}}
               </td>
             </ng-container>
-            
+            <!-- Comment -->
             <ng-container matColumnDef="col-comment">
               <th mat-header-cell *matHeaderCellDef>Comment</th>
               <td class='comment' mat-cell *matCellDef="let review">
                 {{review.comment}}
               </td>
             </ng-container>
+            <!-- Reviewer -->
+            <ng-container matColumnDef="col-reviewer">
+              <th mat-header-cell *matHeaderCellDef>Reviewer</th>
+              <td class='comment' mat-cell *matCellDef="let review">
+                {{review.reviewer.firstname}} {{review.reviewer.lastname}}
+              </td>
+            </ng-container>
             <!-- Add header and row definitions -->
-            <tr mat-header-row *matHeaderRowDef="['col-rating', 'col-comment']">
+            <tr mat-header-row *matHeaderRowDef="displayColumn">
               <!-- *ngFor="let review of selectedPhone$()?.reviews | slice:0:initNumReview" -->
             </tr>
-            <tr mat-row *matRowDef="let row; columns: ['col-rating', 'col-comment'];"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayColumn;"></tr>
           </table>
           <!-- Button to show all -->
           <button mat-button (click)="showAllReviews()">
@@ -152,6 +159,11 @@ export class ItemComponent implements OnInit{
   selectedPhone$ = inject(PhoneService).selected$;
   displayCount = 3;
   showAll: boolean = false;
+  displayColumn = [
+    'col-rating',
+    'col-comment',
+    'col-reviewer'
+  ]
   
   purchaseForm = new FormGroup({
     keyword: new FormControl('', [Validators.required]),
@@ -181,16 +193,17 @@ export class ItemComponent implements OnInit{
     return this.phoneService.brandImageMap[brand];
   }
 
-  goCheckout(){
-
-  }
-
   addToCartBtnClicked(){
     this.addCartClicked = true;
   }
 
-  // 
+  // TODO Add function here
   addToCart(){
+
+  }
+
+  // TODO Add function here
+  goCheckout(){
 
   }
 
@@ -208,11 +221,11 @@ export class ItemComponent implements OnInit{
     return stars;
   }
 
-
-  goBack(){
+  goBackHome(){
     this.userService.homeState$.set('home');
     this.router.navigate(['']);
   }
+
 
   showAllReviews(){
     if(this.showAll){

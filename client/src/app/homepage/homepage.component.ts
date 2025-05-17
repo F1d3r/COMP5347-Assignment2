@@ -74,7 +74,7 @@ import { SearchFormComponent } from '../search-form/search-form.component';
     </mat-toolbar>
 
     <main>
-      <button *ngIf="pageState() == 'search'" (click)="backHome()">Back</button>
+      <button *ngIf="pageState$() == 'search'" (click)="backHome()">Back</button>
       <div id='search-bar-container'>
         <div id="form-wrapper">
           <app-search-form></app-search-form>
@@ -83,15 +83,14 @@ import { SearchFormComponent } from '../search-form/search-form.component';
         
 
       <!-- The page framework for home state -->
-      <div id='homeState' *ngIf="pageState() == 'home'">
-        
+      <div id='homeState' *ngIf="pageState$() == 'home'">
         <div id='suggest'>
           <app-phone-list [phoneSource]="'bestSeller'"></app-phone-list>
           <app-phone-list [phoneSource]="'soldOutSoon'"></app-phone-list>
         </div>
       </div>
       <!-- The page framework for search state -->
-      <div id='searchState' *ngIf="pageState() == 'search'">
+      <div id='searchState' *ngIf="pageState$() == 'search'">
         <app-phone-list [phoneSource]="'search'"></app-phone-list>
       </div>
     </main>
@@ -109,7 +108,7 @@ export class HomepageComponent implements OnInit {
 
   // State signal used to indicate the state of home page.
   // Initialized as home state.
-  pageState = inject(UserService).homeState$;
+  pageState$ = inject(UserService).homeState$;
 
   constructor(
     private router: Router,
@@ -119,6 +118,7 @@ export class HomepageComponent implements OnInit {
 
   ngOnInit() {
     console.log("Current user:",this.user$());
+    console.log("Homepage state:",this.pageState$());
   }
 
   logout(){
@@ -126,6 +126,6 @@ export class HomepageComponent implements OnInit {
   }
 
   backHome(){
-    this.pageState.set('home');
+    this.pageState$.set('home');
   }
 }
