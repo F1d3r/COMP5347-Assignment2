@@ -61,13 +61,9 @@ app.use((req, res, next) => {
 
 // Router
 const userRouter = require('./routes/user.routes');
-const authRouter = require('./routes/auth.routes');
 const phoneRouter = require('./routes/phone.routes');
 app.use('/user', userRouter);
 app.use('/phone', phoneRouter);
-app.use('/auth', authRouter);
-
-
 
 // Error handling middleware
 app.use((err, req, res, next) => {
