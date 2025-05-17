@@ -51,6 +51,23 @@ import { MatIconModule } from '@angular/material/icon';
       margin: 5px;
     }
 
+    td.comment{
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+
+    button.showCompleteComment {
+      width: 60px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 80px;
+      height: 30px;
+      flex-shrink: 0;
+    }
+
   `,
 
   template: `
@@ -119,13 +136,25 @@ import { MatIconModule } from '@angular/material/icon';
             <ng-container matColumnDef="col-comment">
               <th mat-header-cell *matHeaderCellDef>Comment</th>
               <td class='comment' mat-cell *matCellDef="let review">
-                {{review.comment}}
+                <!-- Not expanded -->
+                <span *ngIf="!review.expanded">
+                  {{review.comment?.length > 200 ? 
+                  review.comment.substring(0, 200) + '...' : review.comment}}
+                </span>
+                <!-- Expanded comment -->
+                <span *ngIf="review.expanded">
+                  {{review.comment}}
+                </span>
+                <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
+                (click)="review.expanded = !review.expanded">
+                  {{review.expanded ? 'Hide' : 'Show'}}
+                </button>
               </td>
             </ng-container>
             <!-- Reviewer -->
             <ng-container matColumnDef="col-reviewer">
               <th mat-header-cell *matHeaderCellDef>Reviewer</th>
-              <td class='comment' mat-cell *matCellDef="let review">
+              <td mat-cell *matCellDef="let review">
                 {{review.reviewer.firstname}} {{review.reviewer.lastname}}
               </td>
             </ng-container>
@@ -237,4 +266,20 @@ export class ItemComponent implements OnInit{
     this.showAll = !this.showAll
   }
 
+  // reviews = this.reviews.map(review =>({
+  //   ...review,
+  //   isExpanded: false
+  // }));
+
 }
+
+
+
+// <span *ngIf="review.comment.length <= 200">
+//                   {{review.comment}}
+//                 </span>
+//                 <span *ngIf="review.comment.length > 200">
+//                 </span>
+//                 <button (click)="isExpanded = !isExpanded">
+//                   {{ isExpanded ? 'Hide' : 'Show' }}
+//                 </button>
