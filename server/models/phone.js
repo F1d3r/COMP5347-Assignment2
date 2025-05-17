@@ -1,23 +1,14 @@
 const mongoose = require('mongoose');
- 
-// Review schema
-const ReviewSchema = new mongoose.Schema({
-    _id: mongoose.Types.ObjectId,
-    reviewer: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    rating: Number,
-    comment: String,
-    hidden: Boolean
-});
 
 const PhoneSchema = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     title: String,
     brand: String,
-    imageURL: String,
+    imagePath: String,
     stock: Number,
-    seller: String,
+    seller: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     price: Number,
-    reviews:[ReviewSchema],
+    reviews:[{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
     disabled: {type: Boolean, default: false }
 });
 
@@ -35,7 +26,14 @@ PhoneSchema.statics.getPhone = async function(_id){
             avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
         }
     }
-    ]);
+    ])
+    .populate('seller')
+    .populate({
+        path:'reviews',
+        populate: {path: 'reviewer'}
+    });
+
+    console.log(phone);
     return phone[0];
 }
 

@@ -1,6 +1,6 @@
 // Define user model.
-
 const mongoose = require("mongoose");
+
 const UserSchema = new mongoose.Schema({
     _id: mongoose.Types.ObjectId,
     firstname: { type: String, default: 'Unknown' },
@@ -8,9 +8,10 @@ const UserSchema = new mongoose.Schema({
     email: { type: String, required: true},
     password: { type: String, required: true},
     isVerified: { type: Boolean, default: false },
-    verifyToken: String,
-    registDate: { type: Date, default: Date.now }
+    registDate: { type: Date, default: Date.now },
+    verifyToken: {type: String, defualt: null }
 });
+
 
 UserSchema.statics.createUser = async function(email, firstname, lastname, password, verifyToken){
     const existUser = await this.findOne({email});

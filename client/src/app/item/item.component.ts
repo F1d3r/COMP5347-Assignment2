@@ -109,24 +109,32 @@ import { Phone } from '../phone';
 
           <!-- Comment table -->
           <table mat-table [dataSource]="(selectedPhone$()?.reviews || []).slice(0, displayCount)">
+            <!-- Rating -->
             <ng-container matColumnDef="col-rating">
               <th mat-header-cell *matHeaderCellDef>Rating</th>
               <td mat-cell *matCellDef="let review">
                 {{review.rating}}
               </td>
             </ng-container>
-            
+            <!-- Comment -->
             <ng-container matColumnDef="col-comment">
               <th mat-header-cell *matHeaderCellDef>Comment</th>
               <td class='comment' mat-cell *matCellDef="let review">
                 {{review.comment}}
               </td>
             </ng-container>
+            <!-- Reviewer -->
+            <ng-container matColumnDef="col-reviewer">
+              <th mat-header-cell *matHeaderCellDef>Reviewer</th>
+              <td class='comment' mat-cell *matCellDef="let review">
+                |{{review.reviewer.lastname}}|
+              </td>
+            </ng-container>
             <!-- Add header and row definitions -->
-            <tr mat-header-row *matHeaderRowDef="['col-rating', 'col-comment']">
+            <tr mat-header-row *matHeaderRowDef="displayColumn">
               <!-- *ngFor="let review of selectedPhone$()?.reviews | slice:0:initNumReview" -->
             </tr>
-            <tr mat-row *matRowDef="let row; columns: ['col-rating', 'col-comment'];"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayColumn;"></tr>
           </table>
           <!-- Button to show all -->
           <button mat-button (click)="showAllReviews()">
@@ -152,6 +160,11 @@ export class ItemComponent implements OnInit{
   selectedPhone$ = inject(PhoneService).selected$;
   displayCount = 3;
   showAll: boolean = false;
+  displayColumn = [
+    'col-rating',
+    'col-comment',
+    'col-reviewer'
+  ]
   
   purchaseForm = new FormGroup({
     keyword: new FormControl('', [Validators.required]),
@@ -181,16 +194,17 @@ export class ItemComponent implements OnInit{
     return this.phoneService.brandImageMap[brand];
   }
 
-  goCheckout(){
-
-  }
-
   addToCartBtnClicked(){
     this.addCartClicked = true;
   }
 
-  // 
+  // TODO Add function here
   addToCart(){
+
+  }
+
+  // TODO Add function here
+  goCheckout(){
 
   }
 

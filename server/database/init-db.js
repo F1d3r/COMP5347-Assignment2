@@ -8,18 +8,21 @@ const path = require('path');
 const User = require('../models/user');
 const Phone = require('../models/phone');
 const Activity = require('../models/activity');
+const Review = require('../models/review')
 
 // Default password hashing config.
 require('dotenv').config();
-const saltRounds = parseInt(process.env.SALT_ROUNDS, 10) || 10;
-const defaultPassword = process.env.DEFAULT_PASSWORD || 'Password123!'; 
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10) || 10;
+const DEFAULT_PASSWORD = process.env.DEFAULT_PASSWORD || 'Password123!';
+const ADMIN_EMAIL = process.env.EMAIL_USER || 'tut07g04.comp5347@gmail.com';
+const ADMIN_DEFAULT_PASSWORD = process.env.ADMIN_DEFAULT_PASSWORD || 'Admin123!';
 // MongoDB connection URI.
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/OldPhoneDeals';
 console.log("URI: ", MONGODB_URI);
 
 // JSON File path.
-const user_path = path.join(process.cwd(), 'server/database/userlist.json');
-const phone_path = path.join(process.cwd(), 'server/database/phonelisting.json');
+const user_path = path.join(process.cwd(), 'database/userlist.json');
+const phone_path = path.join(process.cwd(), 'database/phonelisting.json');
 
 
 // Initialize the MongoDB with server's local json file.
@@ -34,8 +37,10 @@ initializeDatabase = async function() {
     const userCount = await User.countDocuments();
     const phoneCount = await Phone.countDocuments();
     const activityCount = await Activity.countDocuments();
+    const reviewCount = await Review.countDocuments();
     // Drop the collection if already exists.
-    if (userCount > 0 || phoneCount > 0 || activityCount > 0) {
+    if (userCount > 0 || phoneCount > 0 
+      || activityCount > 0 || reviewCount > 0) {
       console.log('Database already contains data. Dropping collections...');
       await mongoose.connection.db.dropCollection('user');
       await mongoose.connection.db.dropCollection('phone');
@@ -58,9 +63,9 @@ initializeDatabase = async function() {
     
 
     // Hash a default password for all users
-    console.log('Default password: ' + defaultPassword);
+    console.log('Default password: ' + DEFAULT_PASSWORD);
     console.log('Creating users with hashed passwords...');
-    const hashedPassword = await bcrypt.hash(defaultPassword, saltRounds);
+    const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, SALT_ROUNDS);
     console.log('Default hash: '+ hashedPassword);
     // Process and insert users
     const processedUsers = usersData.map(user => {
@@ -77,7 +82,6 @@ initializeDatabase = async function() {
         email: user.email,
         password: hashedPassword,
         isVerified: true, // For initial data, consider users already verified
-        verifyToken: null,
       };
     });
     // Insert users.
@@ -86,9 +90,8 @@ initializeDatabase = async function() {
 
     // Create admin user if it doesn't exist
     console.log('Creating admin user...');
-    const adminEmail = 'tut07g04.comp5347@gmail.com';
-    const adminPassword = await bcrypt.hash('Admin123!', saltRounds);
-    
+    const adminEmail = ADMIN_EMAIL;
+    const adminPassword = await bcrypt.hash(ADMIN_DEFAULT_PASSWORD, SALT_ROUNDS);
     admin = await User.findOneAndUpdate(
       { email: adminEmail },
       {
@@ -104,48 +107,49 @@ initializeDatabase = async function() {
     
 
     // Process and insert phone listings
-    console.log('Inserting phone listings...');
-    const processedListings = phoneListingsData.map(listing => {
+    console.log('Inserting phones...');
+    const processedPhones = await Promise.all(phoneListingsData.map(async(phone) => {
       // Map brand names to image files
-      const imageFileName = `${listing.brand}.jpeg`;
+      const imageFileName = `${phone.brand}.jpeg`;
       const imagePath = `/assets/images/${imageFileName}`;
       
       // Process reviews
-      const processedReviews = (listing.reviews || []).map(review => {
+      const processedReviewsId = await Promise.all((phone.reviews || []).map(async(review) => {
         // Convert string IDs to ObjectIDs if necessary
         let reviewerId = review.reviewer;
         if (typeof reviewerId === 'string') {
           reviewerId = new mongoose.Types.ObjectId(reviewerId);
         }
-        
-        return {
-          reviewer: reviewerId,
+        const insertedReview = await Review.create({
+          reviewer:reviewerId,
           rating: review.rating,
           comment: review.comment,
           hidden: review.hidden ? true : false
-        };
-      });
+        })
+        return insertedReview._id;
+      }));
+      console.log(`${processedReviewsId.length} reviews inserted`);
       
       // Process seller ID
-      let sellerId = listing.seller;
+      let sellerId = phone.seller;
       if (typeof sellerId === 'string') {
         sellerId = new mongoose.Types.ObjectId(sellerId);
       }
       
       return {
-        title: listing.title,
-        brand: listing.brand,
+        title: phone.title,
+        brand: phone.brand,
         image: imagePath,
-        stock: listing.stock,
+        stock: phone.stock,
         seller: sellerId,
-        price: listing.price,
-        reviews: processedReviews,
-        disabled: listing.disabled ? true : false
+        price: phone.price,
+        reviews: processedReviewsId,
+        disabled: phone.disabled ? true : false
       };
-    });
+    }));
     
-    await Phone.insertMany(processedListings);
-    console.log(`${processedListings.length} phone listings inserted`);
+    await Phone.insertMany(processedPhones);
+    console.log(`${processedPhones.length} phones inserted`);
     
     // Create activity collection.
     let adminId = admin._id;

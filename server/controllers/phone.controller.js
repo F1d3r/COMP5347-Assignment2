@@ -11,8 +11,8 @@ module.exports.getPhone = async function(req, res){
 				console.log("Cannot find phone");
 				res.status(404).send("The phone does not exist");
 			}
-            // console.log(result.length);
-            // console.log(result);
+            console.log(result);
+            console.log(result.length);
             // Send the result to the client.
 			res.status(200).send(result);
 		})
