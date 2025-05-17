@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Phone } from './phone';
 
+
 @Injectable({
   providedIn: 'root'
 })
@@ -16,7 +17,7 @@ export class PhoneService {
     "Motorola": "assets/images/Motorola.jpeg",
     "Nokia": "assets/images/Nokia.jpeg",
     "Samsung": "assets/images/Samsung.jpeg",
-    "Sony": "assets/images/Sopy.jpeg"
+    "Sony": "assets/images/Sony.jpeg"
   };
   
   bestSeller$ = signal<Phone[]>([]);

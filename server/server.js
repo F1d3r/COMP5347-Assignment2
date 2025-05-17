@@ -2,7 +2,6 @@
  * Main server file for OldPhoneDeals application
  */
 
-
 // Import dependencies
 const express = require('express');
 const cors = require('cors');
@@ -64,6 +63,8 @@ const userRouter = require('./routes/user.routes');
 const phoneRouter = require('./routes/phone.routes');
 app.use('/user', userRouter);
 app.use('/phone', phoneRouter);
+
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {

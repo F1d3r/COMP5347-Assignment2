@@ -3,7 +3,6 @@ const userController = require('../controllers/user.controller');
 const userRouter = express.Router();
 
 
-
 userRouter.get('/verify/:token', userController.verifyUser);
 userRouter.get('/test/:token', userController.test);
 userRouter.get('/resetPassword/:_id/:token', userController.resetPassword);

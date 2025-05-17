@@ -5,6 +5,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 
 import {UserService} from './user.service'
 
+
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet, MatToolbarModule],
@@ -15,9 +16,9 @@ import {UserService} from './user.service'
   ],
 
   template: `
-    <mat-toolbar>
+    <!-- <mat-toolbar>
       <span>OldPhoneDeals</span>
-    </mat-toolbar>
+    </mat-toolbar> -->
     <main>
       <!-- Show the component given by the router -->
       <router-outlet></router-outlet>
@@ -25,6 +26,6 @@ import {UserService} from './user.service'
   `
 })
 export class AppComponent {
-  title = 'OldPhoneDeals';
-
+  // title = 'OldPhoneDeals';
+  title = 'homes';
 }
