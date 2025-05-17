@@ -1,10 +1,6 @@
-
 /**
  * Main server file for OldPhoneDeals application
  */
-
-// Load environment variables
-require('dotenv').config();
 
 // Import dependencies
 const express = require('express');
@@ -17,15 +13,22 @@ const session = require('express-session');
 
 // Load environment variables
 require('dotenv').config();
+const PORT = parseInt(process.env.PORT, 10) || 3000;
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/oldphonedeals';
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
 // Create Express server
 const app = express();
 // Import database operations.
 const db = require('./models/db');
 
-// Environment variables
-const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/OldPhoneDeals';
-const NODE_ENV = process.env.NODE_ENV || 'development';
+// Set view engine.
+app.set('view engine', 'ejs');
+// Set view path.
+app.set('views', path.join(__dirname, './views'));
+// Set the static directory.
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // Middleware
 app.use(cors());
@@ -54,13 +57,14 @@ app.use((req, res, next) => {
   next();
 })
 
+
 // Router
 const userRouter = require('./routes/user.routes');
-const authRouter = require('./routes/auth.routes');
 const phoneRouter = require('./routes/phone.routes');
 app.use('/user', userRouter);
 app.use('/phone', phoneRouter);
-app.use('/auth', authRouter);
+
+
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -71,25 +75,17 @@ app.use((err, req, res, next) => {
   });
 });
 
+
+
 // Connect to MongoDB and start server
 try{
-  
-  // // Initialize the database.
-  // db.initializeDatabase().
-  // then(()=>{
-  //   db.connectDB();
-  //   app.listen(PORT, () => {
-  //     console.log(`Server running on port ${PORT}`);
-  //   });
-  // })
-
   // Lauch server withouth initializing.
   db.connectDB();
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
-}
-catch(error){
-  console.error('MongoDB connection error:', error);
-  process.exit(1);
+  
+  
+}catch(dbError){
+  console.log("Failed to connect to database.")
 }
