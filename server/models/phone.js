@@ -105,8 +105,7 @@ PhoneSchema.statics.findPhones = function(keywrod, brand){
 
 // Static function used to get all brand in the database.
 PhoneSchema.statics.getAllBrand = function(){
-    return this.distinct('brand')
-    .sort({'brand':1});
+    return Phone.distinct('brand').sort({'brand':1});
 }
 
 // Exports the model.

@@ -4,9 +4,9 @@
   "description": "eCommerce web application for COMP5347/COMP4347",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js",
-    "server": "nodemon server/server.js",
-    "db-init": "node server/database/init-db.js"
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "db-init": "node database/init-db.js"
   },
   "repository": {
     "type": "git",
