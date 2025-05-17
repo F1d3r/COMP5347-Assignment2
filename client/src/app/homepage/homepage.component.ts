@@ -84,7 +84,6 @@ import { SearchFormComponent } from '../search-form/search-form.component';
 
       <!-- The page framework for home state -->
       <div id='homeState' *ngIf="pageState$() == 'home'">
-        <app-search-form></app-search-form>
         <div id='suggest'>
           <app-phone-list [phoneSource]="'bestSeller'"></app-phone-list>
           <app-phone-list [phoneSource]="'soldOutSoon'"></app-phone-list>
