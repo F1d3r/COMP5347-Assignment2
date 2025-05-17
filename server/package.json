@@ -5,8 +5,8 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server.js",
-    "server": "nodemon server/server.js",
-    "db-init": "node server/database/init-db.js"
+    "server": "nodemon server.js",
+    "db-init": "node database/init-db.js"
   },
   "repository": {
     "type": "git",

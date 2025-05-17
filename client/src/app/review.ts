@@ -1,7 +1,9 @@
+import { User } from "./user";
+
 export interface Review {
-    reviewer: string;
+    _id?: string;
+    reviewer: User;
     rating: number;
     comment: string;
     hidden: boolean;
-    _id?: string;
 }
