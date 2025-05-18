@@ -48,7 +48,7 @@ import { UserService } from '../user.service';
   template: `
     <form [formGroup]="searchForm" (ngSubmit)="searchPhones()">
       <div>
-        <input type="keyword" formControlName="keyword" name="keyword" placeholder="Search here"/>
+        <input type="text" formControlName="keyword" name="keyword" placeholder="Search here"/>
       </div>
 
       <div id='selectBrand' *ngIf="this.pageState() == 'search'">
@@ -68,8 +68,6 @@ import { UserService } from '../user.service';
 })
 export class SearchFormComponent implements OnInit {
   searchForm = new FormGroup({
-    // keyword: new FormControl('', [Validators.required]),
-    // brand: new FormControl('', Validators.required),
     keyword: new FormControl(''),
     brand: new FormControl('All'),
   });
