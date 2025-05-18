@@ -1,24 +1,85 @@
-<h2>📱 Welcome to OldPhoneDeals</h2>
-<button (click)="goToCart()">🛒 Go to Shopping Cart</button>
-<button (click)="goToWishlist()">💖 View Wishlist</button>
+<!-- Enhanced shop.component.html -->
+<div class="shop-container">
+  <!-- Header -->
+  <header class="shop-header">
+    <div class="header-content">
+      <h2>📱 OldPhoneDeals</h2>
+      <div class="nav-actions">
+        <button class="btn" (click)="goToCart()">
+          <span>🛒</span>
+          <span>Cart</span>
+        </button>
+        <button class="btn btn-wishlist" (click)="goToWishlist()">
+          <span>💖</span>
+          <span>Wishlist</span>
+        </button>
+      </div>
+    </div>
+  </header>
 
-<div *ngIf="phones.length > 0; else noData">
-  <div 
-    *ngFor="let item of phones" 
-    class="phone-card" 
-    (click)="goToDetail(item._id)" 
-    style="cursor: pointer;"
-  >
-    <img [src]="item.image" alt="{{ item.title }}" width="100" />
-    <h3>{{ item.title }}</h3>
-    <p><strong>Brand:</strong> {{ item.brand }}</p>
-    <p><strong>Price:</strong> ${{ item.price }}</p>
-    <p><strong>Stock:</strong> {{ item.stock }}</p>
+  <!-- Main Content -->
+  <main class="shop-content">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-controls">
+        <select>
+          <option value="all">All Brands</option>
+          <option value="apple">Apple</option>
+          <option value="samsung">Samsung</option>
+          <option value="nokia">Nokia</option>
+          <option value="motorola">Motorola</option>
+        </select>
+        <select>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="newest">Newest First</option>
+        </select>
+      </div>
+      <div class="search-box">
+        <input type="text" placeholder="Search phones..." />
+      </div>
+    </div>
 
+    <!-- Phone Listings -->
+    <div *ngIf="phones.length > 0; else noData" class="phone-list">
+      <div 
+        *ngFor="let item of phones" 
+        class="phone-card" 
+        (click)="goToDetail(item._id)"
+      >
+        <div class="card-image-container">
+          <img [src]="item.image" alt="{{ item.title }}" class="phone-image" />
+        </div>
+        <div class="card-content">
+          <div class="card-brand">{{ item.brand }}</div>
+          <h3 class="card-title" title="{{ item.title }}">{{ item.title }}</h3>
+          
+          <div class="card-footer">
+            <div class="price">${{ item.price }}</div>
+            <div 
+              class="stock" 
+              [class.low]="item.stock > 0 && item.stock < 5"
+              [class.out]="item.stock <= 0"
+            >
+              {{ item.stock > 0 ? (item.stock < 5 ? 'Low Stock' : 'In Stock') : 'Out of Stock' }}
+            </div>
+          </div>
+          
+          <div class="card-actions">
+            <button title="View Details">View Details</button>
+            <button title="Add to Cart">Add to Cart</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  </div>
+    <!-- No data template -->
+    <ng-template #noData>
+      <div class="no-data">
+        <div class="no-data-icon">📱</div>
+        <h3>No Phones Available</h3>
+        <p>We're currently restocking our inventory. Please check back soon!</p>
+      </div>
+    </ng-template>
+  </main>
 </div>
-
-<ng-template #noData>
-  <p>No phones available.</p>
-</ng-template>

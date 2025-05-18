@@ -1,37 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const Order = require('../models/order');
-const Phone = require('../models/phone');
+const PhoneListing = require('../models/PhoneListing');
 
 // Create new order and update stock
 router.post('/', async (req, res) => {
   try {
     const { userId, items, total } = req.body;
-
+    
     if (!userId) {
       return res.status(400).json({ message: 'Missing userId in request' });
     }
-
+    
     // Check and update stock
     for (let entry of items) {
-      const phone = await Phone.findById(entry.productId);
-      if (!phone) {
+      const phoneListing = await PhoneListing.findById(entry.productId);
+      if (!phoneListing) {
         return res.status(404).json({ message: `Phone not found: ${entry.productId}` });
       }
-
-      if (phone.stock < entry.quantity) {
-        return res.status(400).json({ message: `Insufficient stock for: ${phone.title}` });
+      
+      if (phoneListing.stock < entry.quantity) {
+        return res.status(400).json({ message: `Insufficient stock for: ${phoneListing.title}` });
       }
-
-      phone.stock -= entry.quantity;
-      await phone.save();
+      
+      phoneListing.stock -= entry.quantity;
+      await phoneListing.save();
     }
-
+    
     // Save order with userId
     const order = new Order({ userId, items, total });
     await order.save();
     res.status(201).json(order);
-
+   
   } catch (err) {
     console.error('❌ Order error:', err);
     res.status(500).json({ message: 'Server error during order processing' });

@@ -1,12 +1,11 @@
-const Phone = require('../models/phone');
-const Review = require('../models/review');
+const PhoneListing = require('../models/PhoneListing');
 const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 
 // get all phones
 module.exports.getAllPhones = async function(req, res) {
     try {
-        const phones = await Phone.getAllPhones();
+        const phones = await PhoneListing.getAllPhones();
         res.status(200).json(phones);
     } catch (error) {
         res.status(500).send(error.message || 'Server error getting all phones.');
@@ -17,14 +16,13 @@ module.exports.getAllPhones = async function(req, res) {
 module.exports.getPhone = async function(req, res){
 	phone_id = req.params._id;
 	console.log("Got id:",phone_id);
-	Phone.getPhone(phone_id)
+	PhoneListing.getPhone(phone_id)
 		.then(result => {
 			if(!result){
 				console.log("Cannot find phone");
 				res.status(404).send("The phone does not exist");
 			}
             console.log(result);
-            // console.log(result.length);
             // Send the result to the client.
 			res.status(200).send(result);
 		})
@@ -39,10 +37,8 @@ module.exports.getPhone = async function(req, res){
 // the least quantity available (more than 0 quantity and not disabled).
 module.exports.getSoldOutSoon = async function(req, res){
 
-	Phone.getSoldOutSoon()
+	PhoneListing.getSoldOutSoon()
 		.then(result => {
-            // console.log(result.length);
-            // console.log(result);
             // Send the result to the client.
             res.status(200).send(result);
 		})
@@ -57,10 +53,8 @@ module.exports.getSoldOutSoon = async function(req, res){
 // highest average rating (not disabled and at least two ratings given)
 module.exports.getBestSeller = async function(req, res){
 
-	Phone.getBestSeller()
+	PhoneListing.getBestSeller()
 		.then(result => {
-            // console.log(result.length);
-            // console.log(result);
             // Send the result to the client.
 			res.status(200).send(result);
 		})
@@ -73,7 +67,7 @@ module.exports.getBestSeller = async function(req, res){
 
 // Send all brand to the request.
 module.exports.getAllBrand = async function(req, res){
-	Phone.getAllBrand()
+	PhoneListing.getAllBrand()
 		.then(result =>{
 			console.log(result);
 			console.log(result.length);
@@ -93,7 +87,7 @@ module.exports.searchResult = async function(req,res){
     console.log(keyword);
     console.log(brand);
 
-	Phone.findPhones(keyword, brand)
+	PhoneListing.findPhones(keyword, brand)
 		.then(result => {
 			if (result.length < 1) {
 				console.log("Cannot find any phone with keyword", keyword);
@@ -116,36 +110,29 @@ module.exports.addReview = async function(req, res){
 	comment = req.body.comment;
 	rating = req.body.rating;
 	// Convert id string to id object.
-	phone_id = new mongoose.Types.ObjectId(phone_id),
-	reviewer = new mongoose.Types.ObjectId(reviewer),
-
+	phone_id = new mongoose.Types.ObjectId(phone_id);
+	reviewer = new mongoose.Types.ObjectId(reviewer);
 
 	console.log("Got review:", reviewer, phone_id, comment, rating);
 
-	// First Add the review
-	Review.create({
-		reviewer: reviewer,
-		rating: rating,
-		comment: comment,
-		hidden: false
-	}).then(review =>{
-		// Then insert the review id into the phone list.
-		Phone.findByIdAndUpdate(
-			phone_id,
-			{ $push:{ reviews: review.id } },
-			{ new: true, useFindAndModify:false }
-		).then(phone =>{
-			res.status(200).send(phone);
-		}).catch(error =>{
-			console.log("Failed insert review into phone",error);
-			res.status(500).send("Server Error. Failed to add review to phone list.");
-		})
-	}).catch(error =>{
-		console.log("Failed create review", error);
-		// Delete the review just created.
-		Review.findByIdAndDelete(review._id);
-		res.status(500).send("Server error. Failed to add review.");
-	})
-	
-	
+	// Create review directly in the PhoneListing document
+	PhoneListing.findByIdAndUpdate(
+		phone_id,
+		{ 
+			$push:{ 
+				reviews: {
+					reviewer: reviewer,
+					rating: rating,
+					comment: comment,
+					hidden: false
+				} 
+			} 
+		},
+		{ new: true, useFindAndModify: false }
+	).then(phone => {
+		res.status(200).send(phone);
+	}).catch(error => {
+		console.log("Failed to add review to phone", error);
+		res.status(500).send("Server Error. Failed to add review to phone.");
+	});
 }

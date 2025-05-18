@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 
 // Models to initialize.
 const User = require('../models/User');
-const Phone = require('../models/phone');
+const PhoneListing = require('../models/PhoneListing');
 const Activity = require('../models/activity');
 
 // Default password hashing config.
@@ -35,13 +35,13 @@ module.exports.initializeDatabase = async function() {
 
     // Check if collections exist and have data
     const userCount = await User.countDocuments();
-    const phoneCount = await Phone.countDocuments();
+    const phoneListingCount = await PhoneListing.countDocuments();
     const activityCount = await Activity.countDocuments();
     // Drop the collection if already exists.
-    if (userCount > 0 || phoneCount > 0) {
+    if (userCount > 0 || phoneListingCount > 0) {
       console.log('Database already contains data. Dropping collections...');
       await mongoose.connection.db.dropCollection('user');
-      await mongoose.connection.db.dropCollection('phone');
+      await mongoose.connection.db.dropCollection('phonelisting');
       await mongoose.connection.db.dropCollection('activity');
       console.log('Collections dropped');
     }
@@ -177,7 +177,7 @@ module.exports.initializeDatabase = async function() {
       });
     }
     
-    await Phone.insertMany(processedListings);
+    await PhoneListing.insertMany(processedListings);
     console.log(`${processedListings.length} phone listings inserted`);
     console.log(`Skipped ${skippedListings} listings with invalid sellers`);
     
