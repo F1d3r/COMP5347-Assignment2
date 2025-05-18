@@ -52,7 +52,7 @@ export class PhoneService {
       if(!phone){
         return console.error("Phone does not exist");
       }
-      console.log(phone);
+      console.log("Got phone:", phone);
       this.selected$.set(phone);
     })
     return this.selected$;

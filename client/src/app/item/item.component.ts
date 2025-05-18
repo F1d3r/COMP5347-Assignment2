@@ -54,20 +54,12 @@ import { RatingComponent } from './rating.component';
       margin: 5px;
     }
 
-    td.comment{
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-    }
-
     button.showCompleteComment {
       width: 60px;
-      height: 30px;
+      height: 25px;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 80px;
-      height: 30px;
       flex-shrink: 0;
     }
 
@@ -138,20 +130,25 @@ import { RatingComponent } from './rating.component';
             <!-- Comment -->
             <ng-container matColumnDef="col-comment">
               <th mat-header-cell *matHeaderCellDef>Comment</th>
-              <td class='comment' mat-cell *matCellDef="let review">
-                <!-- Not expanded -->
-                <span *ngIf="!review.expanded">
-                  {{review.comment?.length > 200 ? 
-                  review.comment.substring(0, 200) + '...' : review.comment}}
-                </span>
-                <!-- Expanded comment -->
-                <span *ngIf="review.expanded">
-                  {{review.comment}}
-                </span>
-                <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
-                (click)="review.expanded = !review.expanded">
-                  {{review.expanded ? 'Hide' : 'Show'}}
-                </button>
+              <td mat-cell *matCellDef="let review">
+                <div class='flex-row'>
+                  <!-- Not expanded -->
+                  <div *ngIf="!review.expanded">
+                    {{review.comment?.length > 200 ? 
+                    review.comment.substring(0, 200) + '...' : review.comment}}
+                  </div>
+                  <!-- Expanded comment -->
+                  <div *ngIf="review.expanded">
+                    {{review.comment}}
+                  </div>
+                  
+                  <div>
+                    <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
+                    (click)="review.expanded = !review.expanded">
+                      {{review.expanded ? 'Hide' : 'Show'}}
+                    </button>
+                  </div>
+                </div>
               </td>
             </ng-container>
             <!-- Reviewer -->
