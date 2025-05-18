@@ -175,7 +175,7 @@ import { RatingComponent } from './rating.component';
             </span>
           </button>
 
-          <!-- Leave review -->
+          <!-- Leave review form -->
           <form class='flex-col' [formGroup]="reviewForm" (ngSubmit)="addReview()">
             <label>Leave a review</label>
             <textarea formControlName="comment" name="comment" 
@@ -185,7 +185,7 @@ import { RatingComponent } from './rating.component';
             [rating]="reviewForm.controls['rating'].value ?? 0"></app-rating>
             
             <div>
-              <button type="submit">Add comment</button>
+              <button type="submit" [disabled]="!reviewForm.valid">Add comment</button>
               <button type='reset'>Clear</button>
             </div>
           </form>
@@ -220,7 +220,7 @@ export class ItemComponent implements OnInit{
 
   reviewForm = new FormGroup({
     comment: new FormControl('', [Validators.required]),
-    rating: new FormControl(0, [Validators.required]),
+    rating: new FormControl(5, [Validators.required]),
   });
 
 
