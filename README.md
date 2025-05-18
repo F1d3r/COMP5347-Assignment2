@@ -63,7 +63,9 @@ oldphonedeals/
    brew install mongodb-community
 
    # Install server dependencies
+   cd server
    npm install
+   cd ..
    
    # Install client dependencies
    cd client

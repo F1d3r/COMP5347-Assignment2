@@ -190,8 +190,10 @@ module.exports.handleResetRequest = async function(req, res){
 		// If the user request with an email.
 		// Find the user.
 		if(email){
+			console.log("Find by Email");
 			user = await User.findOne({email:email});
 		}else{
+			console.log("Find by id");
 			user = await User.findOne({_id:_id});
 		}
 		// Check user exist.
@@ -203,7 +205,8 @@ module.exports.handleResetRequest = async function(req, res){
 		
 		// Generate a token for the user.
 		const verifyToken = crypto.randomBytes(32).toString('hex');
-		const verificationLink = `http://localhost:3000/user/resetPassword/${_id}/${verifyToken}`;
+		const verificationLink  = `http://localhost:3000/user/resetPassword/${user._id}/${verifyToken}`;
+
 		// Set the token of the user.
 		user.verifyToken = verifyToken;
 		await user.save();

@@ -1,3 +1,4 @@
+import { UserService } from './../user.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -13,7 +14,11 @@ import { CartService, CartItem } from './cart.service';
 export class CheckoutComponent implements OnInit {
   cartItems: CartItem[] = [];
 
-  constructor(private cartService: CartService, private router: Router) {}
+  constructor(
+    private cartService: CartService, 
+    private router: Router,
+    private userService: UserService
+  ) {}
 
   ngOnInit(): void {
     this.cartItems = this.cartService.getItems();
@@ -43,10 +48,13 @@ export class CheckoutComponent implements OnInit {
   }
 
   confirmOrder(): void {
-    this.cartService.createOrder().subscribe({
+    this.cartService.createOrder(this.userService.user$()?._id!).subscribe({
       next: () => {
         alert('✅ Order placed successfully!');
+        this.userService.homeState$.set('home');
         this.cartService.clearCart();
+        console.log("Cart cleaned");
+        console.log("Cart:", this.cartService.getItems);
         this.router.navigate(['/']);
       },
       error: () => {

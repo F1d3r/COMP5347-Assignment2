@@ -6,16 +6,18 @@ const Wishlist = require('../models/wishlist');
 // Add to Wishlist
 router.post('/', async (req, res) => {
   const { userId, productId } = req.body;
-  try {
-    const existing = await Wishlist.findOne({ userId, productId });
-    if (existing) return res.status(400).json({ message: 'Already in wishlist' });
-
-    const entry = new Wishlist({ userId, productId });
-    await entry.save();
-    res.status(201).json(entry);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  console.log("User id:", userId);
+  console.log("Phone id:", productId);
+  
+  const existing = await Wishlist.findOne({ userId, productId });
+  if (existing) {
+    console.log('Already in wishlist');
+    return res.status(409).send('Already in wishlist');
   }
+
+  const entry = new Wishlist({ userId, productId });
+  await entry.save();
+  res.status(201).json(entry);
 });
 
 // Get users' Wishlist

@@ -1,3 +1,4 @@
+import { catchError } from 'rxjs';
 import { WidthType } from './../../../node_modules/get-east-asian-width/index.d';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -96,20 +97,30 @@ export class SearchFormComponent implements OnInit {
     )
   }
 
+
+  sanitizeInput(inputText: string): string {
+    return inputText.replace(/[$\{\}\[\]\(\)\*\+\?\|\^\.\-]/g, '\\$&');
+  }
+
   // On submit of the form.
   searchPhones(){
-    const keyword = this.searchForm.value.keyword ?? '';
-    const brand = this.searchForm.value.brand ?? '';
+    let keyword = this.searchForm.value.keyword ?? '';
+    const brand = this.searchForm.value.brand ?? 'All';
+
+    // Handle input. Replace '(' and ')' to escape character.
+    keyword = this.sanitizeInput(keyword);
+    
     console.log("Got keyword:", keyword);
     console.log("Got brand:", brand);
 
+
     this.phoneService.getPhones(keyword, brand).subscribe(phones =>{
       this.userService.homeState$.set('search');
-      if(!phones || Object.keys(phones).length === 0){
+      if(!phones || phones.length === 0){
         // Not found result, set saerched result to empty.
         alert("No result found");
         this.phoneService.searched$.set([]);
-        console.log(phones);
+        // this.userService.homeState$.set('home');
       }else{
         // Result found.
         console.log("Found Result");
