@@ -67,7 +67,7 @@ PhoneSchema.statics.getPhone = async function(_id){
                 _id: "$_id",
                 title: { $first: "$title"},
                 brand: { $first: "$brand" },
-                imagePath: { $first: "imagePath"},
+                imagePath: { $first: "$imagePath"},
                 stock: { $first: "$stock" },
                 seller: { $first: "$seller" },
                 price: { $first: "$price" },
@@ -87,6 +87,7 @@ PhoneSchema.statics.getPhone = async function(_id){
         },
         
     ])
+
     return phone[0];
 }
 
@@ -150,19 +151,156 @@ PhoneSchema.statics.getSoldOutSoon = async function(){
 
 
 // Static function used to find the phone by key words search.
-PhoneSchema.statics.findPhones = function(keywrod, brand){
+PhoneSchema.statics.findPhones = async function(keyword, brand){
     // Set to case insensitive.
-    const regex = new RegExp(keywrod, 'i');
-
+    let results = [];
     if(brand == 'All'){
-        return this.find({'title': {$regex: regex}})
-        .sort({'price':1})
+        results = await Phone.aggregate([
+            { $match: { title: { $regex: keyword, $options: "i" } }},
+
+            // Get the seller complete info.
+            {
+                $lookup: {
+                    from:"user",
+                    localField: "seller",
+                    foreignField: "_id",
+                    as: "seller"
+                }
+            },
+            {
+                $unwind: "$seller"
+            },
+
+            // Get the complete information fo the review.
+            {
+                $unwind: { path: "$reviews", preserveNullAndEmptyArrays: true }
+            },
+            {
+                $lookup: {
+                    from: "review",
+                    localField: "reviews",
+                    foreignField: "_id",
+                    as: "reviews"
+                }
+            },
+            {
+                $unwind: { path: "$reviews", preserveNullAndEmptyArrays: true }
+            },
+
+            // Get the complete information of the reviewers.
+            {
+                $lookup: {
+                    from: "user",
+                    localField: "reviews.reviewer",
+                    foreignField: "_id",
+                    as: "reviews.reviewer"
+                }
+            },
+            {
+                $unwind: { path: "$reviews.reviewer", preserveNullAndEmptyArrays: true }
+            },
+            
+            // Group the review
+            {
+                $group: {
+                    _id: "$_id",
+                    title: { $first: "$title"},
+                    brand: { $first: "$brand" },
+                    imagePath: { $first: "$imagePath"},
+                    stock: { $first: "$stock" },
+                    seller: { $first: "$seller" },
+                    price: { $first: "$price" },
+                    reviews: { $push: "$reviews" },
+                    disabled: { $first: "$disabled"}
+                }
+            },
+
+            // Calculate the average rating for each phone
+            { 
+                $addFields: {
+                    reviews: {
+                        $cond: { if: { $eq: ["$reviews", [{}]] }, then: [], else: "$reviews" }
+                    },
+                    avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
+                }
+            },
+        ]).sort({price: -1});
+
     }else{
-        return this.find({'title': {$regex: regex}, 'brand':brand})
-        // Sort by the price in default.
-        .sort({'price':1})
+        results = await Phone.aggregate([
+            { $match: { brand: brand, title: { $regex: keyword, $options: "i" } }},
+
+            // Get the seller complete info.
+            {
+                $lookup: {
+                    from:"user",
+                    localField: "seller",
+                    foreignField: "_id",
+                    as: "seller"
+                }
+            },
+            {
+                $unwind: "$seller"
+            },
+
+            // Get the complete information fo the review.
+            {
+                $unwind: { path: "$reviews", preserveNullAndEmptyArrays: true }
+            },
+            {
+                $lookup: {
+                    from: "review",
+                    localField: "reviews",
+                    foreignField: "_id",
+                    as: "reviews"
+                }
+            },
+            {
+                $unwind: { path: "$reviews", preserveNullAndEmptyArrays: true }
+            },
+
+            // Get the complete information of the reviewers.
+            {
+                $lookup: {
+                    from: "user",
+                    localField: "reviews.reviewer",
+                    foreignField: "_id",
+                    as: "reviews.reviewer"
+                }
+            },
+            {
+                $unwind: { path: "$reviews.reviewer", preserveNullAndEmptyArrays: true }
+            },
+            // Group the review
+            {
+                $group: {
+                    _id: "$_id",
+                    title: { $first: "$title"},
+                    brand: { $first: "$brand" },
+                    imagePath: { $first: "$imagePath"},
+                    stock: { $first: "$stock" },
+                    seller: { $first: "$seller" },
+                    price: { $first: "$price" },
+                    reviews: { $push: "$reviews" },
+                    disabled: { $first: "$disabled"}
+                }
+            },
+
+            // Calculate the average rating for each phone
+            { 
+                $addFields: {
+                    reviews: {
+                        $cond: { if: { $eq: ["$reviews", [{}]] }, then: [], else: "$reviews" }
+                    },
+                    avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
+                }
+            },
+        ]).sort({price: -1});
     }
+    console.log("Result:",results);
+    return results;
 }
+
 
 // Static function used to get all brand in the database.
 PhoneSchema.statics.getAllBrand = function(){

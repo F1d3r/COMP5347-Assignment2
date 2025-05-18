@@ -23,8 +23,9 @@ import { MatSliderModule } from '@angular/material/slider';
       table{
         width: 100%;
       }
+
       img{
-        width: 35%;
+        width: 150px;
         height: auto;
       }
 
@@ -109,7 +110,9 @@ import { MatSliderModule } from '@angular/material/slider';
               <!-- For seller -->
               <ng-container matColumnDef="col-seller">
                 <th mat-header-cell *matHeaderCellDef>Seller</th>
-                <td mat-cell *matCellDef="let phone">{{phone.seller}}</td>
+                <td mat-cell *matCellDef="let phone">
+                  {{phone.seller.firstname}} {{phone.seller.lastname}}
+                </td>
               </ng-container>
               <!-- For review -->
               <ng-container matColumnDef="col-reviews">

@@ -53,6 +53,8 @@ export class CheckoutComponent implements OnInit {
         alert('✅ Order placed successfully!');
         this.userService.homeState$.set('home');
         this.cartService.clearCart();
+        console.log("Cart cleaned");
+        console.log("Cart:", this.cartService.getItems);
         this.router.navigate(['/']);
       },
       error: () => {

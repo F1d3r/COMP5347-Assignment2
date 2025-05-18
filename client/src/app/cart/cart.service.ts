@@ -75,6 +75,7 @@ export class CartService {
 
   clearCart(): void {
     this.items = {};
+    this.saveToStorage();
   }
 
   createOrder(userId: string): Observable<any> {
