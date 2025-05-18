@@ -1,0 +1,19 @@
+.phone-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.phone-card {
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 8px;
+  width: 200px;
+  text-align: center;
+}
+
+.phone-image {
+  width: 100%;
+  height: auto;
+  margin-bottom: 10px;
+}

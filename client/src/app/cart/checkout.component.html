@@ -1,0 +1,25 @@
+<button (click)="goBack()">← Back</button>
+<h2>🧾 Checkout Page</h2>
+
+<div *ngIf="cartItems.length > 0; else emptyCart">
+  <div *ngFor="let item of cartItems" class="checkout-item">
+    <h3>{{ item.phone.title }}</h3>
+    <p><strong>Price:</strong> ${{ item.phone.price }}</p>
+    <p>
+      <strong>Quantity:</strong>
+      <button (click)="decrease(item.phone._id)">−</button>
+      {{ item.quantity }}
+      <button (click)="increase(item.phone._id)">+</button>
+    </p>
+    <p><strong>Total:</strong> ${{ getTotalPrice(item) }}</p>
+    <button (click)="remove(item.phone._id)">Remove</button>
+    <hr />
+  </div>
+
+  <h3>Total Amount: ${{ getTotal() }}</h3>
+  <button (click)="confirmOrder()">✅ Confirm Checkout</button>
+</div>
+
+<ng-template #emptyCart>
+  <p>Your cart is empty.</p>
+</ng-template>

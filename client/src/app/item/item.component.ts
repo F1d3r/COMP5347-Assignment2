@@ -104,15 +104,16 @@ import { RatingComponent } from './rating.component';
                 <!-- Purchase form -->
                 <form class='flex-col' [formGroup]="purchaseForm" (ngSubmit)="goCheckout()">
                   <!-- Purchase options -->
-                  <button (click)="addToCartBtnClicked()">Add to Cart</button>
+                  <button type="button" (click)="addToCartBtnClicked()">Add to Cart</button>
 
                   <div class="flex-col" *ngIf="addCartClicked">
                     <input type="number" name="quantity" id="quantity" min="0" [max]="selectedPhone$()?.stock" step="1" placeholder="Quantity">
-                    <button (click)="addToCart()">Confirm</button>
+                    <button type="button" (click)="addToCart()">Confirm</button>
                   </div>
 
                   <button type="submit">Buy Now</button>
                 </form>
+
 
               </div>
             </div>
@@ -256,7 +257,7 @@ export class ItemComponent implements OnInit{
 
   // TODO Add function here
   goCheckout(){
-
+    this.router.navigate(['/checkout']);
   }
 
   // Get the integer and fraction part.
