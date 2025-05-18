@@ -18,12 +18,11 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     // Find admin user by email and isAdmin flag
-    const admin = await User.findOne({ email, isAdmin: true });
+    const admin = await User.findOne({ email: email, isAdmin: true });
 
     if (!admin) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-
     // Verify password
     const validPassword = await bcrypt.compare(password, admin.password);
 
