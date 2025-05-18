@@ -6,6 +6,9 @@ const Wishlist = require('../models/wishlist');
 // Add to Wishlist
 router.post('/', async (req, res) => {
   const { userId, productId } = req.body;
+  console.log("User id:", userId);
+  console.log("Phone id:", productId);
+  
   try {
     const existing = await Wishlist.findOne({ userId, productId });
     if (existing) return res.status(400).json({ message: 'Already in wishlist' });
@@ -14,6 +17,7 @@ router.post('/', async (req, res) => {
     await entry.save();
     res.status(201).json(entry);
   } catch (err) {
+    console.log("Server error:",err);
     res.status(500).json({ message: err.message });
   }
 });

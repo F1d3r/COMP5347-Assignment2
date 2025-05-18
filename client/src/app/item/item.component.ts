@@ -1,3 +1,4 @@
+import { WishlistService } from './../wishlist/wishlist.service';
 import { UserService } from './../user.service';
 import { PhoneService } from './../phone.service';
 import { Component, inject, OnInit } from '@angular/core';
@@ -104,7 +105,8 @@ import { RatingComponent } from './rating.component';
                 <!-- Purchase form -->
                 <form class='flex-col' [formGroup]="purchaseForm" (ngSubmit)="goCheckout()">
                   <!-- Purchase options -->
-                  <button type="button" (click)="addToCartBtnClicked()">Add to Cart</button>
+                  <button type='button' (click)="addToWishList()">Add to WishList</button>
+                  <button type="button" (click)="addToCart()">Add to Cart</button>
 
                   <div class="flex-col" *ngIf="addCartClicked">
                     <input type="number" name="quantity" id="quantity" min="0" [max]="selectedPhone$()?.stock" step="1" placeholder="Quantity">
@@ -229,7 +231,8 @@ export class ItemComponent implements OnInit{
     private route: ActivatedRoute,
     private phoneService: PhoneService,
     private userService: UserService,
-    private router: Router
+    private router: Router,
+    private wishlistService: WishlistService
   ){}
 
   ngOnInit(): void {
@@ -246,17 +249,31 @@ export class ItemComponent implements OnInit{
     return this.phoneService.brandImageMap[brand];
   }
 
-  addToCartBtnClicked(){
+  addToCart(){
     this.addCartClicked = true;
   }
 
-  // TODO Add function here
-  addToCart(){
-
+  addToWishList(){
+    // If not logged in.
+    if(!this.userService.user$()){
+      this.goLogin();
+      return;
+    }
+    this.wishlistService.addToWishlist(this.userService.user$()?._id!, this.selectedPhone$()?._id!)
+    .subscribe(wishList =>{
+      if(!wishList){
+        return console.error("Add to wish list failed");
+      }
+      console.log("Added to wish list:", wishList);
+    })
   }
 
   // TODO Add function here
   goCheckout(){
+    if(!this.userService.user$()){
+      console.log("Not logged in.");
+      
+    }
     this.router.navigate(['/checkout']);
   }
 
@@ -304,6 +321,11 @@ export class ItemComponent implements OnInit{
       this.reviewForm.reset();
     })
 
+  }
+
+  goLogin(){
+    this.userService.homeState$.set('home');
+    this.router.navigate(['login']);
   }
 
 }
