@@ -1,0 +1,90 @@
+<!-- Updated Homepage Component Template -->
+<header class="header">
+    <mat-toolbar class="toolbar">
+      <div class="brand" (click)="backHome()">
+        <span class="brand-icon">
+          <i class="material-icons">smartphone</i>
+        </span>
+        <span>OldPhoneDeals</span>
+      </div>
+  
+      <div class="nav-actions">
+        <!-- Guest user navigation -->
+        <ng-container *ngIf='!this.user$()'>
+          <button class="btn btn-secondary" id='loginBtn' [routerLink]="['login']">Login</button>
+          <button class="btn btn-signup" id='signupBtn' [routerLink]="['signup']">Sign Up</button>
+        </ng-container>
+  
+        <!-- Authenticated user navigation -->
+        <ng-container *ngIf="this.user$()">
+          <button class="btn btn-secondary" [routerLink]="['/wishlist']">
+            <i class="material-icons">favorite</i>
+            Wishlist
+          </button>
+          <button class="btn" [routerLink]="['/cart']">
+            <i class="material-icons">shopping_cart</i>
+            Cart
+          </button>
+          <span class="user-greeting">Hello, {{ user$()?.lastname }}</span>
+          <button class="btn btn-secondary" id='profileBtn' [routerLink]="['profile']">
+            <i class="material-icons">person</i>
+            Profile
+          </button>
+          <button class="btn" id="logoutBtn" (click)="logout()">
+            <i class="material-icons">exit_to_app</i>
+            Logout
+          </button>
+        </ng-container>
+      </div>
+    </mat-toolbar>
+  </header>
+  
+  <main class="main-container">
+    <!-- Back button for search state -->
+    <button *ngIf="pageState$() === 'search'" class="btn btn-back" (click)="backHome()">
+      <i class="material-icons">arrow_back</i>
+      Back to Home
+    </button>
+    
+    <!-- Search container -->
+    <div class="search-container">
+      <app-search-form></app-search-form>
+    </div>
+  
+    <!-- Home state content -->
+    <div *ngIf="pageState$() === 'home'">
+      <div class="phone-lists-container">
+        <!-- Best Seller Section -->
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">Best Sellers</h2>
+            <p class="section-subtitle">Our most popular phones</p>
+          </div>
+          <div class="section-content">
+            <app-phone-list [phoneSource]="'bestSeller'"></app-phone-list>
+          </div>
+        </div>
+        
+        <!-- Selling Out Soon Section -->
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">Sold Out Soon</h2>
+            <p class="section-subtitle">Get them before they're gone</p>
+          </div>
+          <div class="section-content">
+            <app-phone-list [phoneSource]="'soldOutSoon'"></app-phone-list>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Search state content -->
+    <div *ngIf="pageState$() === 'search'" class="section">
+      <div class="section-header">
+        <h2 class="section-title">Search Results</h2>
+      </div>
+      <div class="section-content">
+        <app-phone-list [phoneSource]="'search'"></app-phone-list>
+      </div>
+    </div>
+  </main>
