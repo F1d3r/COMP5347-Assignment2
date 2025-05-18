@@ -66,6 +66,8 @@ import { SearchFormComponent } from '../search-form/search-form.component';
 
         <!-- If the user logged in -->
         <ng-container *ngIf="this.user$()">
+          <button [routerLink]="['/wishlist']">Wishlist</button>
+          <button [routerLink]="['/cart']">Cart</button>
           <span>Hello, {{ user$()?.lastname }}</span>
           <button id='profileBtn' [routerLink]="['profile']">Profile</button>
           <button id="logoutBtn" (click)="logout()">Logout</button>

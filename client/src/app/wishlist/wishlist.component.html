@@ -1,0 +1,17 @@
+<button (click)="goBack()">← Back</button>
+<h2>💖 Your Wishlist</h2>
+
+<div *ngIf="wishlistItems.length > 0; else noWishlist">
+  <div *ngFor="let item of wishlistItems" class="phone-card">
+    <img [src]="item.image" alt="{{ item.title }}" width="100" />
+    <h3>{{ item.title }}</h3>
+    <p><strong>Brand:</strong> {{ item.brand }}</p>
+    <p><strong>Price:</strong> ${{ item.price }}</p>
+    <button (click)="removeFromWishlist(item._id)">🗑️ Remove</button>
+  </div>
+</div>
+
+<ng-template #noWishlist>
+  <p>You have no items in your wishlist.</p>
+</ng-template>
+

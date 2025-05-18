@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Use session.
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'default-secret',
   cookie: {maxAge: 360000},
   resave: true,
   saveUninitialized: true
@@ -61,8 +61,12 @@ app.use((req, res, next) => {
 // Router
 const userRouter = require('./routes/user.routes');
 const phoneRouter = require('./routes/phone.routes');
+const wishlistRoutes = require('./routes/wishlist.routes');
+const orderRoutes = require('./routes/order.routes');
 app.use('/user', userRouter);
 app.use('/phone', phoneRouter);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/orders', orderRoutes);
 
 
 

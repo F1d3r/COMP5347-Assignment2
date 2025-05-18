@@ -6,6 +6,10 @@ import { ProfileComponent } from './profile/profile.component';
 import { ChangePasswordComponent } from './change-password/change-password.component';
 import { ItemComponent } from './item/item.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
+import { CartComponent } from './cart/cart.component';
+import { CheckoutComponent } from './cart/checkout.component';
+import { WishlistComponent } from './wishlist/wishlist.component';
+
 
 export const routes: Routes = [
   { path: '', component:HomepageComponent, title: 'OldPhoneDeals' },
@@ -15,4 +19,7 @@ export const routes: Routes = [
   { path: 'item/:id', component:ItemComponent, title: 'Item' },
   { path: 'login/forgot', component:ForgotPasswordComponent, title: 'Forgot' },
   { path: 'profile/changePassword', component:ChangePasswordComponent, title: 'ChangePassword' },
+  { path: 'cart', component: CartComponent, title: 'Cart' },
+  { path: 'checkout', component: CheckoutComponent, title: 'Checkout' },
+  { path: 'wishlist', component: WishlistComponent, title: 'Wishlist' },
 ];
