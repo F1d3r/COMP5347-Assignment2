@@ -42,6 +42,6 @@ export class WishlistComponent implements OnInit {
   
 
     goBack(): void {
-        this.router.navigate(['/shop']);
+      window.history.back();
     }
 }
