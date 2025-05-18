@@ -73,8 +73,8 @@ import { RatingComponent } from './rating.component';
         </mat-card-header>
 
         <mat-card-content>
-          <!-- Item image -->
           <div class='flex-row'>
+            <!-- Item image -->
             <img matCardImage [src]='getBrandImages(phoneBrand$())'>
             <div class='flex-col'>
               <!-- Title -->
@@ -104,10 +104,13 @@ import { RatingComponent } from './rating.component';
                 <!-- Purchase form -->
                 <form class='flex-col' [formGroup]="purchaseForm" (ngSubmit)="goCheckout()">
                   <!-- Purchase options -->
+                  <label> {{currentQuantity}} added to cart</label>
                   <button (click)="addToCartBtnClicked()">Add to Cart</button>
 
                   <div class="flex-col" *ngIf="addCartClicked">
-                    <input type="number" name="quantity" id="quantity" min="0" [max]="selectedPhone$()?.stock" step="1" placeholder="Quantity">
+                    <input formControlName="quantity" name="quantity" 
+                    type="number" id="quantity" min="0" 
+                    [max]="selectedPhone$()?.stock!" step="1" placeholder="Quantity">
                     <button (click)="addToCart()">Confirm</button>
                   </div>
 
@@ -204,6 +207,7 @@ export class ItemComponent implements OnInit{
   selectedPhone$ = inject(PhoneService).selected$;
   // Get the phone brand.
   phoneBrand$ = computed(() => this.selectedPhone$()?.brand);
+  currentQuantity: number = 0;
 
   displayCount = 3;
   showAll: boolean = false;
@@ -214,8 +218,7 @@ export class ItemComponent implements OnInit{
   ]
   
   purchaseForm = new FormGroup({
-    keyword: new FormControl('', [Validators.required]),
-    brand: new FormControl('', Validators.required),
+    quantity: new FormControl(0, [Validators.required]),
   });
 
   reviewForm = new FormGroup({
@@ -251,7 +254,7 @@ export class ItemComponent implements OnInit{
 
   // TODO Add function here
   addToCart(){
-
+    this.currentQuantity = this.purchaseForm.value.quantity!;
   }
 
   // TODO Add function here
