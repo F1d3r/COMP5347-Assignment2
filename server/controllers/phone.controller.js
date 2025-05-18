@@ -16,7 +16,7 @@ module.exports.getAllPhones = async function(req, res) {
 // Find one phone by its id.
 module.exports.getPhone = async function(req, res){
 	phone_id = req.params._id;
-	console.log("Got id:",phone_id);
+	// console.log("Got id:",phone_id);
 	Phone.getPhone(phone_id)
 		.then(result => {
 			if(!result){
@@ -98,14 +98,14 @@ module.exports.searchResult = async function(req,res){
 			if (result.length < 1) {
 				console.log("Cannot find any phone with keyword", keyword);
 			}
-            console.log(result);
+            console.log("Got:", result);
             console.log(result.length);
             // Send the result to the client.
             res.status(200).send(result);
 		})
 		.catch(err => {
 			console.log("Cannot find phone with keyword: " + keyword + "!");
-			res.status(404).send("Cannot find phone with keyword: " + keyword + "!");
+			res.status(500).send("Cannot find phone with keyword: " + keyword + "!");
 		});
 }
 

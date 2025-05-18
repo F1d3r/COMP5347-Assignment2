@@ -7,6 +7,7 @@ const path = require('path');
 const User = require('../models/user');
 const Phone = require('../models/phone');
 const Activity = require('../models/activity');
+const Wishlist = require('../models/wishlist');
 
 // Default password hashing config.
 require('dotenv').config();
@@ -40,8 +41,11 @@ module.exports.initializeDatabase = async function() {
     const userCount = await User.countDocuments();
     const phoneCount = await Phone.countDocuments();
     const activityCount = await Activity.countDocuments();
+    const wishlistCount = await Wishlist.countDocuments();
     // Drop the collection if already exists.
-    if (userCount > 0 || phoneCount > 0) {
+    if (userCount > 0 || phoneCount > 0
+      || activityCount  > 0 || wishlistCount > 0
+    ) {
       console.log('Database already contains data. Dropping collections...');
       await mongoose.connection.db.dropCollection('user');
       await mongoose.connection.db.dropCollection('phone');
@@ -146,13 +150,14 @@ module.exports.initializeDatabase = async function() {
         seller: sellerId,
         price: listing.price,
         reviews: processedReviews,
-        disabled: listing.disabled ? true : false
+        disabled: false
       };
     });
     
     await Phone.insertMany(processedListings);
     console.log(`${processedListings.length} phone listings inserted`);
     
+
     // Create activity collection.
     let adminId = admin._id;
     if (typeof adminId === 'object' && adminId.$oid) {
@@ -171,7 +176,6 @@ module.exports.initializeDatabase = async function() {
     await activity1.save();
     await activity2.save();
     console.log("Activity collection created.");
-
 
     
     console.log('\nDatabase initialization completed successfully!');

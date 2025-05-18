@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService, CartItem } from './cart.service';
 import { Router } from '@angular/router';
+import { PhoneService } from '../phone.service';
 
 @Component({
   selector: 'app-cart',
@@ -15,7 +16,8 @@ export class CartComponent implements OnInit {
 
   constructor(
     private cartService: CartService,
-    private router: Router
+    private router: Router,
+    private phoneService: PhoneService
   ) {}
 
   ngOnInit(): void {
@@ -52,6 +54,15 @@ export class CartComponent implements OnInit {
   
   goBack(): void {
     window.history.back();
+  }
+
+
+  // Get the image path for the brand.
+  getBrandImage(brand: string | null | undefined){
+    if(!brand){
+      return null;
+    }
+    return this.phoneService.brandImageMap[brand];
   }
   
 }

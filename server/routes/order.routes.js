@@ -7,8 +7,10 @@ const Phone = require('../models/phone');
 router.post('/', async (req, res) => {
   try {
     const { userId, items, total } = req.body;
+    console.log(userId, items, total);
 
     if (!userId) {
+      console.log("Missing userId");
       return res.status(400).json({ message: 'Missing userId in request' });
     }
 
@@ -16,10 +18,12 @@ router.post('/', async (req, res) => {
     for (let entry of items) {
       const phone = await Phone.findById(entry.productId);
       if (!phone) {
+        console.log("Phone not found");
         return res.status(404).json({ message: `Phone not found: ${entry.productId}` });
       }
 
       if (phone.stock < entry.quantity) {
+        console.log("Stock not eonough");
         return res.status(400).json({ message: `Insufficient stock for: ${phone.title}` });
       }
 

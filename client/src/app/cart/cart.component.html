@@ -3,7 +3,7 @@
 
 <div *ngIf="cartItems.length > 0; else emptyCart">
   <div *ngFor="let item of cartItems" class="phone-card">
-    <img [src]="item.phone.image" alt="{{ item.phone.title }}" width="100" />
+    <img [src]="getBrandImage(item.phone.brand)" alt="{{ item.phone.title }}" width="100" />
     <h3>{{ item.phone.title }}</h3>
     <p><strong>Brand:</strong> {{ item.phone.brand }}</p>
     <p><strong>Price:</strong> ${{ item.phone.price }}</p>

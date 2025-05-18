@@ -93,6 +93,7 @@ export class ProfileComponent implements OnInit{
       if(!user){
         console.error("No user returned.");
       }else{
+        alert("Reset link sent to your email. Click to reset your password.");
         this.userService.user$.set(user);
       }
 
