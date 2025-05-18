@@ -1,3 +1,4 @@
+import { CartService } from './../cart/cart.service';
 import { WishlistService } from './../wishlist/wishlist.service';
 import { UserService } from './../user.service';
 import { PhoneService } from './../phone.service';
@@ -14,6 +15,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 
 import { RatingComponent } from './rating.component';
+
+import { Phone } from '../phone';
 
 
 @Component({
@@ -63,13 +66,20 @@ import { RatingComponent } from './rating.component';
       align-items: center;
       flex-shrink: 0;
     }
+    
+    button{
+      margin: 5px;
+    }
 
   `,
 
   template: `
     <mat-card>
         <mat-card-header>
-          <button class='goBack' (click)='goBackHome()'>Back Home</button>
+          <div class='goBack'>
+            <button (click)='goBackHome()'>Back Home</button>
+            <button [routerLink]="['/cart']">Cart</button>
+          </div>
           <mat-card-title>{{this.selectedPhone$()?.brand}} Phone</mat-card-title>
         </mat-card-header>
 
@@ -106,10 +116,11 @@ import { RatingComponent } from './rating.component';
                 <form class='flex-col' [formGroup]="purchaseForm" (ngSubmit)="goCheckout()">
                   <!-- Purchase options -->
                   <button type='button' (click)="addToWishList()">Add to WishList</button>
-                  <button type="button" (click)="addToCart()">Add to Cart</button>
+                  
                   <label> {{currentQuantity}} added to cart</label>
+                  <button type="button" (click)="addToCart()">Add to Cart</button>
 
-                  <div class="flex-col" *ngIf="addCartClicked">
+                  <div class="flex-col" *ngIf="addedToCart">
                     <input formControlName="quantity" name="quantity" 
                     type="number" id="quantity" min="0" 
                     [max]="selectedPhone$()?.stock!" step="1" placeholder="Quantity">
@@ -124,62 +135,66 @@ import { RatingComponent } from './rating.component';
             </div>
           </div>
 
-          <!-- Comment table -->
-          <table mat-table [dataSource]="(selectedPhone$()?.reviews || []).slice(0, displayCount)">
-            <!-- Rating -->
-            <ng-container matColumnDef="col-rating">
-              <th mat-header-cell *matHeaderCellDef>Rating</th>
-              <td mat-cell *matCellDef="let review">
-                {{review.rating}}
-              </td>
-            </ng-container>
-            <!-- Comment -->
-            <ng-container matColumnDef="col-comment">
-              <th mat-header-cell *matHeaderCellDef>Comment</th>
-              <td mat-cell *matCellDef="let review">
-                <div class='flex-row'>
-                  <!-- Not expanded -->
-                  <div *ngIf="!review.expanded">
-                    {{review.comment?.length > 200 ? 
-                    review.comment.substring(0, 200) + '...' : review.comment}}
+          <div *ngIf="selectedPhone$()?.reviews?.length != 0">
+            <!-- Comment table -->
+            <table mat-table [dataSource]="(selectedPhone$()?.reviews || []).slice(0, displayCount)">
+              <!-- Rating -->
+              <ng-container matColumnDef="col-rating">
+                <th mat-header-cell *matHeaderCellDef>Rating</th>
+                <td mat-cell *matCellDef="let review">
+                  {{review.rating}}
+                </td>
+              </ng-container>
+              <!-- Comment -->
+              <ng-container matColumnDef="col-comment">
+                <th mat-header-cell *matHeaderCellDef>Comment</th>
+                <td mat-cell *matCellDef="let review">
+                  <div class='flex-row'>
+                    <!-- Not expanded -->
+                    <div *ngIf="!review.expanded">
+                      {{review.comment?.length > 200 ? 
+                      review.comment.substring(0, 200) + '...' : review.comment}}
+                    </div>
+                    <!-- Expanded comment -->
+                    <div *ngIf="review.expanded">
+                      {{review.comment}}
+                    </div>
+                    
+                    <div>
+                      <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
+                      (click)="review.expanded = !review.expanded">
+                        {{review.expanded ? 'Hide' : 'Show'}}
+                      </button>
+                    </div>
                   </div>
-                  <!-- Expanded comment -->
-                  <div *ngIf="review.expanded">
-                    {{review.comment}}
-                  </div>
-                  
-                  <div>
-                    <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
-                    (click)="review.expanded = !review.expanded">
-                      {{review.expanded ? 'Hide' : 'Show'}}
-                    </button>
-                  </div>
-                </div>
-              </td>
-            </ng-container>
-            <!-- Reviewer -->
-            <ng-container matColumnDef="col-reviewer">
-              <th mat-header-cell *matHeaderCellDef>Reviewer</th>
-              <td mat-cell *matCellDef="let review">
-                {{review.reviewer.firstname}} {{review.reviewer.lastname}}
-              </td>
-            </ng-container>
-            <!-- Add header and row definitions -->
-            <tr mat-header-row *matHeaderRowDef="displayColumn">
-              <!-- *ngFor="let review of selectedPhone$()?.reviews | slice:0:initNumReview" -->
-            </tr>
-            <tr mat-row *matRowDef="let row; columns: displayColumn;"></tr>
-          </table>
+                </td>
+              </ng-container>
+              <!-- Reviewer -->
+              <ng-container matColumnDef="col-reviewer">
+                <th mat-header-cell *matHeaderCellDef>Reviewer</th>
+                <td mat-cell *matCellDef="let review">
+                  {{review.reviewer.firstname}} {{review.reviewer.lastname}}
+                </td>
+              </ng-container>
+              <!-- Add header and row definitions -->
+              <tr mat-header-row *matHeaderRowDef="displayColumn">
+                <!-- *ngFor="let review of selectedPhone$()?.reviews | slice:0:initNumReview" -->
+              </tr>
+              <tr mat-row *matRowDef="let row; columns: displayColumn;"></tr>
+            </table>
 
-          <!-- Button to show all -->
-          <button mat-button (click)="showAllReviews()">
-            <span *ngIf="!showAll">
-              Show All {{selectedPhone$()?.reviews?.length}} reviews
-            </span>
-            <span *ngIf="showAll">
-              Collapse Reviews
-            </span>
-          </button>
+            <!-- Button to show all -->
+            <button mat-button (click)="showAllReviews()">
+              <span *ngIf="!showAll">
+                Show All {{selectedPhone$()?.reviews?.length}} reviews
+              </span>
+              <span *ngIf="showAll">
+                Collapse Reviews
+              </span>
+            </button>
+
+          </div>
+          
 
           <!-- Leave review form -->
           <form class='flex-col' [formGroup]="reviewForm" (ngSubmit)="addReview()">
@@ -206,11 +221,11 @@ import { RatingComponent } from './rating.component';
 })
 export class ItemComponent implements OnInit{
   phone_id: string|null = null;
-  addCartClicked: boolean = false;
   selectedPhone$ = inject(PhoneService).selected$;
   // Get the phone brand.
   phoneBrand$ = computed(() => this.selectedPhone$()?.brand);
   currentQuantity: number = 0;
+  addedToCart: boolean = false;
 
   displayCount = 3;
   showAll: boolean = false;
@@ -235,7 +250,8 @@ export class ItemComponent implements OnInit{
     private phoneService: PhoneService,
     private userService: UserService,
     private router: Router,
-    private wishlistService: WishlistService
+    private wishlistService: WishlistService,
+    private cartService: CartService
   ){}
 
   ngOnInit(): void {
@@ -253,22 +269,25 @@ export class ItemComponent implements OnInit{
   }
 
   addToCart(){
-    this.addCartClicked = true;
+    if(!this.userService.user$()){
+      this.goLogin();
+    }
+    if(!this.addedToCart){
+      this.addedToCart = !this.addedToCart;
+      return;
+    }
+    this.cartService.addToCart(this.phoneService.selected$() as Phone, this.purchaseForm.value.quantity!);
   }
 
   addToWishList(){
+    console.log("Adding to wish list.");
     // If not logged in.
     if(!this.userService.user$()){
+      console.log("No user logged in");
       this.goLogin();
       return;
     }
-    this.wishlistService.addToWishlist(this.userService.user$()?._id!, this.selectedPhone$()?._id!)
-    .subscribe(wishList =>{
-      if(!wishList){
-        return console.error("Add to wish list failed");
-      }
-      console.log("Added to wish list:", wishList);
-    })
+    this.wishlistService.addToWishlist(this.userService.user$()?._id!, this.selectedPhone$()?._id!);
   }
 
   // TODO Add function here

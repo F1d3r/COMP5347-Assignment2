@@ -72,13 +72,16 @@ PhoneSchema.statics.getPhone = async function(_id){
                 seller: { $first: "$seller" },
                 price: { $first: "$price" },
                 reviews: { $push: "$reviews" },
-                disabled: { $first: "disabled"}
+                disabled: { $first: "$disabled"}
             }
         },
 
         // Calculate the average rating for each phone
         { 
             $addFields: {
+                reviews: {
+                    $cond: { if: { $eq: ["$reviews", [{}]] }, then: [], else: "$reviews" }
+                },
                 avgRating: { $round: [{ $avg: "$reviews.rating" }, 2] }
             }
         },
@@ -86,10 +89,6 @@ PhoneSchema.statics.getPhone = async function(_id){
     ])
     return phone[0];
 }
-
-
-
-
 
 
 // Find the 5 phons with highest rating.
@@ -105,6 +104,15 @@ PhoneSchema.statics.getBestSeller = async function(){
             $expr: { $gte: [{ $size: "$reviews" }, 2]}
         }
     },
+    // Got the complete info to review.
+    {
+            $lookup: {
+                from: "review",
+                localField: "reviews",
+                foreignField: "_id",
+                as: "reviews"
+            }
+        },
     // Calculate the average rating for each phone
     { 
         $addFields: {
@@ -116,6 +124,7 @@ PhoneSchema.statics.getBestSeller = async function(){
     // Return only the top result
     { $limit: 5 }
     ]);
+
     return topPhones;
 }
 

@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Phone } from '../shop/phone.service';
+import { Phone } from '../phone';
 import { Observable } from 'rxjs';
 
 export interface CartItem {
   phone: Phone;
   quantity: number;
+  max_quantity: number;
 }
 
 @Injectable({
@@ -28,12 +29,8 @@ export class CartService {
     this.items = stored ? JSON.parse(stored) : {};
   }
 
-  addToCart(phone: Phone): void {
-    if (this.items[phone._id]) {
-      this.items[phone._id].quantity += 1;
-    } else {
-      this.items[phone._id] = { phone, quantity: 1 };
-    }
+  addToCart(phone: Phone, quantity: number): void {
+    this.items[phone._id] = { phone, quantity: quantity, max_quantity: quantity};
     console.log(`✅ Added to cart: ${phone.title}`);
     this.saveToStorage();
   }
@@ -52,6 +49,9 @@ export class CartService {
 
   increaseQuantity(phoneId: string): void {
     if (this.items[phoneId]) {
+      if(this.items[phoneId].quantity == this.items[phoneId].max_quantity){
+        return;
+      }
       this.items[phoneId].quantity += 1;
       this.saveToStorage();
     }
@@ -77,9 +77,8 @@ export class CartService {
     this.items = {};
   }
 
-  createOrder(): Observable<any> {
+  createOrder(userId: string): Observable<any> {
     const cartArray = Object.values(this.items);
-    const userId = 'demo-user-id';
   
     const orderPayload = {
       userId,

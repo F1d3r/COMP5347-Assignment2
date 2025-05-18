@@ -16,7 +16,7 @@ module.exports.getAllPhones = async function(req, res) {
 // Find one phone by its id.
 module.exports.getPhone = async function(req, res){
 	phone_id = req.params._id;
-	console.log("Got id:",phone_id);
+	// console.log("Got id:",phone_id);
 	Phone.getPhone(phone_id)
 		.then(result => {
 			if(!result){

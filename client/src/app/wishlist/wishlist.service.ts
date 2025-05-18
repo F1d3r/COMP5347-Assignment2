@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Phone } from '../shop/phone.service';
+import { Phone } from '../phone';
 
 export interface WishlistItem {
   userId: string;
@@ -17,8 +17,14 @@ export class WishlistService {
   constructor(private http: HttpClient) {}
 
   // Add
-  addToWishlist(userId: string, productId: string): Observable<any> {
-    return this.http.post(this.apiUrl, { userId, productId });
+  addToWishlist(userId: string, productId: string) {
+    console.log("Adding the wish list record to server.");
+    this.http.post(this.apiUrl, { userId, productId }).subscribe({
+      next: response => console.log("Wish list added:",response),
+      error: err => {
+        alert("Item has been added to your wish list.");
+      }
+    })
   }
 
   // Get
