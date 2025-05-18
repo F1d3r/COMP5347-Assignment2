@@ -51,7 +51,7 @@ export class CartComponent implements OnInit {
   
   
   goBack(): void {
-    this.router.navigate(['/shop']);
+    window.history.back();
   }
   
 }

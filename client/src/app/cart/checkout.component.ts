@@ -47,7 +47,7 @@ export class CheckoutComponent implements OnInit {
       next: () => {
         alert('✅ Order placed successfully!');
         this.cartService.clearCart();
-        this.router.navigate(['/shop']);
+        this.router.navigate(['/']);
       },
       error: () => {
         alert('❌ Failed to place order. Please try again.');
@@ -56,6 +56,6 @@ export class CheckoutComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/shop']);
+    window.history.back();
   }
 }

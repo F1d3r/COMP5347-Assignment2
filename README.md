@@ -78,17 +78,24 @@ oldphonedeals/
    # Server Configuration
    PORT=3000
    NODE_ENV=development
-   
+
    # MongoDB Configuration
-   MONGODB_URI=mongodb://localhost:27017/oldphonedeals
-   
+   MONGODB_URI=mongodb://localhost:27017/OldPhoneDeals
+   DEFAULT_PASSWORD=Password123!
+   SALT_ROUNDS=10
+
+   # Session Configuration
+   SESSION_SECRET=TOP-SECRET
+
    # JWT Configuration
-   JWT_SECRET=your_jwt_secret_key
-   
+   JWT_SECRET=JWT_SECRET
+
    # Email Configuration
    EMAIL_SERVICE=gmail
-   EMAIL_USER=your_email@gmail.com
-   EMAIL_PASSWORD=your_email_app_password
+   EMAIL_HOST=smtp.gmail.com
+   EMAIL_PORT=465
+   EMAIL_USER=tut07g04.comp5347@gmail.com
+   EMAIL_PASSWORD=ahxsrummwfkabydg
    ```
 
 4. **Initialize the database**
