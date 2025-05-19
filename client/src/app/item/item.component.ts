@@ -481,6 +481,7 @@ import { PhoneListing } from '../phonelisting';
                     [max]="selectedPhoneListing$()?.stock!" 
                     step="1" 
                     placeholder="Quantity"
+                    (keydown)="blockInput($event)"
                   >
                   <button type="button" class="btn-cart" (click)="addToCart(null)">
                     <mat-icon>check</mat-icon> Confirm
@@ -802,4 +803,8 @@ export class ItemComponent implements OnInit{
     this.router.navigate(['login']);
   }
 
+  // Block the keyboard input.
+  blockInput(event: KeyboardEvent) {
+    event.preventDefault();
+  }
 }
