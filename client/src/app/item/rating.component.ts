@@ -8,9 +8,12 @@ import { MatIcon } from '@angular/material/icon';
   imports: [MatIcon, CommonModule],
   template: `
     <div class="rating">
-      <mat-icon *ngFor="let star of stars; let i = index"
-                (click)="setRating(i + 1)"
-                [ngClass]="{'filled': i < rating}">
+      <mat-icon 
+        *ngFor="let star of stars; let i = index"
+        (click)="setRating(i + 1)"
+        [ngClass]="{'filled': i < rating, 'hovered': i < hoveredRating}"
+        (mouseenter)="hoveredRating = i + 1"
+        (mouseleave)="hoveredRating = 0">
         star
       </mat-icon>
     </div>
@@ -20,13 +23,22 @@ import { MatIcon } from '@angular/material/icon';
       display: flex;
       gap: 5px;
       cursor: pointer;
+      align-items: center;
     }
+    
     mat-icon {
       font-size: 24px;
-      color: gray;
+      color: #bdc3c7;
+      transition: all 0.2s ease;
     }
+    
     .filled {
       color: gold;
+    }
+    
+    .hovered:not(.filled) {
+      color: #f1c40f;
+      transform: scale(1.1);
     }
   `],
   providers: [
@@ -41,6 +53,7 @@ import { MatIcon } from '@angular/material/icon';
 export class RatingComponent implements ControlValueAccessor {
   @Input() rating = 0;
   stars = Array(5).fill(0);
+  hoveredRating = 0;
 
   private onChange = (rating: number) => {};
   private onTouched = () => {};

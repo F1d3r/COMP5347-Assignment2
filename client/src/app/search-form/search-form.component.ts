@@ -7,6 +7,7 @@ from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 
 import { PhoneListingService } from '../phonelisting.service';
 import { UserService } from '../user.service';
@@ -14,24 +15,65 @@ import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-search-form',
-  imports: [ReactiveFormsModule, MatSelectModule, CommonModule],
+  imports: [ReactiveFormsModule, MatSelectModule, CommonModule, MatIconModule],
 
   styles: `
-    form{
+    form {
       display: flex;
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      gap:10px;
+      gap: 12px;
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0.75rem;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .search-input {
+      flex: 1;
+      position: relative;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 0.75rem;
+      padding-left: 2.5rem;
+      border: 1px solid #e1e5e9;
+      border-radius: 4px;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+    
+    input[type="text"]:focus {
+      border-color: #3498db;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7f8c8d;
     }
 
-    #selectBrand{
+    #selectBrand {
       display: flex;
       flex-direction: row;
+      min-width: 150px;
     }
 
     mat-select {
       width: 150px;
+      background-color: #f5f7fa;
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #e1e5e9;
     }
 
     .mat-select-trigger {
@@ -44,26 +86,86 @@ import { UserService } from '../user.service';
       min-width: 150px !important;
       max-width: 150px !important;
     }
+    
+    button {
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      border: none;
+      background-color: #3498db;
+      color: white;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+      transform: translateY(-2px);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    button:disabled {
+      background-color: #bdc3c7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    @media (max-width: 768px) {
+      form {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+      }
+      
+      #selectBrand {
+        width: 100%;
+      }
+      
+      mat-select {
+        width: 100%;
+      }
+      
+      button {
+        width: 100%;
+      }
+      
+      .search-input {
+        width: 100%;
+      }
+    }
   `,
 
   template: `
     <form [formGroup]="searchForm" (ngSubmit)="searchPhoneListings()">
-      <div>
-        <input type="text" formControlName="keyword" name="keyword" placeholder="Search here"/>
+      <div class="search-input">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input 
+          type="text" 
+          formControlName="keyword" 
+          name="keyword" 
+          placeholder="Search phones by keyword..."
+        />
       </div>
 
       <div id='selectBrand' *ngIf="this.pageState() == 'search'">
-        <mat-select formControlName="brand" placeholder="Select Brand" panelClass="fixed-width-panel">
-            <mat-option *ngFor='let brand of phonelistingBrands' [value]="brand">
-              {{brand}}
-            </mat-option>
+        <mat-select 
+          formControlName="brand" 
+          placeholder="Select Brand" 
+          panelClass="fixed-width-panel"
+        >
+          <mat-option *ngFor='let brand of phonelistingBrands' [value]="brand">
+            {{brand}}
+          </mat-option>
         </mat-select>
       </div>
 
-      <div>
-        <button type="submit" [disabled]="!searchForm.valid">Search</button>
-      </div>
-
+      <button type="submit" [disabled]="!searchForm.valid">
+        <mat-icon>search</mat-icon> Search
+      </button>
     </form>
   `
 })
