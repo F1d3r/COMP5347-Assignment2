@@ -74,7 +74,6 @@ phoneListingSchema.statics.getPhone = async function(_id) {
     .populate('seller', '-password')
     .populate('reviews.reviewer', '-password')
     .lean();
-
   if (phone) {
     // Filter out reviews from hidden/disabled users and hidden reviews
     if (phone.reviews && phone.reviews.length > 0) {

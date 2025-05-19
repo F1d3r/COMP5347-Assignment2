@@ -388,7 +388,7 @@ import { PhoneListing } from '../phonelisting';
             <mat-icon>arrow_back</mat-icon> Back Home
           </button>
           <button class="btn-cart" [routerLink]="['/cart']">
-            <mat-icon>shopping_cart</mat-icon> Cart
+            <mat-icon>shopping_cart</mat-icon> Cart({{this.cartQuantity$()}})
           </button>
         </div>
         <mat-card-title>{{this.selectedPhoneListing$()?.brand}} Phone</mat-card-title>
@@ -501,8 +501,8 @@ import { PhoneListing } from '../phonelisting';
 
                   <!-- Additional Button to hide this review if the user is the reviewer/seller -->
                   <button class="hideReview" 
-                  *ngIf="(review.reviewer._id === this.currentUser$?._id
-                  || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id)" 
+                  *ngIf="(review.reviewer._id === this.currentUser$()?._id
+                  || this.currentUser$()?._id === this.selectedPhoneListing$()?.seller?._id)" 
                   (click)="hideReview(review._id)">
                     <label>Hide this review</label>
                   </button>
@@ -572,7 +572,8 @@ import { PhoneListing } from '../phonelisting';
 export class ItemComponent implements OnInit{
   phonelisting_id: string|null = null;
   selectedPhoneListing$ = inject(PhoneListingService).selected$;
-  currentUser$ = inject(UserService).user$();
+  currentUser$ = inject(UserService).user$;
+  cartQuantity$ = inject(CartService).allQuantity$;
   // Get the phonelisting brand.
   phonelistingBrand$ = computed(() => this.selectedPhoneListing$()?.brand);
   currentQuantity: number = 0;
@@ -594,7 +595,6 @@ export class ItemComponent implements OnInit{
     comment: new FormControl('', [Validators.required]),
     rating: new FormControl(5, [Validators.required]),
   });
-
 
   constructor(
     private route: ActivatedRoute,

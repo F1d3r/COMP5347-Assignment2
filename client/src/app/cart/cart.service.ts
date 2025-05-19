@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { PhoneListing } from '../phonelisting';
 import { Observable } from 'rxjs';
+import { signal } from '@angular/core';
 
 export interface CartItem {
   phonelisting: PhoneListing;
@@ -15,6 +16,8 @@ export interface CartItem {
 export class CartService {
   private items: { [id: string]: CartItem } = {};
   private storageKey = 'cartItems';
+
+  allQuantity$ = signal(0);
 
   constructor(private http: HttpClient) {
     this.loadFromStorage();
@@ -33,6 +36,8 @@ export class CartService {
     this.items[phonelisting._id] = { phonelisting, quantity: quantity, max_quantity: quantity};
     console.log(`✅ Added to cart: ${phonelisting.title}`);
     this.saveToStorage();
+
+    this.allQuantity$.set(this.getAllQuantity());
   }
 
   getItems(): CartItem[] {
@@ -44,6 +49,15 @@ export class CartService {
   getQuantity(phonelistingId: string): number {
     this.loadFromStorage();
     return this.items[phonelistingId]?.quantity || 0;
+  }
+
+  getAllQuantity(){
+    let allQuantity = 0;
+    const data = this.getItems();
+    data.forEach((cartItem) =>{
+      allQuantity += this.getQuantity(cartItem.phonelisting._id);
+    })
+    return allQuantity;
   }
   
 
