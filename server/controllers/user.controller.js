@@ -37,6 +37,10 @@ module.exports.authenticateLogin = async function(req, res){
 	if(!user){
 		return res.status(404).send("User does note exist");
 	}
+	if(user.disabled){
+		return res.status(409).send("User is disabled.");
+	}
+
 	console.log(password);
 	console.log(user.password);
 	// Check the password
