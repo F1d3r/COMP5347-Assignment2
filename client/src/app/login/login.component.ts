@@ -236,6 +236,8 @@ export class LoginComponent {
           alert("Password incorrect, please try again");
         }else if(error.status === 404){
           alert("User does not exist, please try again");
+        }else if(error.status === 409){
+          alert("The user is disabled.");
         }else{
           console.error("Unexpected error", error);
         }
