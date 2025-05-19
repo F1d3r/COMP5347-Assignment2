@@ -295,6 +295,10 @@ import { PhoneListing } from '../phonelisting';
       max-width: 100%;
       line-height: 1.5;
     }
+    
+    .hidden-comment {
+      color: var(--text-muted);
+    }
 
     /* Review Form */
     .review-form {
@@ -340,20 +344,47 @@ import { PhoneListing } from '../phonelisting';
     }
 
     button.showCompleteComment {
-      width: 150px;
+      min-width: 110px;
       height: 30px;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-shrink: 0;
+      background-color: var(--primary-light);
+      color: white;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      padding: 0 12px;
     }
 
     button.hideReview {
-      height: 30px;
+      height: 36px;
+      width: 36px;
       display: flex;
       justify-content: center;
       align-items: center;
       flex-shrink: 0;
+      background-color: var(--warning);
+      color: white;
+      margin-left: 10px;
+      border-radius: 50%;
+      min-width: 0;
+      padding: 0;
+    }
+
+    button.unhideReview {
+      height: 36px;
+      width: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+      background-color: var(--success);
+      color: white;
+      margin-left: 10px;
+      border-radius: 50%;
+      min-width: 0;
+      padding: 0;
     }
 
     /* Responsive Adjustments */
@@ -485,27 +516,42 @@ import { PhoneListing } from '../phonelisting';
               <ng-container matColumnDef="col-comment">
                 <th mat-header-cell *matHeaderCellDef>Comment</th>
                 <td class='comment' mat-cell *matCellDef="let review">
-                  <!-- Not expanded -->
-                  <span *ngIf="!review.expanded">
-                    {{review.comment?.length > 200 ? 
-                    review.comment.substring(0, 200) + '...' : review.comment}}
-                  </span>
-                  <!-- Expanded comment -->
-                  <span *ngIf="review.expanded">
-                    {{review.comment}}
-                  </span>
-                  <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
-                  (click)="review.expanded = !review.expanded">
-                    {{review.expanded ? 'Hide' : 'Show All'}}
-                  </button>
+                  <!-- Display hidden reviews as gray text for seller/reviewer, hide for everyone else -->
+                  <ng-container *ngIf="!review.hidden || (review.hidden && (review.reviewer._id === this.currentUser$?._id || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id))">
+                    <!-- Not expanded -->
+                    <span *ngIf="!review.expanded" [class.hidden-comment]="review.hidden">
+                      {{review.comment?.length > 200 ? 
+                      review.comment.substring(0, 200) + '...' : review.comment}}
+                    </span>
+                    <!-- Expanded comment -->
+                    <span *ngIf="review.expanded" [class.hidden-comment]="review.hidden">
+                      {{review.comment}}
+                    </span>
+                    <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
+                    (click)="review.expanded = !review.expanded">
+                      <mat-icon>{{review.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</mat-icon>
+                      {{review.expanded ? 'Hide' : 'Show All'}}
+                    </button>
 
-                  <!-- Additional Button to hide this review if the user is the reviewer/seller -->
-                  <button class="hideReview" 
-                  *ngIf="(review.reviewer._id === this.currentUser$?._id
-                  || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id)" 
-                  (click)="hideReview(review._id)">
-                    <label>Hide this review</label>
-                  </button>
+                    <!-- Button to hide or unhide this review if the user is the reviewer/seller -->
+                    <button class="hideReview" 
+                    *ngIf="(review.reviewer._id === this.currentUser$?._id
+                    || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id) && !review.hidden" 
+                    (click)="hideReview(review._id)">
+                      <mat-icon>visibility_off</mat-icon>
+                    </button>
+                    <button class="unhideReview" 
+                    *ngIf="(review.reviewer._id === this.currentUser$?._id
+                    || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id) && review.hidden" 
+                    (click)="unhideReview(review._id)">
+                      <mat-icon>visibility</mat-icon>
+                    </button>
+                  </ng-container>
+                  
+                  <!-- Message when review is hidden and current user can't see it -->
+                  <div *ngIf="review.hidden && !(review.reviewer._id === this.currentUser$?._id || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id)">
+                    <em>This review has been hidden</em>
+                  </div>
                 </td>
               </ng-container>
               
@@ -635,17 +681,26 @@ export class ItemComponent implements OnInit{
     console.log("Got quantity:",quantity, this.purchaseForm.value.quantity);
     if(!this.userService.user$()){
       this.goLogin();
+      return;
     }
     // Check stock.
     if(this.phonelistingService.selected$()?.stock == 0){
       return alert("Not enough stock.");
     }
 
-    if(quantity){
-      this.cartService.addToCart(this.phonelistingService.selected$() as PhoneListing, quantity);
-    }else{
-      this.cartService.addToCart(this.phonelistingService.selected$() as PhoneListing, this.purchaseForm.value.quantity!);
+    const actualQuantity = quantity !== null ? quantity : this.purchaseForm.value.quantity!;
+    
+    if (actualQuantity <= 0) {
+      return alert("Please select a valid quantity.");
     }
+    
+    this.cartService.addToCart(this.phonelistingService.selected$() as PhoneListing, actualQuantity);
+    
+    // Update the displayed quantity in the UI
+    this.currentQuantity = this.cartService.getQuantity(this.selectedPhoneListing$()?._id || '');
+    
+    // Hide the quantity input after adding to cart
+    this.addedToCart = false;
   }
 
   addToWishList(){
@@ -729,6 +784,9 @@ export class ItemComponent implements OnInit{
     this.phonelistingService.hideReview(review_id, this.phonelistingService.selected$()?._id!);
   }
 
+  unhideReview(review_id: string){
+    this.phonelistingService.unhideReview(review_id, this.phonelistingService.selected$()?._id!);
+  }
 
 
   goLogin(){

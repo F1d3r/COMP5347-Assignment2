@@ -89,7 +89,23 @@ export class PhoneListingService {
         console.error("The review does not exists.", err);
       }
     })
+  }
 
+  unhideReview(review_id: string, phone_id: string){
+    this.httpClient.post<{ status: number, message: string, data: PhoneListing}>(`${this.url}/phonelisting/unhideReview`, {review_id: review_id, phone_id:phone_id})
+    .subscribe({
+      next: (response) =>{
+        if(response.status === 200){
+          // Set the selected phone.
+          this.selected$.set(response.data);
+        }else{
+          console.error("Got:",response.status);
+        }
+      },
+      error: (err) => {
+        console.error("The review does not exists.", err);
+      }
+    })
   }
 
 

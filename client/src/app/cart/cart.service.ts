@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { PhoneListing } from '../phonelisting';
 import { Observable } from 'rxjs';
+import { NotificationService } from '../notification.service';
 
 export interface CartItem {
   phonelisting: PhoneListing;
@@ -16,7 +17,10 @@ export class CartService {
   private items: { [id: string]: CartItem } = {};
   private storageKey = 'cartItems';
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private notificationService: NotificationService
+  ) {
     this.loadFromStorage();
   }
 
@@ -32,7 +36,25 @@ export class CartService {
   addToCart(phonelisting: PhoneListing, quantity: number): void {
     this.items[phonelisting._id] = { phonelisting, quantity: quantity, max_quantity: quantity};
     console.log(`✅ Added to cart: ${phonelisting.title}`);
+    
+    // Add notification for item added to cart
+    let notifications: any[] = [];
+    this.notificationService.notifications$.subscribe(currentNotifications => {
+      notifications = currentNotifications;
+    }).unsubscribe();
+    
+    const newNotification = {
+      _id: new Date().getTime().toString(),
+      type: 'ADMIN_ALERT' as 'ORDER_PLACED' | 'ORDER_DELIVERED' | 'ADMIN_ALERT',
+      content: `Added ${quantity} × ${phonelisting.title} to your cart`,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+      relatedItem: phonelisting._id
+    };
+    this.notificationService.updateNotifications([newNotification, ...notifications]);
+    
     this.saveToStorage();
+    return;
   }
 
   getItems(): CartItem[] {
