@@ -105,7 +105,7 @@ module.exports.searchResult = async function(req,res){
 
 
 module.exports.addReview = async function(req, res){
-	phone_id = req.body.phone_id;
+	phone_id = req.body.phonelisting_id;
 	reviewer = req.body.reviewer;
 	comment = req.body.comment;
 	rating = req.body.rating;
@@ -130,6 +130,7 @@ module.exports.addReview = async function(req, res){
 		},
 		{ new: true, useFindAndModify: false }
 	).then(phone => {
+		console.log(phone);
 		res.status(200).send(phone);
 	}).catch(error => {
 		console.log("Failed to add review to phone", error);

@@ -645,6 +645,7 @@ export class ItemComponent implements OnInit{
     console.log("A review adding:", this.reviewForm.value.comment, this.reviewForm.value.rating);
     this.phonelistingService.addReview(this.userService.user$()?._id!, this.reviewForm.value.comment!, this.reviewForm.value.rating!)
     .subscribe(phonelisting => {
+      console.log(phonelisting);
       this.phonelistingService.getPhoneListing(phonelisting._id);
       // Reset form after adding review success.
       this.reviewForm.reset();
