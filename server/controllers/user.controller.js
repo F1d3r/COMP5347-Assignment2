@@ -85,7 +85,7 @@ module.exports.createUser = async function(req, res){
 		try{
 			// Create a verify token.
 			const verifyToken = crypto.randomBytes(32).toString('hex');
-			const verificationLink = `http://localhost:3000/verify/${verifyToken}`;
+			const verificationLink = `http://localhost:3000/user/verify/${verifyToken}`;
 			// Create user.
 			const newUser = await User.createUser(email, firstname, lastname, hashedPassword, verifyToken);
 

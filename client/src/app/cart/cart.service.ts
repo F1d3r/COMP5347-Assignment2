@@ -2,7 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { PhoneListing } from '../phonelisting';
 import { Observable } from 'rxjs';
+
+import { signal } from '@angular/core';
+
 import { NotificationService } from '../notification.service';
+
 
 export interface CartItem {
   phonelisting: PhoneListing;
@@ -16,6 +20,8 @@ export interface CartItem {
 export class CartService {
   private items: { [id: string]: CartItem } = {};
   private storageKey = 'cartItems';
+
+  allQuantity$ = signal(0);
 
   constructor(
     private http: HttpClient,
@@ -54,6 +60,7 @@ export class CartService {
     this.notificationService.updateNotifications([newNotification, ...notifications]);
     
     this.saveToStorage();
+    this.allQuantity$.set(this.getAllQuantity());
     return;
   }
 
@@ -66,6 +73,15 @@ export class CartService {
   getQuantity(phonelistingId: string): number {
     this.loadFromStorage();
     return this.items[phonelistingId]?.quantity || 0;
+  }
+
+  getAllQuantity(){
+    let allQuantity = 0;
+    const data = this.getItems();
+    data.forEach((cartItem) =>{
+      allQuantity += this.getQuantity(cartItem.phonelisting._id);
+    })
+    return allQuantity;
   }
   
 

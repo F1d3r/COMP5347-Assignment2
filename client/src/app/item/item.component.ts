@@ -419,7 +419,7 @@ import { PhoneListing } from '../phonelisting';
             <mat-icon>arrow_back</mat-icon> Back Home
           </button>
           <button class="btn-cart" [routerLink]="['/cart']">
-            <mat-icon>shopping_cart</mat-icon> Cart
+            <mat-icon>shopping_cart</mat-icon> Cart({{this.cartQuantity$()}})
           </button>
         </div>
         <mat-card-title>{{this.selectedPhoneListing$()?.brand}} Phone</mat-card-title>
@@ -517,7 +517,7 @@ import { PhoneListing } from '../phonelisting';
                 <th mat-header-cell *matHeaderCellDef>Comment</th>
                 <td class='comment' mat-cell *matCellDef="let review">
                   <!-- Display hidden reviews as gray text for seller/reviewer, hide for everyone else -->
-                  <ng-container *ngIf="!review.hidden || (review.hidden && (review.reviewer._id === this.currentUser$?._id || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id))">
+                  <ng-container *ngIf="!review.hidden || (review.hidden && (review.reviewer._id === this.currentUser$()?._id || this.currentUser$()?._id === this.selectedPhoneListing$()?.seller?._id))">
                     <!-- Not expanded -->
                     <span *ngIf="!review.expanded" [class.hidden-comment]="review.hidden">
                       {{review.comment?.length > 200 ? 
@@ -533,25 +533,34 @@ import { PhoneListing } from '../phonelisting';
                       {{review.expanded ? 'Hide' : 'Show All'}}
                     </button>
 
+                    <!-- Additional Button to hide this review if the user is the reviewer/seller -->
+                    <button class="hideReview" 
+                      *ngIf="(review.reviewer._id === this.currentUser$()?._id
+                      || this.currentUser$()?._id === this.selectedPhoneListing$()?.seller?._id)" 
+                      (click)="hideReview(review._id)">
+                      <label>Hide this review</label>
+                    </button>
+                  
                     <!-- Button to hide or unhide this review if the user is the reviewer/seller -->
                     <button class="hideReview" 
-                    *ngIf="(review.reviewer._id === this.currentUser$?._id
-                    || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id) && !review.hidden" 
+                    *ngIf="(review.reviewer._id === this.currentUser$()?._id
+                    || this.currentUser$()?._id === this.selectedPhoneListing$()?.seller?._id) && !review.hidden" 
                     (click)="hideReview(review._id)">
                       <mat-icon>visibility_off</mat-icon>
                     </button>
                     <button class="unhideReview" 
-                    *ngIf="(review.reviewer._id === this.currentUser$?._id
-                    || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id) && review.hidden" 
+                    *ngIf="(review.reviewer._id === this.currentUser$()?._id
+                    || this.currentUser$()?._id === this.selectedPhoneListing$()?.seller?._id) && review.hidden" 
                     (click)="unhideReview(review._id)">
                       <mat-icon>visibility</mat-icon>
                     </button>
                   </ng-container>
                   
                   <!-- Message when review is hidden and current user can't see it -->
-                  <div *ngIf="review.hidden && !(review.reviewer._id === this.currentUser$?._id || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id)">
+                  <div *ngIf="review.hidden && !(review.reviewer._id === this.currentUser$()?._id || this.currentUser$()?._id === this.selectedPhoneListing$()?.seller?._id)">
                     <em>This review has been hidden</em>
                   </div>
+
                 </td>
               </ng-container>
               
@@ -618,7 +627,8 @@ import { PhoneListing } from '../phonelisting';
 export class ItemComponent implements OnInit{
   phonelisting_id: string|null = null;
   selectedPhoneListing$ = inject(PhoneListingService).selected$;
-  currentUser$ = inject(UserService).user$();
+  currentUser$ = inject(UserService).user$;
+  cartQuantity$ = inject(CartService).allQuantity$;
   // Get the phonelisting brand.
   phonelistingBrand$ = computed(() => this.selectedPhoneListing$()?.brand);
   currentQuantity: number = 0;
@@ -640,7 +650,6 @@ export class ItemComponent implements OnInit{
     comment: new FormControl('', [Validators.required]),
     rating: new FormControl(5, [Validators.required]),
   });
-
 
   constructor(
     private route: ActivatedRoute,

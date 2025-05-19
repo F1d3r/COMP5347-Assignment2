@@ -24,7 +24,7 @@
           </button>
           <button class="btn" [routerLink]="['/cart']">
             <i class="material-icons">shopping_cart</i>
-            Cart
+            Cart({{this.cartQuantity$()}})
           </button>
           <span class="user-greeting">Hello, {{ user$()?.lastname }}</span>
           <button class="btn btn-secondary" id='profileBtn' [routerLink]="['profile']">
