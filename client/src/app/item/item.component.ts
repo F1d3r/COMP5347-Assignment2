@@ -532,14 +532,6 @@ import { PhoneListing } from '../phonelisting';
                       <mat-icon>{{review.expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</mat-icon>
                       {{review.expanded ? 'Hide' : 'Show All'}}
                     </button>
-
-                    <!-- Additional Button to hide this review if the user is the reviewer/seller -->
-                    <button class="hideReview" 
-                      *ngIf="(review.reviewer._id === this.currentUser$()?._id
-                      || this.currentUser$()?._id === this.selectedPhoneListing$()?.seller?._id)" 
-                      (click)="hideReview(review._id)">
-                      <label>Hide this review</label>
-                    </button>
                   
                     <!-- Button to hide or unhide this review if the user is the reviewer/seller -->
                     <button class="hideReview" 
