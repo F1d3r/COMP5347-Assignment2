@@ -7,18 +7,10 @@ import { FormsModule } from '@angular/forms';
 import { Injectable } from '@angular/core';
 
 import { UserService } from './../user.service';
-import { PhoneListComponent } from "../phone-list/phone-list.component";
+import { PhoneListingListComponent } from "../phonelisting-list/phonelisting-list.component";
 import { SearchFormComponent } from '../search-form/search-form.component';
 
-interface Phone {
-  _id: string;
-  title: string;
-  brand: string;
-  image: string;
-  price: number;
-  stock: number;
-  rating: number;
-}
+import { PhoneListing } from '../phonelisting';
 
 @Component({
   selector: 'app-homepage',
@@ -29,7 +21,7 @@ interface Phone {
     MatToolbarModule, 
     MatIconModule,
     FormsModule,
-    PhoneListComponent, 
+    PhoneListingListComponent, 
     SearchFormComponent
   ],
   styleUrls: ['./homepage.component.css'],
@@ -39,7 +31,7 @@ interface Phone {
   providedIn: 'root'
 })
 export class HomepageComponent implements OnInit {
-  title = 'OldPhoneDeals';
+  title = 'OldPhoneListingDeals';
   user$ = inject(UserService).user$;
   pageState$ = inject(UserService).homeState$;
   searchQuery: string = '';

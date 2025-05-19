@@ -1,7 +1,7 @@
 import { CartService } from './../cart/cart.service';
 import { WishlistService } from './../wishlist/wishlist.service';
 import { UserService } from './../user.service';
-import { PhoneService } from './../phone.service';
+import { PhoneListingService } from './../phonelisting.service';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule, Router } from '@angular/router';
@@ -16,7 +16,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { RatingComponent } from './rating.component';
 
-import { Phone } from '../phone';
+import { PhoneListing } from '../phonelisting';
 
 
 @Component({
@@ -80,35 +80,35 @@ import { Phone } from '../phone';
             <button (click)='goBackHome()'>Back Home</button>
             <button [routerLink]="['/cart']">Cart</button>
           </div>
-          <mat-card-title>{{this.selectedPhone$()?.brand}} Phone</mat-card-title>
+          <mat-card-title>{{this.selectedPhoneListing$()?.brand}} Phone</mat-card-title>
         </mat-card-header>
 
         <mat-card-content>
           <div class='flex-row'>
             <!-- Item image -->
-            <img matCardImage [src]='getBrandImages(phoneBrand$())'>
+            <img matCardImage [src]='getBrandImages(phonelistingBrand$())'>
             <div class='flex-col'>
               <!-- Title -->
-              <label>\${{selectedPhone$()?.title}}</label>
-              <label>Seller: {{selectedPhone$()?.seller?.firstname}} {{selectedPhone$()?.seller?.lastname}}</label>
+              <label>\${{selectedPhoneListing$()?.title}}</label>
+              <label>Seller: {{selectedPhoneListing$()?.seller?.firstname}} {{selectedPhoneListing$()?.seller?.lastname}}</label>
 
               <div class='flex-row'>
                 <!-- Product details -->
                 <div class='flex-col'>
                   <!-- Price -->
-                  <label>\${{selectedPhone$()?.price}}</label>
+                  <label>\${{selectedPhoneListing$()?.price}}</label>
                   <!-- Stock -->
-                  <label>{{this.selectedPhone$()?.stock}} left in stock</label>
+                  <label>{{this.selectedPhoneListing$()?.stock}} left in stock</label>
                   
                   <div>
                     <!-- Rating Stars -->
-                    <span *ngFor="let star of getStars(selectedPhone$()?.avgRating)">
+                    <span *ngFor="let star of getStars(selectedPhoneListing$()?.avgRating)">
                       <mat-icon class='star-icon' [ngStyle]="{'clip-path': 'inset(0 ' + (100 - star * 100) + '% 0 0)'}">star</mat-icon>
                     </span>
                     <!-- Rating -->
-                    <Label>{{selectedPhone$()?.avgRating}}</Label>
+                    <Label>{{selectedPhoneListing$()?.avgRating}}</Label>
                     <!-- Number of reviews -->
-                    <label>({{this.selectedPhone$()?.reviews?.length}})</label>
+                    <label>({{this.selectedPhoneListing$()?.reviews?.length}})</label>
                   </div>
                 </div>
 
@@ -123,7 +123,7 @@ import { Phone } from '../phone';
                   <div class="flex-col" *ngIf="addedToCart">
                     <input formControlName="quantity" name="quantity" 
                     type="number" id="quantity" min="0" 
-                    [max]="selectedPhone$()?.stock!" step="1" placeholder="Quantity">
+                    [max]="selectedPhoneListing$()?.stock!" step="1" placeholder="Quantity">
                     <button type="button" (click)="addToCart()">Confirm</button>
                   </div>
 
@@ -135,9 +135,9 @@ import { Phone } from '../phone';
             </div>
           </div>
 
-          <div *ngIf="selectedPhone$()?.reviews?.length != 0">
+          <div *ngIf="selectedPhoneListing$()?.reviews?.length != 0">
             <!-- Comment table -->
-            <table mat-table [dataSource]="(selectedPhone$()?.reviews || []).slice(0, displayCount)">
+            <table mat-table [dataSource]="(selectedPhoneListing$()?.reviews || []).slice(0, displayCount)">
               <!-- Rating -->
               <ng-container matColumnDef="col-rating">
                 <th mat-header-cell *matHeaderCellDef>Rating</th>
@@ -178,7 +178,7 @@ import { Phone } from '../phone';
               </ng-container>
               <!-- Add header and row definitions -->
               <tr mat-header-row *matHeaderRowDef="displayColumn">
-                <!-- *ngFor="let review of selectedPhone$()?.reviews | slice:0:initNumReview" -->
+                <!-- *ngFor="let review of selectedPhoneListing$()?.reviews | slice:0:initNumReview" -->
               </tr>
               <tr mat-row *matRowDef="let row; columns: displayColumn;"></tr>
             </table>
@@ -186,7 +186,7 @@ import { Phone } from '../phone';
             <!-- Button to show all -->
             <button mat-button (click)="showAllReviews()">
               <span *ngIf="!showAll">
-                Show All {{selectedPhone$()?.reviews?.length}} reviews
+                Show All {{selectedPhoneListing$()?.reviews?.length}} reviews
               </span>
               <span *ngIf="showAll">
                 Collapse Reviews
@@ -220,10 +220,10 @@ import { Phone } from '../phone';
   `
 })
 export class ItemComponent implements OnInit{
-  phone_id: string|null = null;
-  selectedPhone$ = inject(PhoneService).selected$;
-  // Get the phone brand.
-  phoneBrand$ = computed(() => this.selectedPhone$()?.brand);
+  phonelisting_id: string|null = null;
+  selectedPhoneListing$ = inject(PhoneListingService).selected$;
+  // Get the phonelisting brand.
+  phonelistingBrand$ = computed(() => this.selectedPhoneListing$()?.brand);
   currentQuantity: number = 0;
   addedToCart: boolean = false;
 
@@ -247,7 +247,7 @@ export class ItemComponent implements OnInit{
 
   constructor(
     private route: ActivatedRoute,
-    private phoneService: PhoneService,
+    private phonelistingService: PhoneListingService,
     private userService: UserService,
     private router: Router,
     private wishlistService: WishlistService,
@@ -255,9 +255,9 @@ export class ItemComponent implements OnInit{
   ){}
 
   ngOnInit(): void {
-    this.phone_id = this.route.snapshot.paramMap.get('id');
-    // Update the selected phone.
-    this.phoneService.getPhone(this.phone_id);
+    this.phonelisting_id = this.route.snapshot.paramMap.get('id');
+    // Update the selected phonelisting.
+    this.phonelistingService.getPhoneListing(this.phonelisting_id);
   }
 
   // Get the image path for the brand.
@@ -265,7 +265,7 @@ export class ItemComponent implements OnInit{
     if(!brand){
       return null;
     }
-    return this.phoneService.brandImageMap[brand];
+    return this.phonelistingService.brandImageMap[brand];
   }
 
   addToCart(){
@@ -276,7 +276,7 @@ export class ItemComponent implements OnInit{
       this.addedToCart = !this.addedToCart;
       return;
     }
-    this.cartService.addToCart(this.phoneService.selected$() as Phone, this.purchaseForm.value.quantity!);
+    this.cartService.addToCart(this.phonelistingService.selected$() as PhoneListing, this.purchaseForm.value.quantity!);
   }
 
   addToWishList(){
@@ -287,7 +287,7 @@ export class ItemComponent implements OnInit{
       this.goLogin();
       return;
     }
-    this.wishlistService.addToWishlist(this.userService.user$()?._id!, this.selectedPhone$()?._id!);
+    this.wishlistService.addToWishlist(this.userService.user$()?._id!, this.selectedPhoneListing$()?._id!);
   }
 
   // TODO Add function here
@@ -323,7 +323,7 @@ export class ItemComponent implements OnInit{
     if(this.showAll){
       this.displayCount = 3;
     }else{
-      this.displayCount = this.selectedPhone$()?.reviews?.length || 3;
+      this.displayCount = this.selectedPhoneListing$()?.reviews?.length || 3;
 
     }
     this.showAll = !this.showAll
@@ -336,9 +336,9 @@ export class ItemComponent implements OnInit{
       return alert("You can only leave a review after login.");
     }
     console.log("A review adding:", this.reviewForm.value.comment, this.reviewForm.value.rating);
-    this.phoneService.addReview(this.userService.user$()?._id!, this.reviewForm.value.comment!, this.reviewForm.value.rating!)
-    .subscribe(phone => {
-      this.phoneService.getPhone(phone._id);
+    this.phonelistingService.addReview(this.userService.user$()?._id!, this.reviewForm.value.comment!, this.reviewForm.value.rating!)
+    .subscribe(phonelisting => {
+      this.phonelistingService.getPhoneListing(phonelisting._id);
       // Reset form after adding review success.
       this.reviewForm.reset();
     })

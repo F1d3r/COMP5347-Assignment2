@@ -20,7 +20,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 // Create Express server
 const app = express();
 // Import database operations.
-const db = require('./models/db');
+// const db = require('./models/db');
 
 // Set view engine.
 app.set('view engine', 'ejs');
@@ -66,7 +66,7 @@ app.use('/assets', express.static(path.join(__dirname, '../client/src/assets')))
 
 // Import routes
 const userRouter = require('./routes/user.routes');
-const phoneRouter = require('./routes/phone.routes');
+const phonelistingRouter = require('./routes/phonelisting.routes');
 const adminRoutes = require('./routes/admin.routes');
 const reviewRoutes = require('./routes/review.routes');
 const notificationRoutes = require('./routes/notifications.routes');
@@ -80,7 +80,7 @@ app.get('/api/test', (req, res) => {
 
 // API routes
 app.use('/user', userRouter);
-app.use('/phone', phoneRouter);
+app.use('/phonelisting', phonelistingRouter);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/notifications', notificationRoutes);

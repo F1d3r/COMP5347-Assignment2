@@ -1,10 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Phone } from '../phone';
+import { PhoneListing } from '../phonelisting';
 import { Observable } from 'rxjs';
 
 export interface CartItem {
-  phone: Phone;
+  phonelisting: PhoneListing;
   quantity: number;
   max_quantity: number;
 }
@@ -29,9 +29,9 @@ export class CartService {
     this.items = stored ? JSON.parse(stored) : {};
   }
 
-  addToCart(phone: Phone, quantity: number): void {
-    this.items[phone._id] = { phone, quantity: quantity, max_quantity: quantity};
-    console.log(`✅ Added to cart: ${phone.title}`);
+  addToCart(phonelisting: PhoneListing, quantity: number): void {
+    this.items[phonelisting._id] = { phonelisting, quantity: quantity, max_quantity: quantity};
+    console.log(`✅ Added to cart: ${phonelisting.title}`);
     this.saveToStorage();
   }
 
@@ -41,36 +41,36 @@ export class CartService {
     return Object.values(data);
   }
   
-  getQuantity(phoneId: string): number {
+  getQuantity(phonelistingId: string): number {
     this.loadFromStorage();
-    return this.items[phoneId]?.quantity || 0;
+    return this.items[phonelistingId]?.quantity || 0;
   }
   
 
-  increaseQuantity(phoneId: string): void {
-    if (this.items[phoneId]) {
-      if(this.items[phoneId].quantity == this.items[phoneId].max_quantity){
+  increaseQuantity(phonelistingId: string): void {
+    if (this.items[phonelistingId]) {
+      if(this.items[phonelistingId].quantity == this.items[phonelistingId].max_quantity){
         return;
       }
-      this.items[phoneId].quantity += 1;
+      this.items[phonelistingId].quantity += 1;
       this.saveToStorage();
     }
   }
 
-  decreaseQuantity(phoneId: string): void {
-    if (this.items[phoneId]) {
-      this.items[phoneId].quantity -= 1;
-      if (this.items[phoneId].quantity <= 0) {
-        delete this.items[phoneId];
+  decreaseQuantity(phonelistingId: string): void {
+    if (this.items[phonelistingId]) {
+      this.items[phonelistingId].quantity -= 1;
+      if (this.items[phonelistingId].quantity <= 0) {
+        delete this.items[phonelistingId];
       }
       this.saveToStorage();
     }
   }
 
-  removeFromCart(phoneId: string): void {
-    delete this.items[phoneId];
+  removeFromCart(phonelistingId: string): void {
+    delete this.items[phonelistingId];
     this.saveToStorage();
-    console.log('🗑️ Removed from cart:', phoneId);
+    console.log('🗑️ Removed from cart:', phonelistingId);
   }
 
   clearCart(): void {
@@ -84,10 +84,10 @@ export class CartService {
     const orderPayload = {
       userId,
       items: cartArray.map((item: CartItem) => ({
-        productId: item.phone._id,
+        productId: item.phonelisting._id,
         quantity: item.quantity
       })),
-      total: cartArray.reduce((sum, item) => sum + item.phone.price * item.quantity, 0)
+      total: cartArray.reduce((sum, item) => sum + item.phonelisting.price * item.quantity, 0)
     };
   
     return this.http.post('http://localhost:3000/api/orders', orderPayload);

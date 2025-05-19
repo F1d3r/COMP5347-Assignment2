@@ -15,7 +15,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 
 @Component({
-  selector: 'app-phone-list',
+  selector: 'app-phonelisting-list',
   imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule, CommonModule, MatSelectModule, MatSliderModule],
 
   styles: [
@@ -133,7 +133,7 @@ import { MatSliderModule } from '@angular/material/slider';
     </mat-card>
   `
 })
-export class PhoneListComponent implements OnInit { 
+export class PhoneListingListComponent implements OnInit { 
   @Input() phonelistingSource?: string;
 
   priceMin$ = signal(0);
@@ -222,13 +222,4 @@ export class PhoneListComponent implements OnInit {
 
     this.phonelistingList$.set(list);
   }
-
-  // // filter phones under max price
-  // onInputChange(startVal: string, endVal: string) {
-  //   console.log('Start:', startVal, 'End:', endVal);
-  //   this.currentMin = Number(startVal);
-  //   this.currentMax = Number(endVal);
-  // }
-  
-
 }

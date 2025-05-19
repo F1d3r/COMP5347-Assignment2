@@ -8,7 +8,7 @@ import { Router } from '@angular/router';
 
 import { MatSelectModule } from '@angular/material/select';
 
-import { PhoneService } from '../phone.service';
+import { PhoneListingService } from '../phonelisting.service';
 import { UserService } from '../user.service';
 
 
@@ -47,14 +47,14 @@ import { UserService } from '../user.service';
   `,
 
   template: `
-    <form [formGroup]="searchForm" (ngSubmit)="searchPhones()">
+    <form [formGroup]="searchForm" (ngSubmit)="searchPhoneListings()">
       <div>
         <input type="text" formControlName="keyword" name="keyword" placeholder="Search here"/>
       </div>
 
       <div id='selectBrand' *ngIf="this.pageState() == 'search'">
         <mat-select formControlName="brand" placeholder="Select Brand" panelClass="fixed-width-panel">
-            <mat-option *ngFor='let brand of phoneBrands' [value]="brand">
+            <mat-option *ngFor='let brand of phonelistingBrands' [value]="brand">
               {{brand}}
             </mat-option>
         </mat-select>
@@ -73,23 +73,23 @@ export class SearchFormComponent implements OnInit {
     brand: new FormControl('All'),
   });
   
-  phoneBrands:string[] = [];
+  phonelistingBrands:string[] = [];
   pageState = inject(UserService).homeState$;
 
 
   constructor(
-    private phoneService: PhoneService, 
+    private phonelistingService: PhoneListingService, 
     private router: Router, 
     private userService: UserService
   ){}
 
   ngOnInit(){
     // Get all brand info through the service.
-    this.phoneService.getAllBrand().subscribe(
+    this.phonelistingService.getAllBrand().subscribe(
       (data) => {
-        // this.phoneBrands = data;
-        // this.phoneBrands.push('All');
-        this.phoneBrands = ['All', ...data];
+        // this.phonelistingBrands = data;
+        // this.phonelistingBrands.push('All');
+        this.phonelistingBrands = ['All', ...data];
       },
       (error)=>{
         console.log(error);
@@ -103,7 +103,7 @@ export class SearchFormComponent implements OnInit {
   }
 
   // On submit of the form.
-  searchPhones(){
+  searchPhoneListings(){
     let keyword = this.searchForm.value.keyword ?? '';
     const brand = this.searchForm.value.brand ?? 'All';
 
@@ -114,18 +114,18 @@ export class SearchFormComponent implements OnInit {
     console.log("Got brand:", brand);
 
 
-    this.phoneService.getPhones(keyword, brand).subscribe(phones =>{
+    this.phonelistingService.getPhoneListings(keyword, brand).subscribe(phonelistings =>{
       this.userService.homeState$.set('search');
-      if(!phones || phones.length === 0){
+      if(!phonelistings || phonelistings.length === 0){
         // Not found result, set saerched result to empty.
         alert("No result found");
-        this.phoneService.searched$.set([]);
+        this.phonelistingService.searched$.set([]);
         // this.userService.homeState$.set('home');
       }else{
         // Result found.
         console.log("Found Result");
-        this.phoneService.searched$.set(phones);
-        console.log(phones);
+        this.phonelistingService.searched$.set(phonelistings);
+        console.log(phonelistings);
         this.router.navigate(['']);
         // Set the home state to search.
         this.userService.homeState$.set('search');

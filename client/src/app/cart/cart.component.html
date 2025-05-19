@@ -9,24 +9,24 @@
 
   <div *ngIf="cartItems.length > 0; else emptyCart">
     <div *ngFor="let item of cartItems" class="phone-card">
-      <img [src]="item.phone.image" alt="{{ item.phone.title }}" class="phone-image" />
+      <img [src]="getBrandImage(item.phonelisting.brand)" alt="{{ item.phonelisting.title }}" class="phone-image" />
       
       <div class="phone-details">
-        <h3>{{ item.phone.title }}</h3>
-        <p><strong>Brand:</strong> {{ item.phone.brand }}</p>
-        <p><strong>Price:</strong> ${{ item.phone.price }}</p>
+        <h3>{{ item.phonelisting.title }}</h3>
+        <p><strong>Brand:</strong> {{ item.phonelisting.brand }}</p>
+        <p><strong>Price:</strong> ${{ item.phonelisting.price }}</p>
         
         <div class="quantity-controls">
           <strong>Quantity:</strong>
-          <button class="quantity-btn" (click)="decrease(item.phone._id)">-</button>
+          <button class="quantity-btn" (click)="decrease(item.phonelisting._id)">-</button>
           <span class="quantity-value">{{ item.quantity }}</span>
-          <button class="quantity-btn" (click)="increase(item.phone._id)">+</button>
+          <button class="quantity-btn" (click)="increase(item.phonelisting._id)">+</button>
         </div>
       </div>
       
       <div class="cart-actions">
         <div class="item-total">Total: ${{ getTotalPrice(item) }}</div>
-        <button class="btn btn-remove" (click)="remove(item.phone._id)">Remove</button>
+        <button class="btn btn-remove" (click)="remove(item.phonelisting._id)">Remove</button>
       </div>
     </div>
 
