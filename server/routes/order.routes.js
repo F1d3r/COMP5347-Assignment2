@@ -31,9 +31,54 @@ router.post('/', async (req, res) => {
       await phoneListing.save();
     }
     
-    // Save order with userId
-    const order = new Order({ userId, items, total });
+    // Get phone title and other details if not provided
+    const transformedItems = [];
+    
+    for (const item of items) {
+      const phone = await PhoneListing.findById(item.productId);
+      transformedItems.push({
+        phoneId: item.productId,
+        title: phone ? phone.title : "Unknown Phone",
+        price: phone ? phone.price : 0,
+        quantity: item.quantity
+      });
+    }
+    
+    // Save order with userId and status
+    const order = new Order({ 
+      userId, 
+      items: transformedItems, 
+      totalAmount: total,
+      status: 'pending'
+    });
     await order.save();
+    
+    // Create notification for admins about the new order
+    try {
+      const User = require('../models/User');
+      const Notification = require('../models/Notification');
+      
+      const user = await User.findById(userId);
+      const userFullName = `${user.firstname} ${user.lastname}`;
+      
+      // Find all admin users
+      const admins = await User.find({ isAdmin: true });
+      
+      // Create notification for each admin
+      for (const admin of admins) {
+        await Notification.create({
+          user: admin._id,
+          type: 'ORDER_PLACED',
+          content: `New order placed by ${userFullName}. Total: $${total.toFixed(2)}`,
+          relatedItem: order._id,
+          itemModel: 'Order'
+        });
+      }
+    } catch (notificationError) {
+      console.error('Error creating admin notifications:', notificationError);
+      // Continue with order processing even if notification fails
+    }
+    
     res.status(201).json(order);
    
   } catch (err) {

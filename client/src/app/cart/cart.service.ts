@@ -85,12 +85,14 @@ export class CartService {
       userId,
       items: cartArray.map((item: CartItem) => ({
         productId: item.phonelisting._id,
+        title: item.phonelisting.title,
+        price: item.phonelisting.price,
         quantity: item.quantity
       })),
       total: cartArray.reduce((sum, item) => sum + item.phonelisting.price * item.quantity, 0)
     };
   
-    return this.http.post('http://localhost:3000/api/orders', orderPayload);
+    return this.http.post('/api/orders', orderPayload);
   }
   
   
