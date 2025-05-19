@@ -1,20 +1,21 @@
-<!-- Updated Homepage Component Template -->
-<header class="header">
-    <mat-toolbar class="toolbar">
+<div class="homepage-wrapper">
+  <!-- Header -->
+  <header class="header">
+    <div class="toolbar">
       <div class="brand" (click)="backHome()">
         <span class="brand-icon">
           <i class="material-icons">smartphone</i>
         </span>
         <span>OldPhoneListingDeals</span>
       </div>
-  
+
       <div class="nav-actions">
         <!-- Guest user navigation -->
         <ng-container *ngIf='!this.user$()'>
           <button class="btn btn-secondary" id='loginBtn' [routerLink]="['login']">Login</button>
           <button class="btn btn-signup" id='signupBtn' [routerLink]="['signup']">Sign Up</button>
         </ng-container>
-  
+
         <!-- Authenticated user navigation -->
         <ng-container *ngIf="this.user$()">
           <button class="btn btn-secondary" [routerLink]="['/wishlist']">
@@ -36,9 +37,10 @@
           </button>
         </ng-container>
       </div>
-    </mat-toolbar>
+    </div>
   </header>
-  
+
+  <!-- Main Content -->
   <main class="main-container">
     <!-- Back button for search state -->
     <button *ngIf="pageState$() === 'search'" class="btn btn-back" (click)="backHome()">
@@ -50,9 +52,9 @@
     <div class="search-container">
       <app-search-form></app-search-form>
     </div>
-  
+
     <!-- Home state content -->
-    <div *ngIf="pageState$() === 'home'">
+    <div *ngIf="pageState$() === 'home'" class="tab-content">
       <div class="phonelisting-lists-container">
         <!-- Best Seller Section -->
         <div class="section">
@@ -79,12 +81,15 @@
     </div>
     
     <!-- Search state content -->
-    <div *ngIf="pageState$() === 'search'" class="section">
-      <div class="section-header">
-        <h2 class="section-title">Search Results</h2>
-      </div>
-      <div class="section-content">
-        <app-phonelisting-list [phonelistingSource]="'search'"></app-phonelisting-list>
+    <div *ngIf="pageState$() === 'search'" class="tab-content">
+      <div class="section">
+        <div class="section-header">
+          <h2 class="section-title">Search Results</h2>
+        </div>
+        <div class="section-content">
+          <app-phonelisting-list [phonelistingSource]="'search'"></app-phonelisting-list>
+        </div>
       </div>
     </div>
   </main>
+</div>

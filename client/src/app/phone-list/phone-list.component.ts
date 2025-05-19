@@ -13,23 +13,54 @@ import { PhoneListing } from '../phonelisting';
 import { MatSelectModule } from '@angular/material/select';
 
 import { MatSliderModule } from '@angular/material/slider';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-phone-list',
-  imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule, CommonModule, MatSelectModule, MatSliderModule],
+  imports: [MatTableModule, MatCardModule, MatButtonModule, RouterModule, CommonModule, MatSelectModule, MatSliderModule, MatIconModule],
 
   styles: [
     `
-      table{
+      :host {
+        --primary-dark: #2c3e50;
+        --primary-light: #3498db;
+        --text-muted: #7f8c8d;
+        --border-light: #e1e5e9;
+      }
+      
+      table {
         width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
       }
 
-      img{
-        width: 150px;
-        height: auto;
+      img {
+        width: 100px;
+        height: 100px;
+        object-fit: contain;
+        margin: 0 auto;
+        display: block;
+      }
+      
+      th, td {
+        padding: 12px 16px;
+        text-align: left;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-light);
+      }
+      
+      th {
+        background-color: #f8f9fa;
+        color: var(--primary-dark);
+        font-weight: 600;
+      }
+      
+      tr:hover {
+        background-color: #f5f7fa;
+        cursor: pointer;
       }
 
-      #sort_slider{
+      #sort_slider {
         display: flex;
         justify-content: flex-end;
         align-items: center;
@@ -37,7 +68,63 @@ import { MatSliderModule } from '@angular/material/slider';
         height: 40px;
         font-size: 0.85rem;
       }
-
+      
+      .star-icon {
+        color: gold;
+      }
+      
+      .rating-display {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      
+      .seller-info {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .seller-name {
+        font-weight: 500;
+        color: var(--primary-dark);
+      }
+      
+      .seller-email {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+      }
+      
+      mat-card {
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      
+      mat-card-header {
+        background-color: var(--primary-dark);
+        color: white;
+        padding: 1rem;
+      }
+      
+      mat-card-title {
+        margin: 0 !important;
+        font-size: 1.25rem !important;
+      }
+      
+      mat-card-subtitle {
+        color: rgba(255, 255, 255, 0.8) !important;
+        margin: 0.5rem 0 0 0 !important;
+      }
+      
+      mat-card-content {
+        padding: 1rem;
+      }
+      
+      .price-display {
+        font-weight: 600;
+        color: var(--primary-dark);
+      }
     `,
   ],
 
@@ -60,8 +147,8 @@ import { MatSliderModule } from '@angular/material/slider';
             <div *ngIf="phonelistingSource === 'search'" id='sort_slider'>
               <mat-form-field>
                 <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
-                  <mat-option value="titleAsc">Title: A -> Z</mat-option>
-                  <mat-option value="titleDesc">Title: Z -> A</mat-option>
+                  <mat-option value="titleAsc">Title: A → Z</mat-option>
+                  <mat-option value="titleDesc">Title: Z → A</mat-option>
                   <mat-option value="priceAsc">Price: Low to High</mat-option>
                   <mat-option value="priceDesc">Price: High to Low</mat-option>
                   <mat-option value="stockAsc">Stock: Low to High</mat-option>
@@ -71,9 +158,6 @@ import { MatSliderModule } from '@angular/material/slider';
 
               <label>Price: </label>
               <mat-slider discrete min=0 [max]="maxPrice$()" step=1>
-                <!-- <input #startInput matSliderStartThumb (input)="onInputChange(startInput.value, endInput.value)" />
-                <input #endInput matSliderEndThumb (input)="onInputChange(startInput.value, endInput.value)" /> -->
-                
                 <input #startInput matSliderStartThumb [value]="priceMin$()" (input)="priceMin$.set($any($event.target).value || 0)" />
                 <input #endInput matSliderEndThumb [value]="priceMax$()" (input)="priceMax$.set($any($event.target).value || 100)" />
               </mat-slider>
@@ -100,7 +184,9 @@ import { MatSliderModule } from '@angular/material/slider';
               <!-- For price -->
               <ng-container matColumnDef="col-price">
                 <th mat-header-cell *matHeaderCellDef>Price</th>
-                <td mat-cell *matCellDef="let phonelisting">{{phonelisting.price}}</td>
+                <td mat-cell *matCellDef="let phonelisting">
+                  <div class="price-display">${{phonelisting.price.toFixed(2)}}</div>
+                </td>
               </ng-container>
               <!-- For stock -->
               <ng-container matColumnDef="col-stock">
@@ -111,18 +197,28 @@ import { MatSliderModule } from '@angular/material/slider';
               <ng-container matColumnDef="col-seller">
                 <th mat-header-cell *matHeaderCellDef>Seller</th>
                 <td mat-cell *matCellDef="let phonelisting">
-                  {{phonelisting.seller.firstname}} {{phonelisting.seller.lastname}}
+                  <div class="seller-info">
+                    <span class="seller-name">{{phonelisting.seller.firstname}} {{phonelisting.seller.lastname}}</span>
+                    <span class="seller-email">{{phonelisting.seller.email}}</span>
+                  </div>
                 </td>
               </ng-container>
               <!-- For review -->
               <ng-container matColumnDef="col-reviews">
                 <th mat-header-cell *matHeaderCellDef>Reviews</th>
-                <td mat-cell *matCellDef="let phonelisting">{{phonelisting.reviews}}</td>
+                <td mat-cell *matCellDef="let phonelisting">{{phonelisting.reviews?.length || 0}}</td>
               </ng-container>
               <!-- For rating -->
               <ng-container matColumnDef="col-rating">
                 <th mat-header-cell *matHeaderCellDef>Rating</th>
-                <td mat-cell *matCellDef="let phonelisting">{{phonelisting.avgRating}}</td>
+                <td mat-cell *matCellDef="let phonelisting">
+                  <div class="rating-display">
+                    <span *ngFor="let star of getStars(phonelisting.avgRating)">
+                      <mat-icon class='star-icon' [ngStyle]="{'clip-path': 'inset(0 ' + (100 - star * 100) + '% 0 0)'}">star</mat-icon>
+                    </span>
+                    <span>({{phonelisting.reviews?.length || 0}})</span>
+                  </div>
+                </td>
               </ng-container>
 
               <!-- Add header and row definitions -->
@@ -158,13 +254,17 @@ export class PhoneListComponent implements OnInit {
       this.phonelistingList$ = this.phonelistingService.bestSeller$;
       this.displayedColumns = [
         'col-image',
-        'col-rating'
+        'col-title',
+        'col-rating',
+        'col-price'
       ]
     }else if(this.phonelistingSource === 'soldOutSoon'){
       this.phonelistingService.getSoldOutSoon();
       this.phonelistingList$ = this.phonelistingService.soldOutSoon$;
       this.displayedColumns = [
         'col-image',
+        'col-title',
+        'col-rating',
         'col-price'
       ]
     }else if(this.phonelistingSource === 'search'){
@@ -173,9 +273,10 @@ export class PhoneListComponent implements OnInit {
         'col-image',
         'col-title',
         'col-brand',
+        'col-rating',
+        'col-price',
         'col-stock',
-        'col-seller',
-        'col-price'
+        'col-seller'
       ];
     }
     // Compute filteredPhoneList dynamically.
@@ -193,7 +294,20 @@ export class PhoneListComponent implements OnInit {
   getBrandImages(brand: string){
     return this.phonelistingService.brandImageMap[brand] || "assets/images/default.png";
   }
-
+  
+  // Get the integer and fraction part for star ratings
+  getStars(rating: number | null | undefined): number[]{
+    if(!rating){
+      return [0];
+    }
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1;
+    const stars = Array(fullStars).fill(1);
+    if(halfStar>0){
+      stars.push(halfStar);
+    }
+    return stars;
+  }
 
   // Handle click on selected phonelisting.
   itemClicked(phonelisting: any): void{
@@ -222,13 +336,4 @@ export class PhoneListComponent implements OnInit {
 
     this.phonelistingList$.set(list);
   }
-
-  // // filter phones under max price
-  // onInputChange(startVal: string, endVal: string) {
-  //   console.log('Start:', startVal, 'End:', endVal);
-  //   this.currentMin = Number(startVal);
-  //   this.currentMax = Number(endVal);
-  // }
-  
-
 }
