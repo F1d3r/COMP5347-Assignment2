@@ -299,6 +299,10 @@ import { PhoneListing } from '../phonelisting';
     .hidden-comment {
       color: var(--text-muted);
     }
+    
+    .hidden-row {
+      background-color: #e0e0e0 !important;
+    }
 
     /* Review Form */
     .review-form {
@@ -566,7 +570,7 @@ import { PhoneListing } from '../phonelisting';
               
               <!-- Add header and row definitions -->
               <tr mat-header-row *matHeaderRowDef="displayColumn"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayColumn;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayColumn;" [ngClass]="{'hidden-row': row.hidden}"></tr>
             </table>
 
             <!-- Button to show all -->
