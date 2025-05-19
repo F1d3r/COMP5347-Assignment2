@@ -23,7 +23,7 @@ import { UserService } from '../user.service';
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      gap: 12px;
+      gap: 60px;
       width: 100%;
       max-width: 600px;
       margin: 0 auto;

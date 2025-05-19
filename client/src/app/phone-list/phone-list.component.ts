@@ -233,7 +233,7 @@ export class PhoneListComponent implements OnInit {
   @Input() phonelistingSource?: string;
 
   priceMin$ = signal(0);
-  priceMax$ = signal(10000);
+  priceMax$ = signal(0);
   phonelistingList$ = {} as WritableSignal<PhoneListing[]>;
   maxPrice$: any;
   filteredPhoneListingList$: any;
@@ -286,7 +286,10 @@ export class PhoneListComponent implements OnInit {
     // Compute maxPrice dynamically.
     this.maxPrice$ = computed(() => {
       const phonelistings = this.phonelistingList$();
-      return phonelistings.length ? Math.max(...phonelistings.map(phonelisting => phonelisting.price)) : 100;
+      const max = phonelistings.length ? Math.max(...phonelistings.map(phonelisting => phonelisting.price)) : 100;
+      // Update the priceMax signal with the computed maximum price
+      this.priceMax$.set(max);
+      return max;
     });
   }
 
