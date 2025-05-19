@@ -23,7 +23,7 @@ import { UserService } from '../user.service';
       flex-direction: row;
       justify-content: center;
       align-items: center;
-      gap: 60px;
+      gap: 20px;
       width: 100%;
       max-width: 600px;
       margin: 0 auto;
@@ -34,7 +34,7 @@ import { UserService } from '../user.service';
     }
     
     .search-input {
-      flex: 1;
+      flex-grow: 2;
       position: relative;
     }
     
@@ -66,6 +66,7 @@ import { UserService } from '../user.service';
     #selectBrand {
       display: flex;
       flex-direction: row;
+      flex-grow: 1;
       min-width: 150px;
     }
 
@@ -89,6 +90,7 @@ import { UserService } from '../user.service';
     }
     
     button {
+      flex-grow: 1;
       padding: 0.5rem 1rem;
       border-radius: 4px;
       cursor: pointer;
@@ -114,7 +116,7 @@ import { UserService } from '../user.service';
       cursor: not-allowed;
       transform: none;
     }
-    
+
     /* The style applied when the page width is less than 768. */
     @media (max-width: 768px) {
       form {
@@ -154,7 +156,7 @@ import { UserService } from '../user.service';
           type="text" 
           formControlName="keyword" 
           name="keyword" 
-          placeholder="Search phones by keyword..."
+          placeholder="Search phones"
         />
       </div>
 
