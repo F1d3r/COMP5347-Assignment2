@@ -11,6 +11,7 @@ import { PhoneListingListComponent } from "../phonelisting-list/phonelisting-lis
 import { SearchFormComponent } from '../search-form/search-form.component';
 
 import { PhoneListing } from '../phonelisting';
+import { CartService } from '../cart/cart.service';
 
 @Component({
   selector: 'app-homepage',
@@ -34,6 +35,7 @@ export class HomepageComponent implements OnInit {
   title = 'OldPhoneListingDeals';
   user$ = inject(UserService).user$;
   pageState$ = inject(UserService).homeState$;
+  cartQuantity$ = inject(CartService).allQuantity$;
   searchQuery: string = '';
 
   constructor(
