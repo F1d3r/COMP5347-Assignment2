@@ -42,6 +42,7 @@ import { UserService } from '../user.service';
       width: 100%;
       padding: 0.75rem;
       padding-left: 2.5rem;
+      box-sizing: border-box;
       border: 1px solid #e1e5e9;
       border-radius: 4px;
       font-size: 1rem;
@@ -114,6 +115,7 @@ import { UserService } from '../user.service';
       transform: none;
     }
     
+    /* The style applied when the page width is less than 768. */
     @media (max-width: 768px) {
       form {
         flex-direction: column;
@@ -136,6 +138,10 @@ import { UserService } from '../user.service';
       .search-input {
         width: 100%;
       }
+
+      #searchInput{
+        width: 100%;
+      }
     }
   `,
 
@@ -144,6 +150,7 @@ import { UserService } from '../user.service';
       <div class="search-input">
         <mat-icon class="search-icon">search</mat-icon>
         <input 
+          id="searchInput"
           type="text" 
           formControlName="keyword" 
           name="keyword" 
