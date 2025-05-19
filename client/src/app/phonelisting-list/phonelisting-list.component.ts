@@ -125,6 +125,7 @@ import { MatIconModule } from '@angular/material/icon';
     </mat-card>
   `,
   styles: [`
+
     .table-container {
       width: 100%;
       max-width: 1800px;
@@ -166,12 +167,18 @@ import { MatIconModule } from '@angular/material/icon';
       border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     }
 
+    /* Why this not working? */
     .mat-column-col-image {
       width: 100px;
+      min-width: 80px;
+      max-width: 120px;
     }
     
     .mat-column-col-title {
-      width: 40%;
+      width: 60%;
+      white-space: normal;
+      word-wrap: break-word;
+      word-break: break-word;
     }
     
     .mat-column-col-brand {
@@ -191,8 +198,8 @@ import { MatIconModule } from '@angular/material/icon';
     }
     
     .mat-column-col-rating {
-      width: 12%;
-      min-width: 100px;
+      width: 15%;
+      min-width: 120px;
     }
     
     .mat-column-col-price {

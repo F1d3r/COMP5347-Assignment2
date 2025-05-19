@@ -414,7 +414,7 @@ import { PhoneListing } from '../phonelisting';
                 
                 <div *ngIf="currentQuantity > 0" class="stock">{{currentQuantity}} added to cart</div>
                 
-                <button type="button" class="btn-cart" (click)="addToCart()">
+                <button type="button" class="btn-cart" (click)="addToCartClicked()">
                   <mat-icon>add_shopping_cart</mat-icon> Add to Cart
                 </button>
 
@@ -430,7 +430,7 @@ import { PhoneListing } from '../phonelisting';
                     step="1" 
                     placeholder="Quantity"
                   >
-                  <button type="button" class="btn-cart" (click)="addToCart()">
+                  <button type="button" class="btn-cart" (click)="addToCart(null)">
                     <mat-icon>check</mat-icon> Confirm
                   </button>
                 </div>
@@ -573,15 +573,27 @@ export class ItemComponent implements OnInit{
     return this.phonelistingService.brandImageMap[brand];
   }
 
-  addToCart(){
+
+  addToCartClicked(){
+    this.addedToCart = true;
+  }
+
+
+  addToCart(quantity: number | null){
+    console.log("Got quantity:",quantity, this.purchaseForm.value.quantity);
     if(!this.userService.user$()){
       this.goLogin();
     }
-    if(!this.addedToCart){
-      this.addedToCart = !this.addedToCart;
-      return;
+    // Check stock.
+    if(this.phonelistingService.selected$()?.stock == 0){
+      return alert("Not enough stock.");
     }
-    this.cartService.addToCart(this.phonelistingService.selected$() as PhoneListing, this.purchaseForm.value.quantity!);
+
+    if(quantity){
+      this.cartService.addToCart(this.phonelistingService.selected$() as PhoneListing, quantity);
+    }else{
+      this.cartService.addToCart(this.phonelistingService.selected$() as PhoneListing, this.purchaseForm.value.quantity!);
+    }
   }
 
   addToWishList(){
@@ -595,11 +607,21 @@ export class ItemComponent implements OnInit{
     this.wishlistService.addToWishlist(this.userService.user$()?._id!, this.selectedPhoneListing$()?._id!);
   }
 
-  // TODO Add function here
+
   goCheckout(){
     if(!this.userService.user$()){
       console.log("Not logged in.");
-      
+      return alert("Login to buy things.");
+    }
+    // If the user has not add this into cart.
+    if(this.cartService.getQuantity(this.phonelistingService.selected$()?._id ?? '') == 0){
+      // If the stock of current phone is empty.
+      if(this.phonelistingService.selected$()?.stock == 0){
+        return alert("The stock is not enough.");
+      }else{
+        // Add 
+        this.addToCart(1);
+      }
     }
     this.router.navigate(['/checkout']);
   }
