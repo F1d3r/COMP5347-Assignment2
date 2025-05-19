@@ -2,6 +2,7 @@ import { UserService } from './../user.service';
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { PhoneService } from '../phone.service';
 import { CartService, CartItem } from './cart.service';
 
 @Component({
@@ -17,7 +18,8 @@ export class CheckoutComponent implements OnInit {
   constructor(
     private cartService: CartService, 
     private router: Router,
-    private userService: UserService
+    private userService: UserService,
+    private phoneService: PhoneService
   ) {}
 
   ngOnInit(): void {
@@ -45,6 +47,14 @@ export class CheckoutComponent implements OnInit {
 
   getTotal(): number {
     return this.cartItems.reduce((total, item) => total + item.phonelisting.price * item.quantity, 0);
+  }
+  
+  getTaxAmount(): number {
+    return this.getTotal() * 0.05;
+  }
+  
+  getFinalTotal(): number {
+    return this.getTotal() + this.getTaxAmount();
   }
 
   confirmOrder(): void {
@@ -78,5 +88,9 @@ export class CheckoutComponent implements OnInit {
 
   goBack(): void {
     window.history.back();
+  }
+
+  getBrandImage(brand: string): string {
+    return this.phoneService.brandImageMap[brand] || 'assets/images/default.png';
   }
 }

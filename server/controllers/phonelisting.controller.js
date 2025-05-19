@@ -141,31 +141,81 @@ module.exports.addReview = async function(req, res){
 
 
 module.exports.hideReview = async function(req, res){
-	review_id = req.body.review_id;
-	// Convert id string to id object.
-	reviewer = new mongoose.Types.ObjectId(reviewer);
+	const review_id = req.body.review_id;
+	const phone_id = req.body.phone_id;
+	
+	console.log("Hiding review:", review_id, "in phone:", phone_id);
 
-	console.log("Got review:", review_id, phone_id);
+	try {
+		// Find the phone and update the specific review's hidden status
+		const updatedPhone = await PhoneListing.findOneAndUpdate(
+			{ _id: phone_id, "reviews._id": review_id },
+			{ $set: { "reviews.$.hidden": true } },
+			{ new: true }
+		).populate('seller', '-password')
+		 .populate('reviews.reviewer', '-password');
 
-	// Create review directly in the PhoneListing document
-	Review.findByIdAndUpdate(
-		review_id,
-		{ hidden: true },
-		{ new: true, useFindAndModify: false }
-	).then(result =>{
-		// TODO: consider the inconsistency here.
-		PhoneListing.findByIdAndUpdate(
-			phone_id,
-			{
-				$set: { "reviews.$[elem].hidden" : true }
-			},
-			{
-				arrayFilters: [{"elem._id": review_id}],
-				new: true
-			}
-		)
-	}).catch(error => {
-		console.log("Failed to add review to phone", error);
-		res.status(500).send("Server Error. Failed to add review to phone.");
-	});
+		if (!updatedPhone) {
+			console.log("Phone or review not found");
+			return res.status(404).json({ 
+				status: 404, 
+				message: "Phone or review not found",
+				data: null
+			});
+		}
+
+		console.log("Review hidden successfully");
+		res.status(200).json({ 
+			status: 200, 
+			message: "Review hidden successfully",
+			data: updatedPhone
+		});
+	} catch (error) {
+		console.error("Failed to hide review:", error);
+		res.status(500).json({ 
+			status: 500, 
+			message: "Server Error. Failed to hide review.",
+			data: null
+		});
+	}
+}
+
+module.exports.unhideReview = async function(req, res){
+	const review_id = req.body.review_id;
+	const phone_id = req.body.phone_id;
+	
+	console.log("Unhiding review:", review_id, "in phone:", phone_id);
+
+	try {
+		// Find the phone and update the specific review's hidden status to false
+		const updatedPhone = await PhoneListing.findOneAndUpdate(
+			{ _id: phone_id, "reviews._id": review_id },
+			{ $set: { "reviews.$.hidden": false } },
+			{ new: true }
+		).populate('seller', '-password')
+		 .populate('reviews.reviewer', '-password');
+
+		if (!updatedPhone) {
+			console.log("Phone or review not found");
+			return res.status(404).json({ 
+				status: 404, 
+				message: "Phone or review not found",
+				data: null
+			});
+		}
+
+		console.log("Review unhidden successfully");
+		res.status(200).json({ 
+			status: 200, 
+			message: "Review unhidden successfully",
+			data: updatedPhone
+		});
+	} catch (error) {
+		console.error("Failed to unhide review:", error);
+		res.status(500).json({ 
+			status: 500, 
+			message: "Server Error. Failed to unhide review.",
+			data: null
+		});
+	}
 }

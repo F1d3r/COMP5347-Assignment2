@@ -1,25 +1,103 @@
-<button (click)="goBack()">← Back</button>
-<h2>🧾 Checkout Page</h2>
-
-<div *ngIf="cartItems.length > 0; else emptyCart">
-  <div *ngFor="let item of cartItems" class="checkout-item">
-    <h3>{{ item.phonelisting.title }}</h3>
-    <p><strong>Price:</strong> ${{ item.phonelisting.price }}</p>
-    <p>
-      <strong>Quantity:</strong>
-      <button (click)="decrease(item.phonelisting._id)">−</button>
-      {{ item.quantity }}
-      <button (click)="increase(item.phonelisting._id)">+</button>
-    </p>
-    <p><strong>Total:</strong> ${{ getTotalPrice(item) }}</p>
-    <button (click)="remove(item.phonelisting._id)">Remove</button>
-    <hr />
+<div class="cart-header checkout-header">
+  <div class="header-content">
+    <h2><span class="material-icons">shopping_bag</span> Checkout</h2>
   </div>
-
-  <h3>Total Amount: ${{ getTotal() }}</h3>
-  <button (click)="confirmOrder()">✅ Confirm Checkout</button>
 </div>
 
-<ng-template #emptyCart>
-  <p>Your cart is empty.</p>
-</ng-template>
+<div class="progress-container">
+  <div class="progress-step completed">
+    <span class="step-number">1</span>
+    <span class="step-name">Cart</span>
+  </div>
+  <div class="progress-line"></div>
+  <div class="progress-step active">
+    <span class="step-number">2</span>
+    <span class="step-name">Checkout</span>
+  </div>
+</div>
+
+<div class="cart-container checkout-container">
+  <button class="btn back-btn" (click)="goBack()">
+    <span class="material-icons">arrow_back</span> Return to Cart
+  </button>
+
+  <div *ngIf="cartItems.length > 0; else emptyCart" class="checkout-layout">
+    <div class="checkout-main">
+      <div class="checkout-section">
+        <h3 class="section-title"><span class="material-icons">inventory_2</span> Order Summary</h3>
+        <div *ngFor="let item of cartItems" class="phone-card checkout-item">
+          <img [src]="getBrandImage(item.phonelisting.brand)" alt="{{ item.phonelisting.title }}" class="phone-image" />
+          
+          <div class="phone-details">
+            <h3>{{ item.phonelisting.title }}</h3>
+            <p><strong>Brand:</strong> {{ item.phonelisting.brand }}</p>
+            <p><strong>Price:</strong> ${{ item.phonelisting.price }}</p>
+            
+            <div class="quantity-controls">
+              <strong>Quantity:</strong>
+              <button class="quantity-btn" (click)="decrease(item.phonelisting._id)">-</button>
+              <span class="quantity-value">{{ item.quantity }}</span>
+              <button class="quantity-btn" (click)="increase(item.phonelisting._id)">+</button>
+            </div>
+          </div>
+          
+          <div class="cart-actions">
+            <div class="item-total">Total: ${{ getTotalPrice(item) }}</div>
+            <button class="btn btn-remove" (click)="remove(item.phonelisting._id)">Remove</button>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="checkout-section">
+        <h3 class="section-title"><span class="material-icons">payment</span> Payment Method</h3>
+        <div class="payment-options">
+          <div class="payment-option">
+            <input type="radio" id="credit" name="payment" checked>
+            <label for="credit">Credit Card</label>
+          </div>
+          <div class="payment-option">
+            <input type="radio" id="paypal" name="payment">
+            <label for="paypal">PayPal</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-sidebar">
+      <div class="sidebar-content">
+        <h3>Order Total</h3>
+        <div class="order-detail">
+          <span>Subtotal:</span>
+          <span>${{ getTotal().toFixed(2) }}</span>
+        </div>
+        <div class="order-detail">
+          <span>Shipping:</span>
+          <span>$0.00</span>
+        </div>
+        <div class="order-detail">
+          <span>Tax:</span>
+          <span>${{ (getTotal() * 0.05).toFixed(2) }}</span>
+        </div>
+        <div class="order-total">
+          <span>Total:</span>
+          <span>${{ (getTotal() * 1.05).toFixed(2) }}</span>
+        </div>
+        <button class="btn btn-confirm" (click)="confirmOrder()">
+          <span class="material-icons">lock</span> Complete Order
+        </button>
+        <div class="security-info">
+          <span class="material-icons">verified_user</span>
+          <span>Secure Checkout</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <ng-template #emptyCart>
+    <div class="empty-cart">
+      <p>Your cart is empty.</p>
+      <button class="btn" (click)="goBack()">Continue Shopping</button>
+    </div>
+  </ng-template>
+</div>

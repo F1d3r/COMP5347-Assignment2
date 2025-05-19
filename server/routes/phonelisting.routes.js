@@ -11,5 +11,6 @@ phonelistingRouter.get('/:_id', phonelistingController.getPhone)
 
 phonelistingRouter.post('/addReview', phonelistingController.addReview);
 phonelistingRouter.post('/hideReview', phonelistingController.hideReview);
+phonelistingRouter.post('/unhideReview', phonelistingController.unhideReview);
 
 module.exports = phonelistingRouter;
