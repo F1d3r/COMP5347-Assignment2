@@ -146,7 +146,7 @@
                 </span>
               </td>
               <td class="date-column">{{ formatDate(user.createdAt) }}</td>
-              <td class="date-column">{{ user.lastLogin ? formatDate(user.lastLogin) : 'Never' }}</td>
+              <td class="date-column">{{ user.lastLogin ? formatDateTime(user.lastLogin) : 'Never' }}</td>
               <td class="actions-column">
                 <div class="actions">
                   <button 

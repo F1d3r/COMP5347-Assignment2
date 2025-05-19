@@ -685,6 +685,7 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   formatDate(dateString: string): string {
+    if (!dateString) return 'Never';
     return new Date(dateString).toLocaleDateString();
   }
   
