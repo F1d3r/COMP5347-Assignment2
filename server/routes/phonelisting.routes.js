@@ -10,5 +10,6 @@ phonelistingRouter.get('/allBrand', phonelistingController.getAllBrand);
 phonelistingRouter.get('/:_id', phonelistingController.getPhone)
 
 phonelistingRouter.post('/addReview', phonelistingController.addReview);
+phonelistingRouter.post('/hideReview', phonelistingController.hideReview);
 
 module.exports = phonelistingRouter;
