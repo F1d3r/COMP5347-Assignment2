@@ -123,7 +123,7 @@ oldphonedeals/
 The following npm scripts are available:
 
 - `npm run server`: Start the backend server
-- `npm run init-db`: Initialize the database with sample data
+- `npm run db-init`: Initialize the database with sample data
 - `npm start`: Start the production server
 
 ## Contributing
@@ -134,13 +134,6 @@ The following npm scripts are available:
 4. Push to the branch (`git push origin feature/your-feature`)
 5. Create a new Pull Request
 
-## Team Members
-
-- [Your Name]
-- [Team Member 2]
-- [Team Member 3]
-- [Team Member 4]
-- [Team Member 5]
 
 ## License
 
