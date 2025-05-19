@@ -773,9 +773,12 @@ export class ItemComponent implements OnInit{
     this.phonelistingService.addReview(this.userService.user$()?._id!, this.reviewForm.value.comment!, this.reviewForm.value.rating!)
     .subscribe(phonelisting => {
       console.log(phonelisting);
+      // Update the selected phonelisting with the latest data including reviews
       this.phonelistingService.getPhoneListing(phonelisting._id);
       // Reset form after adding review success.
       this.reviewForm.reset();
+      // Ensure all reviews are displayed after adding a new one
+      this.displayCount = this.showAll ? (phonelisting.reviews?.length || 3) : 3;
     })
   }
 
