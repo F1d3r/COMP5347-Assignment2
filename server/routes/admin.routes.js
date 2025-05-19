@@ -88,10 +88,32 @@ router.post('/logout', (req, res) => {
 // Get all users (admin only)
 router.get('/users', isAdmin, async (req, res) => {
   try {
+    const Activity = require('../models/activity');
+    
+    // Get all users
     const users = await User.find()
       .select('-password')
       .sort({ createdAt: -1 });
-    res.json(users);
+    
+    // For each user, find their most recent login activity
+    const usersWithLoginActivity = await Promise.all(users.map(async (user) => {
+      const userObj = user.toObject();
+      
+      // Find the most recent login activity for this user
+      const latestLogin = await Activity.findOne({
+        userId: user._id,
+        activity: 'login'
+      }).sort({ timestamp: -1 });
+      
+      // Add lastLogin field if login activity was found
+      if (latestLogin) {
+        userObj.lastLogin = latestLogin.timestamp;
+      }
+      
+      return userObj;
+    }));
+    
+    res.json(usersWithLoginActivity);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
