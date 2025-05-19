@@ -21,19 +21,21 @@ The application implements:
 oldphonedeals/
 ├── client/                  # Angular frontend
 │   ├── src/                 # Source code
+|   |   ├── app              # Source code
+|   |   └── assets
+|   |       └── iamges       # phone images
 │   ├── angular.json         # Angular configuration
 │   └── package.json         # Frontend dependencies
 ├── server/                  # Node.js backend
-│   ├── config/              # Configuration files
+|   ├── database/            # Initial dataset files
+|   |   ├── init-db.js       # Initial dataset javascript
+│   |   ├── phonelist.json   # Phone listing data
+│   |   └── userlist.json    # User data
 │   ├── controllers/         # Request handlers
-│   ├── middleware/          # Custom middleware
 │   ├── models/              # MongoDB models
 │   ├── routes/              # API routes
+│   ├── test.js              # Test file
 │   └── server.js            # Entry point
-├── dataset/                 # Initial dataset files
-│   ├── phonelisting.json    # Phone listing data
-│   ├── userlist.json        # User data
-│   └── images/              # Phone images
 ├── .gitignore               # Git ignore file
 ├── package.json             # Project dependencies
 └── README.md                # Project documentation
