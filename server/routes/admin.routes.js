@@ -565,6 +565,127 @@ router.get('/notifications', isAdmin, async (req, res) => {
   }
 });
 
+// Get all orders (admin only)
+router.get('/orders', isAdmin, async (req, res) => {
+  try {
+    const Order = require('../models/order');
+    const User = require('../models/User');
+    // Find all orders and populate with user information
+    const orders = await Order.find()
+      .populate('userId', 'firstname lastname email')
+      .sort({ createdAt: -1 });
+    
+    res.json(orders);
+  } catch (error) {
+    console.error('Error loading orders:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update order status (admin only)
+router.patch('/orders/:orderId/status', isAdmin, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    
+    const Order = require('../models/order');
+    const validStatuses = ['pending', 'processing', 'shipped', 'delivered'];
+    
+    if (!status || !validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+    
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    ).populate('userId', 'firstname lastname email');
+    
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    // Create notification for the user if order is delivered
+    if (status === 'delivered') {
+      const Notification = require('../models/Notification');
+      
+      await Notification.create({
+        user: order.userId._id,
+        type: 'ORDER_DELIVERED',
+        content: `Your order has been delivered!`,
+        relatedItem: order._id,
+        itemModel: 'Order'
+      });
+    }
+    
+    res.json({ 
+      message: 'Order status updated successfully',
+      order
+    });
+  } catch (error) {
+    console.error('Error updating order status:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Export orders as CSV or JSON (admin only)
+router.get('/orders/export/:format', isAdmin, async (req, res) => {
+  try {
+    const { format } = req.params;
+    
+    if (format !== 'csv' && format !== 'json') {
+      return res.status(400).json({ message: 'Format must be either csv or json' });
+    }
+    
+    const Order = require('../models/order');
+    
+    // Get all orders with user info
+    const orders = await Order.find()
+      .populate('userId', 'firstname lastname email')
+      .sort({ createdAt: -1 });
+      
+    if (format === 'json') {
+      // Return JSON format
+      return res.json(orders);
+    } else {
+      // CSV format
+      const csv = [
+        'Order ID,Date,Buyer Name,Buyer Email,Items,Quantity,Total,Status'
+      ];
+      
+      orders.forEach(order => {
+        const buyer = order.userId 
+          ? `${order.userId.firstname} ${order.userId.lastname}`
+          : 'Unknown User';
+        
+        const buyerEmail = order.userId ? order.userId.email : 'Unknown';
+        const date = new Date(order.createdAt).toLocaleDateString();
+        
+        // For each item in the order, create a row
+        if (order.items && order.items.length > 0) {
+          order.items.forEach(item => {
+            csv.push(
+              `${order._id},${date},"${buyer}","${buyerEmail}","${item.title}",${item.quantity},$${order.totalAmount.toFixed(2)},${order.status}`
+            );
+          });
+        } else {
+          // If no items, still create a row
+          csv.push(
+            `${order._id},${date},"${buyer}","${buyerEmail}","No items",0,$${order.totalAmount.toFixed(2)},${order.status}`
+          );
+        }
+      });
+      
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=orders.csv');
+      return res.status(200).send(csv.join('\n'));
+    }
+  } catch (error) {
+    console.error('Error exporting orders:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Mark notification as read
 router.patch('/notifications/:notificationId/read', isAdmin, async (req, res) => {
   try {

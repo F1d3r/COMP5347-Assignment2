@@ -48,16 +48,29 @@ export class CheckoutComponent implements OnInit {
   }
 
   confirmOrder(): void {
-    this.cartService.createOrder(this.userService.user$()?._id!).subscribe({
+    // Get current user ID
+    const userId = this.userService.user$()?._id;
+    
+    if (!userId) {
+      alert('❌ You must be logged in to place an order.');
+      return;
+    }
+    
+    // Make sure there are items in cart
+    if (this.cartItems.length === 0) {
+      alert('❌ Your cart is empty.');
+      return;
+    }
+    
+    this.cartService.createOrder(userId).subscribe({
       next: () => {
         alert('✅ Order placed successfully!');
         this.userService.homeState$.set('home');
         this.cartService.clearCart();
-        console.log("Cart cleaned");
-        console.log("Cart:", this.cartService.getItems);
         this.router.navigate(['/']);
       },
-      error: () => {
+      error: (error) => {
+        console.error('Order error:', error);
         alert('❌ Failed to place order. Please try again.');
       }
     });

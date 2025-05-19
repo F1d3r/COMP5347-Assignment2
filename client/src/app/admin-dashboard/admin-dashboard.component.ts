@@ -32,6 +32,27 @@ interface PhoneListing {
   createdAt: string;
 }
 
+interface OrderItem {
+  phoneId: string;
+  title: string;
+  price: number;
+  quantity: number;
+}
+
+interface Order {
+  _id: string;
+  userId: {
+    _id: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+  } | null;
+  items: OrderItem[];
+  totalAmount: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  createdAt: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -44,15 +65,21 @@ export class AdminDashboardComponent implements OnInit {
   users: User[] = [];
   listings: PhoneListing[] = [];
   reviews: any[] = [];
+  orders: Order[] = [];
+  
+  // Search terms
   reviewSearchTerm = '';
-  reviewSearchFilter = 'content'; // 'content', 'user', or 'listing'
-  filteredReviews: any[] = [];
-
-  // Search and filter
   userSearchTerm = '';
   listingSearchTerm = '';
+  orderSearchTerm = '';
+  
+  reviewSearchFilter = 'content'; // 'content', 'user', or 'listing'
+  
+  // Filtered lists
+  filteredReviews: any[] = [];
   filteredUsers: User[] = [];
   filteredListings: PhoneListing[] = [];
+  filteredOrders: Order[] = [];
   
   // Loading states
   loading = false;
@@ -61,6 +88,9 @@ export class AdminDashboardComponent implements OnInit {
   // Edit states
   editingUser: User | null = null;
   editingListing: PhoneListing | null = null;
+  selectedOrder: Order | null = null;
+  newStatus: string = 'pending';
+  
   userEditForm: FormGroup;
   listingEditForm: FormGroup;
   
@@ -99,6 +129,7 @@ export class AdminDashboardComponent implements OnInit {
     this.loadUsers();
     this.loadListings();
     this.loadReviews();
+    this.loadOrders();
   }
 
   loadReviews(): void {
@@ -248,6 +279,8 @@ export class AdminDashboardComponent implements OnInit {
       this.loadListings();
     } else if (tab === 'reviews') {
       this.loadReviews();
+    } else if (tab === 'orders') {
+      this.loadOrders();
     }
   }
 
@@ -408,6 +441,148 @@ export class AdminDashboardComponent implements OnInit {
     this.editingListing = null;
     this.userEditForm.reset();
     this.listingEditForm.reset();
+    this.selectedOrder = null;
+  }
+  
+  // Order Management Methods
+  loadOrders(): void {
+    this.loading = true;
+    this.http.get<Order[]>('/api/admin/orders').subscribe({
+      next: (orders) => {
+        this.orders = orders;
+        this.filteredOrders = orders;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading orders:', error);
+        this.loading = false;
+      }
+    });
+  }
+
+  searchOrders(): void {
+    if (!this.orderSearchTerm) {
+      this.filteredOrders = this.orders;
+      return;
+    }
+    
+    const term = this.orderSearchTerm.toLowerCase();
+    
+    this.filteredOrders = this.orders.filter(order => {
+      // Search by order ID
+      const idMatch = order._id.toLowerCase().includes(term);
+      
+      // Search by buyer name or email
+      const buyerMatch = order.userId && (
+        (order.userId.firstname && order.userId.firstname.toLowerCase().includes(term)) ||
+        (order.userId.lastname && order.userId.lastname.toLowerCase().includes(term)) ||
+        (order.userId.email && order.userId.email.toLowerCase().includes(term))
+      );
+      
+      // Search by item titles
+      const itemsMatch = order.items && order.items.some(item => 
+        item.title && item.title.toLowerCase().includes(term)
+      );
+      
+      // Search by status
+      const statusMatch = order.status && order.status.toLowerCase().includes(term);
+      
+      // Search by price (if the search term is a number)
+      const priceMatch = !isNaN(parseFloat(term)) && 
+        order.totalAmount.toString().includes(term);
+      
+      return idMatch || buyerMatch || itemsMatch || statusMatch || priceMatch;
+    });
+  }
+  
+  openStatusUpdateModal(order: Order): void {
+    this.selectedOrder = order;
+    this.newStatus = order.status;
+  }
+  
+  cancelStatusUpdate(): void {
+    this.selectedOrder = null;
+    this.newStatus = 'pending';
+  }
+  
+  updateOrderStatus(): void {
+    if (!this.selectedOrder || !this.newStatus) {
+      return;
+    }
+    
+    this.http.patch(`/api/admin/orders/${this.selectedOrder._id}/status`, { status: this.newStatus })
+      .subscribe({
+        next: (response: any) => {
+          // Update the order in our arrays
+          const orderIndex = this.orders.findIndex(o => o._id === this.selectedOrder?._id);
+          if (orderIndex !== -1) {
+            this.orders[orderIndex].status = this.newStatus as any;
+          }
+          
+          const filteredIndex = this.filteredOrders.findIndex(o => o._id === this.selectedOrder?._id);
+          if (filteredIndex !== -1) {
+            this.filteredOrders[filteredIndex].status = this.newStatus as any;
+          }
+          
+          alert(`Order status updated to ${this.newStatus.toUpperCase()}`);
+          this.cancelStatusUpdate();
+        },
+        error: (error) => {
+          console.error('Error updating order status:', error);
+          alert('Error updating order status: ' + (error.error?.message || 'Unknown error'));
+        }
+      });
+  }
+  
+  exportOrders(format: 'csv' | 'json'): void {
+    if (format === 'json') {
+      // Handle JSON export - first get the data as JSON
+      this.http.get('/api/admin/orders/export/json')
+        .subscribe({
+          next: (data) => {
+            // Convert to blob
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            
+            // Create link element and trigger download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `orders_export_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          },
+          error: (error) => {
+            console.error('Error exporting orders to JSON:', error);
+            alert('Error exporting orders: ' + (error.error?.message || 'Unknown error'));
+          }
+        });
+    } else {
+      // Handle CSV export - get the data with proper content type handling
+      this.http.get('/api/admin/orders/export/csv', { responseType: 'blob' })
+        .subscribe({
+          next: (blob) => {
+            // Create link element and trigger download
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `orders_export_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            
+            // Cleanup
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+          },
+          error: (error) => {
+            console.error('Error exporting orders to CSV:', error);
+            alert('Error exporting orders: ' + (error.error?.message || 'Unknown error'));
+          }
+        });
+    }
   }
 
   // Existing functions (delete, toggle, etc.)
