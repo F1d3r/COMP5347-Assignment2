@@ -3,6 +3,7 @@ const router = express.Router();
 const User = require('../models/User');
 const PhoneListing = require('../models/PhoneListing');
 const bcrypt = require('bcrypt');
+const adminLogController = require('../controllers/adminLog.controller');
 
 // Admin authentication middleware
 const isAdmin = (req, res, next) => {
@@ -40,6 +41,16 @@ router.post('/login', async (req, res) => {
     // Set session timeout (15 minutes)
     req.session.cookie.maxAge = 15 * 60 * 1000;
 
+    // Log the admin login
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      admin._id, 
+      'admin_login',
+      null,
+      { email: admin.email }
+    );
+
     res.json({ 
       message: 'Admin logged in successfully',
       admin: {
@@ -56,6 +67,16 @@ router.post('/login', async (req, res) => {
 
 // Admin logout endpoint
 router.post('/logout', (req, res) => {
+  // Log the admin logout if there's an admin session
+  if (req.session && req.session.user && req.session.user._id) {
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'admin_logout'
+    );
+  }
+
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ message: 'Could not log out' });
@@ -76,7 +97,7 @@ router.get('/users', isAdmin, async (req, res) => {
   }
 });
 
-// Edit a user (admin only) - NEW ENDPOINT
+// Edit a user (admin only)
 router.patch('/users/:userId', isAdmin, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -85,6 +106,12 @@ router.patch('/users/:userId', isAdmin, async (req, res) => {
     // Validate input
     if (!firstname || !lastname || !email) {
       return res.status(400).json({ message: 'First name, last name, and email are required' });
+    }
+
+    // Get original user data for logging
+    const originalUser = await User.findById(userId).select('-password');
+    if (!originalUser) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
     // Check if email already exists for another user
@@ -108,9 +135,26 @@ router.patch('/users/:userId', isAdmin, async (req, res) => {
       { new: true, runValidators: true }
     ).select('-password');
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+    // Log the user update
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'user_update',
+      userId,
+      { 
+        before: {
+          firstname: originalUser.firstname,
+          lastname: originalUser.lastname,
+          email: originalUser.email
+        },
+        after: {
+          firstname: updatedUser.firstname,
+          lastname: updatedUser.lastname,
+          email: updatedUser.email
+        }
+      }
+    );
 
     res.json({ 
       message: 'User updated successfully',
@@ -121,7 +165,6 @@ router.patch('/users/:userId', isAdmin, async (req, res) => {
   }
 });
 
-// Delete a user (admin only)
 // Delete a user (admin only)
 router.delete('/users/:userId', isAdmin, async (req, res) => {
   try {
@@ -140,6 +183,23 @@ router.delete('/users/:userId', isAdmin, async (req, res) => {
     
     // First cascade delete related data
     const cascadeResults = await cascadeUserDelete(userId);
+    
+    // Log the user deletion
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'user_delete',
+      userId,
+      { 
+        user: {
+          email: user.email,
+          firstname: user.firstname,
+          lastname: user.lastname
+        },
+        cascadeResults: cascadeResults
+      }
+    );
     
     // Then delete the user
     await User.findByIdAndDelete(userId);
@@ -170,8 +230,30 @@ router.patch('/users/:userId/toggle-admin', isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Save original status for logging
+    const originalStatus = user.isAdmin;
+    
+    // Toggle admin status
     user.isAdmin = !user.isAdmin;
     await user.save();
+
+    // Log the admin status change
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'user_toggle_admin',
+      userId,
+      { 
+        user: {
+          email: user.email,
+          firstname: user.firstname,
+          lastname: user.lastname
+        },
+        before: { isAdmin: originalStatus },
+        after: { isAdmin: user.isAdmin }
+      }
+    );
 
     res.json({ 
       message: 'User admin status updated successfully',
@@ -194,7 +276,7 @@ router.get('/listings', isAdmin, async (req, res) => {
   }
 });
 
-// Edit a listing (admin only) - NEW ENDPOINT
+// Edit a listing (admin only)
 router.patch('/listings/:listingId', isAdmin, async (req, res) => {
   try {
     const { listingId } = req.params;
@@ -209,6 +291,14 @@ router.patch('/listings/:listingId', isAdmin, async (req, res) => {
       return res.status(400).json({ message: 'Price and stock must be non-negative' });
     }
 
+    // Get original listing for logging
+    const originalListing = await PhoneListing.findById(listingId)
+      .populate('seller', 'firstname lastname email');
+    
+    if (!originalListing) {
+      return res.status(404).json({ message: 'Listing not found' });
+    }
+
     // Update listing
     const updatedListing = await PhoneListing.findByIdAndUpdate(
       listingId,
@@ -221,9 +311,32 @@ router.patch('/listings/:listingId', isAdmin, async (req, res) => {
       { new: true, runValidators: true }
     ).populate('seller', 'firstname lastname email');
 
-    if (!updatedListing) {
-      return res.status(404).json({ message: 'Listing not found' });
-    }
+    // Log the listing update
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'listing_update',
+      listingId,
+      { 
+        before: {
+          title: originalListing.title,
+          brand: originalListing.brand,
+          price: originalListing.price,
+          stock: originalListing.stock
+        },
+        after: {
+          title: updatedListing.title,
+          brand: updatedListing.brand,
+          price: updatedListing.price,
+          stock: updatedListing.stock
+        },
+        seller: {
+          _id: originalListing.seller._id,
+          email: originalListing.seller.email
+        }
+      }
+    );
 
     res.json({ 
       message: 'Listing updated successfully',
@@ -239,11 +352,36 @@ router.delete('/listings/:listingId', isAdmin, async (req, res) => {
   try {
     const { listingId } = req.params;
 
-    const listing = await PhoneListing.findByIdAndDelete(listingId);
+    // Get listing before deleting for logging
+    const listing = await PhoneListing.findById(listingId)
+      .populate('seller', 'firstname lastname email');
 
     if (!listing) {
       return res.status(404).json({ message: 'Listing not found' });
     }
+
+    // Log the listing deletion
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'listing_delete',
+      listingId,
+      { 
+        listing: {
+          title: listing.title,
+          brand: listing.brand,
+          price: listing.price
+        },
+        seller: {
+          _id: listing.seller._id,
+          email: listing.seller.email
+        }
+      }
+    );
+
+    // Delete the listing
+    await PhoneListing.findByIdAndDelete(listingId);
 
     res.json({ message: 'Listing deleted successfully' });
   } catch (error) {
@@ -393,7 +531,8 @@ router.delete('/reviews/:listingId/:reviewId', isAdmin, async (req, res) => {
     const { listingId, reviewId } = req.params;
     
     // Find the listing
-    const listing = await PhoneListing.findById(listingId);
+    const listing = await PhoneListing.findById(listingId)
+      .populate('reviews.reviewer', 'firstname lastname email');
     
     if (!listing) {
       return res.status(404).json({ message: 'Listing not found' });
@@ -407,6 +546,35 @@ router.delete('/reviews/:listingId/:reviewId', isAdmin, async (req, res) => {
     if (reviewIndex === -1) {
       return res.status(404).json({ message: 'Review not found' });
     }
+    
+    // Get review for logging before removing
+    const reviewForLogging = {
+      _id: listing.reviews[reviewIndex]._id,
+      rating: listing.reviews[reviewIndex].rating,
+      comment: listing.reviews[reviewIndex].comment,
+      reviewer: listing.reviews[reviewIndex].reviewer
+        ? {
+            _id: listing.reviews[reviewIndex].reviewer._id,
+            email: listing.reviews[reviewIndex].reviewer.email
+          }
+        : null
+    };
+
+    // Log the review deletion
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'review_delete',
+      reviewId,
+      { 
+        review: reviewForLogging,
+        listing: {
+          _id: listing._id,
+          title: listing.title
+        }
+      }
+    );
     
     // Remove the review from the array
     listing.reviews.splice(reviewIndex, 1);
@@ -428,7 +596,8 @@ router.patch('/reviews/:listingId/:reviewId/toggle-visibility', isAdmin, async (
     const { listingId, reviewId } = req.params;
     
     // Find the listing
-    const listing = await PhoneListing.findById(listingId);
+    const listing = await PhoneListing.findById(listingId)
+      .populate('reviews.reviewer', 'firstname lastname email');
     
     if (!listing) {
       return res.status(404).json({ message: 'Listing not found' });
@@ -445,7 +614,37 @@ router.patch('/reviews/:listingId/:reviewId/toggle-visibility', isAdmin, async (
     
     // Toggle the hidden status
     const currentVisibility = listing.reviews[reviewIndex].hidden === true;
+    const previousVisibility = currentVisibility;
     listing.reviews[reviewIndex].hidden = !currentVisibility;
+    
+    // Log the review visibility toggle
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'review_toggle_visibility',
+      reviewId,
+      { 
+        review: {
+          _id: listing.reviews[reviewIndex]._id,
+          comment: listing.reviews[reviewIndex].comment.substr(0, 50) + (listing.reviews[reviewIndex].comment.length > 50 ? '...' : ''),
+          reviewer: listing.reviews[reviewIndex].reviewer
+            ? {
+                _id: listing.reviews[reviewIndex].reviewer._id,
+                email: listing.reviews[reviewIndex].reviewer.email
+              }
+            : null
+        },
+        listing: {
+          _id: listing._id,
+          title: listing.title
+        },
+        visibility: {
+          before: previousVisibility,
+          after: !previousVisibility
+        }
+      }
+    );
     
     await listing.save();
     
@@ -473,6 +672,9 @@ router.patch('/users/:userId/toggle-disabled', isAdmin, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     
+    // Save original status for logging
+    const originalStatus = user.disabled;
+    
     // Toggle disabled status
     user.disabled = !user.disabled;
     await user.save();
@@ -484,6 +686,25 @@ router.patch('/users/:userId/toggle-disabled', isAdmin, async (req, res) => {
       // If user is disabled, disable their listings and hide their reviews
       cascadeResult = await cascadeUserDisable(userId);
       
+      // Log the user disable action
+      adminLogController.logAdminAction(
+        req, 
+        res, 
+        req.session.user._id, 
+        'user_toggle_disable',
+        userId,
+        { 
+          user: {
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname
+          },
+          before: { disabled: originalStatus },
+          after: { disabled: user.disabled },
+          cascadeResult: cascadeResult
+        }
+      );
+      
       res.json({ 
         message: `User disabled successfully. Also disabled ${cascadeResult.disabledListings} listings and hid ${cascadeResult.hiddenReviews} reviews in ${cascadeResult.listingsWithReviews} listings.`,
         disabled: true
@@ -491,6 +712,25 @@ router.patch('/users/:userId/toggle-disabled', isAdmin, async (req, res) => {
     } else {
       // If user is re-enabled, re-enable their listings and unhide their reviews
       cascadeResult = await cascadeUserEnable(userId);
+      
+      // Log the user enable action
+      adminLogController.logAdminAction(
+        req, 
+        res, 
+        req.session.user._id, 
+        'user_toggle_disable',
+        userId,
+        { 
+          user: {
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname
+          },
+          before: { disabled: originalStatus },
+          after: { disabled: user.disabled },
+          cascadeResult: cascadeResult
+        }
+      );
       
       res.json({ 
         message: `User enabled successfully. Also re-enabled ${cascadeResult.enabledListings} listings and unhid ${cascadeResult.unhiddenReviews} reviews in ${cascadeResult.listingsWithReviews} listings.`,
@@ -506,16 +746,43 @@ router.patch('/users/:userId/toggle-disabled', isAdmin, async (req, res) => {
 // Toggle listing disabled status (admin only)
 router.patch('/listings/:listingId/toggle-status', isAdmin, async (req, res) => {
   try {
-    const listing = await PhoneListing.findById(req.params.listingId);
+    const listing = await PhoneListing.findById(req.params.listingId)
+      .populate('seller', 'firstname lastname email');
 
     if (!listing) {
       return res.status(404).json({ message: 'Listing not found' });
     }
 
+    // Save original status for logging
+    const originalStatus = listing.disabled === true;
+    
     // Ensure we're toggling a boolean value
     const currentStatus = listing.disabled === true;
     listing.disabled = !currentStatus;
     await listing.save();
+
+    // Log the listing status toggle
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'listing_toggle_status',
+      listing._id,
+      { 
+        listing: {
+          title: listing.title,
+          brand: listing.brand
+        },
+        seller: {
+          _id: listing.seller._id,
+          email: listing.seller.email
+        },
+        status: {
+          before: originalStatus,
+          after: listing.disabled
+        }
+      }
+    );
 
     res.json({ 
       message: 'Listing status toggled successfully',
@@ -525,6 +792,7 @@ router.patch('/listings/:listingId/toggle-status', isAdmin, async (req, res) => 
     res.status(500).json({ message: error.message });
   }
 });
+
 // Get admin dashboard stats (admin only)
 router.get('/stats', isAdmin, async (req, res) => {
   try {
@@ -595,15 +863,46 @@ router.patch('/orders/:orderId/status', isAdmin, async (req, res) => {
       return res.status(400).json({ message: 'Invalid status value' });
     }
     
+    // Get original order for logging
+    const originalOrder = await Order.findById(orderId)
+      .populate('userId', 'firstname lastname email');
+    
+    if (!originalOrder) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+    
+    // Original status for logging
+    const originalStatus = originalOrder.status;
+    
     const order = await Order.findByIdAndUpdate(
       orderId,
       { status },
       { new: true }
     ).populate('userId', 'firstname lastname email');
     
-    if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
+    // Log the order status update
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'order_update_status',
+      orderId,
+      { 
+        order: {
+          _id: order._id,
+          totalAmount: order.totalAmount,
+          itemCount: order.items ? order.items.length : 0
+        },
+        user: order.userId ? {
+          _id: order.userId._id,
+          email: order.userId.email
+        } : null,
+        status: {
+          before: originalStatus,
+          after: status
+        }
+      }
+    );
     
     // Create notification for the user if order is delivered
     if (status === 'delivered') {
@@ -643,6 +942,19 @@ router.get('/orders/export/:format', isAdmin, async (req, res) => {
     const orders = await Order.find()
       .populate('userId', 'firstname lastname email')
       .sort({ createdAt: -1 });
+    
+    // Log the export operation
+    adminLogController.logAdminAction(
+      req, 
+      res, 
+      req.session.user._id, 
+      'export_orders',
+      null,
+      { 
+        format: format,
+        count: orders.length
+      }
+    );
       
     if (format === 'json') {
       // Return JSON format
@@ -784,6 +1096,7 @@ async function cascadeUserDisable(userId) {
     throw error;
   }
 }
+
 // Cascade user enable: re-enables listings and unhides reviews
 async function cascadeUserEnable(userId) {
   try {

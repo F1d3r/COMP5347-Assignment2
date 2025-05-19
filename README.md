@@ -134,7 +134,7 @@ oldphonedeals/
 The following npm scripts are available:
 
 - `npm run server`: Start the backend server
-- `npm run init-db`: Initialize the database with sample data
+- `npm run db-init`: Initialize the database with sample data
 - `npm start`: Start the production server
 
 ## Contributing

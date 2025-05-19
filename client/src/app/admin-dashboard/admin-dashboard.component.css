@@ -593,6 +593,111 @@ tr:hover {
   100% { transform: rotate(360deg); }
 }
 
+/* Audit Log Styles */
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.filter-controls select {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-width: 180px;
+}
+
+.log-details-modal {
+  max-width: 700px;
+}
+
+.log-details {
+  margin-bottom: 1.5rem;
+}
+
+.details-content {
+  margin-top: 1.5rem;
+}
+
+.details-content pre {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  font-size: 0.85rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.btn-view-details {
+  background-color: #2c3e50;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: background-color 0.3s;
+}
+
+.btn-view-details:hover {
+  background-color: #1a2530;
+}
+
+.btn-close {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.btn-close:hover {
+  background-color: #2980b9;
+}
+
+.ip-column {
+  font-family: monospace;
+  font-size: 0.85rem;
+  width: 120px;
+}
+
+/* Action badges */
+.badge.action-admin_login {
+  background-color: #3498db;
+}
+
+.badge.action-admin_logout {
+  background-color: #95a5a6;
+}
+
+.badge.action-user_update, 
+.badge.action-listing_update, 
+.badge.action-order_update_status {
+  background-color: #f39c12;
+}
+
+.badge.action-user_delete,
+.badge.action-listing_delete,
+.badge.action-review_delete {
+  background-color: #e74c3c;
+}
+
+.badge.action-user_toggle_admin,
+.badge.action-user_toggle_disable,
+.badge.action-listing_toggle_status,
+.badge.action-review_toggle_visibility {
+  background-color: #9b59b6;
+}
+
+.badge.action-export_orders {
+  background-color: #2ecc71;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .header-content {

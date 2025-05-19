@@ -35,7 +35,13 @@
       [class.active]="activeTab === 'orders'"
       (click)="switchTab('orders')"
     >
-      Orders & Logs
+      Orders
+    </button>
+    <button 
+      [class.active]="activeTab === 'logs'"
+      (click)="switchTab('logs')"
+    >
+      Audit Logs
     </button>
   </nav>
 
@@ -364,9 +370,10 @@
           <thead>
             <tr>
               <th class="id-column">Order ID</th>
-              <th class="date-column">Date</th>
+              <th class="date-column">Timestamp</th>
               <th>Buyer</th>
               <th>Items</th>
+              <th class="number-column">Quantity</th>
               <th class="price-column">Total</th>
               <th class="status-column">Status</th>
               <th class="actions-column">Actions</th>
@@ -385,10 +392,20 @@
               <td>
                 <div class="order-items">
                   <div *ngFor="let item of order.items" class="order-item">
-                    {{ item.title }} (x{{ item.quantity }})
+                    {{ item.title }}
                   </div>
                   <div *ngIf="!order.items || order.items.length === 0" class="no-items">
                     No items
+                  </div>
+                </div>
+              </td>
+              <td class="number-column">
+                <div class="order-items">
+                  <div *ngFor="let item of order.items" class="order-item">
+                    {{ item.quantity }}
+                  </div>
+                  <div *ngIf="!order.items || order.items.length === 0" class="no-items">
+                    -
                   </div>
                 </div>
               </td>
@@ -411,7 +428,7 @@
               </td>
             </tr>
             <tr *ngIf="filteredOrders.length === 0">
-              <td colspan="7" class="no-data">No orders found</td>
+              <td colspan="8" class="no-data">No orders found</td>
             </tr>
           </tbody>
         </table>
@@ -445,6 +462,111 @@
             </button>
             <button type="button" class="btn-save" (click)="updateOrderStatus()">
               Update Status
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Logs Tab -->
+    <div *ngIf="activeTab === 'logs'" class="tab-content">
+      <div class="section-header">
+        <h2>Admin Audit Logs</h2>
+        <div class="controls">
+          <div class="search-box">
+            <input
+              type="text"
+              placeholder="Search logs..."
+              [(ngModel)]="logSearchTerm"
+              (input)="searchLogs()"
+            />
+          </div>
+          <div class="filter-controls">
+            <select [(ngModel)]="logActionFilter" (change)="filterLogs()">
+              <option value="">All Actions</option>
+              <option value="admin_login">Admin Login</option>
+              <option value="admin_logout">Admin Logout</option>
+              <option value="user_update">User Update</option>
+              <option value="user_delete">User Delete</option>
+              <option value="user_toggle_admin">Toggle Admin</option>
+              <option value="user_toggle_disable">Toggle Disable</option>
+              <option value="listing_update">Listing Update</option>
+              <option value="listing_toggle_status">Toggle Listing</option>
+              <option value="listing_delete">Delete Listing</option>
+              <option value="review_toggle_visibility">Toggle Review</option>
+              <option value="review_delete">Delete Review</option>
+              <option value="order_update_status">Update Order</option>
+              <option value="export_orders">Export Orders</option>
+            </select>
+            <button class="btn-export" (click)="exportLogs()">Export Logs</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th class="date-column">Timestamp</th>
+              <th>Admin</th>
+              <th>Action</th>
+              <th>Resource ID</th>
+              <th>Details</th>
+              <th class="ip-column">IP Address</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let log of filteredLogs">
+              <td class="date-column">{{ formatDateTime(log.timestamp) }}</td>
+              <td>
+                <span *ngIf="log.adminId">
+                  {{ log.adminId.firstname }} {{ log.adminId.lastname }}
+                </span>
+                <span *ngIf="!log.adminId">Unknown Admin</span>
+              </td>
+              <td>
+                <span [class]="'badge action-' + log.actionType">
+                  {{ formatActionType(log.actionType) }}
+                </span>
+              </td>
+              <td class="id-column">{{ log.targetId || 'N/A' }}</td>
+              <td>
+                <button class="btn-view-details" (click)="viewLogDetails(log)">
+                  View Details
+                </button>
+              </td>
+              <td class="ip-column">{{ log.ipAddress }}</td>
+            </tr>
+            <tr *ngIf="filteredLogs.length === 0">
+              <td colspan="6" class="no-data">No logs found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Log Details Modal -->
+      <div *ngIf="selectedLog" class="edit-modal-overlay" 
+          (mousedown)="startClick($event)" 
+          (mouseup)="finishClick($event)">
+        <div class="edit-modal log-details-modal" (click)="$event.stopPropagation()">
+          <h3>Log Details</h3>
+          <div class="log-details">
+            <p><strong>Timestamp:</strong> {{ formatDateTime(selectedLog.timestamp) }}</p>
+            <p><strong>Admin:</strong> {{ selectedLog.adminId ? selectedLog.adminId.firstname + ' ' + selectedLog.adminId.lastname + ' (' + selectedLog.adminId.email + ')' : 'Unknown' }}</p>
+            <p><strong>Action:</strong> {{ formatActionType(selectedLog.actionType) }}</p>
+            <p><strong>Target ID:</strong> {{ selectedLog.targetId || 'N/A' }}</p>
+            <p><strong>IP Address:</strong> {{ selectedLog.ipAddress }}</p>
+            <p><strong>User Agent:</strong> {{ selectedLog.userAgent }}</p>
+            
+            <div class="details-content">
+              <h4>Details:</h4>
+              <pre>{{ formatLogDetails(selectedLog.details) }}</pre>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn-close" (click)="closeLogDetails()">
+              Close
             </button>
           </div>
         </div>

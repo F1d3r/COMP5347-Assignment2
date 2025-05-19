@@ -68,6 +68,7 @@ app.use('/assets', express.static(path.join(__dirname, '../client/src/assets')))
 const userRouter = require('./routes/user.routes');
 const phonelistingRouter = require('./routes/phonelisting.routes');
 const adminRoutes = require('./routes/admin.routes');
+const adminLogRoutes = require('./routes/adminLog.routes');
 const reviewRoutes = require('./routes/review.routes');
 const notificationRoutes = require('./routes/notifications.routes');
 const wishlistRoutes = require('./routes/wishlist.routes');
@@ -82,6 +83,7 @@ app.get('/api/test', (req, res) => {
 app.use('/user', userRouter);
 app.use('/phonelisting', phonelistingRouter);
 app.use('/api/admin', adminRoutes);
+app.use('/api/adminlogs', adminLogRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/wishlist', wishlistRoutes);
