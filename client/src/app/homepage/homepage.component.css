@@ -1,0 +1,363 @@
+/* Enhanced Homepage Component Styles */
+:root {
+    --primary-dark: #2c3e50;
+    --primary-light: #3498db;
+    --accent: #e74c3c;
+    --success: #27ae60;
+    --warning: #f39c12;
+    --text-dark: #2c3e50;
+    --text-light: #ecf0f1;
+    --text-muted: #7f8c8d;
+    --border-light: #e1e5e9;
+    --bg-light: #f5f7fa;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+  }
+  
+  /* Header Styles */
+  .header {
+    background-color: var(--primary-dark);
+    color: var(--text-light);
+    width: 100%;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  
+  .toolbar {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    height: 64px;
+  }
+  
+  .brand {
+    font-size: 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .brand-icon {
+    font-size: 1.2rem;
+  }
+  
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .user-greeting {
+    color: var(--text-light);
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  /* Button Styles */
+  .btn {
+    background-color: var(--primary-light);
+    color: var(--text-light);
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .btn-secondary {
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-light);
+  }
+  
+  .btn-signup {
+    background-color: var(--success);
+  }
+  
+  .btn-signup:hover {
+    background-color: #219652;
+  }
+  
+  .btn-wishlist {
+    background-color: var(--accent);
+  }
+  
+  .btn-wishlist:hover {
+    background-color: #c0392b;
+  }
+  
+  .btn-back {
+    background-color: #95a5a6;
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-back:hover {
+    background-color: #7f8c8d;
+  }
+  
+  /* Main Container */
+  .main-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+  
+  /* Search Bar Styles */
+  .search-container {
+    background-color: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .search-form {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .search-input {
+    flex-grow: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+  }
+  
+  .search-button {
+    background-color: var(--primary-light);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  
+  .search-button:hover {
+    background-color: #2980b9;
+  }
+  
+  /* Phone Lists Container */
+  .phone-lists-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+  
+  /* Section Styles */
+  .section {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  
+  .section-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+  
+  .section-title {
+    margin: 0;
+    color: var(--text-dark);
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .section-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0.25rem 0 0;
+  }
+  
+  .section-content {
+    padding: 0;
+  }
+  
+  /* Phone List Table */
+  .phone-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .phone-table th {
+    text-align: left;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+    color: var(--text-dark);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-light);
+  }
+  
+  .phone-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-light);
+    vertical-align: middle;
+  }
+  
+  .phone-table tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .phone-table tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* Phone Images */
+  .phone-image {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    padding: 0.25rem;
+  }
+  
+  .image-cell {
+    width: 80px;
+  }
+  
+  /* Rating Stars */
+  .rating {
+    display: flex;
+    gap: 0.25rem;
+  }
+  
+  .star {
+    color: #ddd;
+  }
+  
+  .star.filled {
+    color: #f39c12;
+  }
+  
+  /* Price Display */
+  .price {
+    font-weight: 600;
+    color: var(--text-dark);
+    text-align: right;
+  }
+  
+  .price::before {
+    content: '$';
+  }
+  
+  /* Stock Display */
+  .stock-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  
+  .stock-badge.low {
+    background-color: #ffeae9;
+    color: var(--accent);
+  }
+  
+  .stock-badge.in-stock {
+    background-color: #e8f5e9;
+    color: var(--success);
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 992px) {
+    .phone-lists-container {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .toolbar {
+      flex-direction: column;
+      height: auto;
+      padding: 1rem;
+      gap: 1rem;
+    }
+    
+    .nav-actions {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .search-form {
+      flex-direction: column;
+    }
+    
+    .search-button {
+      width: 100%;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .phone-table {
+      font-size: 0.9rem;
+    }
+    
+    .phone-table th,
+    .phone-table td {
+      padding: 0.75rem;
+    }
+    
+    .image-cell {
+      width: 60px;
+    }
+    
+    .phone-image {
+      width: 40px;
+      height: 40px;
+    }
+  }

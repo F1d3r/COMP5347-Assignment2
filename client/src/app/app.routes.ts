@@ -1,3 +1,4 @@
+// app.routes.ts
 import { Routes } from '@angular/router';
 import { HomepageComponent } from './homepage/homepage.component';
 import { LoginComponent } from './login/login.component';
@@ -9,7 +10,9 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { CartComponent } from './cart/cart.component';
 import { CheckoutComponent } from './cart/checkout.component';
 import { WishlistComponent } from './wishlist/wishlist.component';
-
+import { AdminComponent } from './admin/admin.component';
+import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
+import { PhoneListingListComponent } from './phonelisting-list/phonelisting-list.component';
 
 export const routes: Routes = [
   { path: '', component:HomepageComponent, title: 'OldPhoneDeals' },
@@ -22,4 +25,6 @@ export const routes: Routes = [
   { path: 'cart', component: CartComponent, title: 'Cart' },
   { path: 'checkout', component: CheckoutComponent, title: 'Checkout' },
   { path: 'wishlist', component: WishlistComponent, title: 'Wishlist' },
+  { path: 'admin', component: AdminComponent, title: 'Admin' },
+  { path: 'admin/dashboard', component: AdminDashboardComponent, title: 'Admin Dashboard' }
 ];

@@ -1,0 +1,359 @@
+<!-- admin-dashboard.component.html -->
+<div class="admin-dashboard">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <h1>OldPhoneDeals Admin Dashboard</h1>
+      <div class="admin-info">
+        <span>Welcome, {{ adminInfo?.firstname }} {{ adminInfo?.lastname }}</span>
+        <button class="logout-btn" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <nav class="dashboard-nav">
+    <button 
+      [class.active]="activeTab === 'users'"
+      (click)="switchTab('users')"
+    >
+      Users Management
+    </button>
+    <button 
+      [class.active]="activeTab === 'listings'"
+      (click)="switchTab('listings')"
+    >
+      Listings Management
+    </button>
+    <button 
+      [class.active]="activeTab === 'reviews'"
+      (click)="switchTab('reviews')"
+    >
+      Reviews Management
+    </button>
+    <button 
+      [class.active]="activeTab === 'orders'"
+      (click)="switchTab('orders')"
+    >
+      Orders & Logs
+    </button>
+  </nav>
+
+  <!-- Dashboard Content -->
+  <main class="dashboard-content">
+    <!-- Users Tab -->
+    <div *ngIf="activeTab === 'users'" class="tab-content">
+      <div class="section-header">
+        <h2>Users Management</h2>
+        <div class="search-box">
+          <input
+            type="text"
+            placeholder="Search users..."
+            [(ngModel)]="userSearchTerm"
+            (input)="searchUsers()"
+          />
+        </div>
+      </div>
+    
+      <!-- User Edit Form Modal -->
+      <div *ngIf="editingUser" class="edit-modal-overlay" 
+            (mousedown)="startClick($event)" 
+            (mouseup)="finishClick($event)">
+        <div class="edit-modal" (click)="$event.stopPropagation()">
+          <h3>Edit User</h3>
+          <form [formGroup]="userEditForm" (ngSubmit)="saveUserEdit()">
+            <div class="form-group">
+              <label for="firstname">First Name</label>
+              <input 
+                type="text" 
+                id="firstname"
+                formControlName="firstname" 
+              />
+              <div *ngIf="userEditForm.get('firstname')?.errors && userEditForm.get('firstname')?.touched" 
+                  class="error-message">
+                First name is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="lastname">Last Name</label>
+              <input 
+                type="text" 
+                id="lastname"
+                formControlName="lastname" 
+              />
+              <div *ngIf="userEditForm.get('lastname')?.errors && userEditForm.get('lastname')?.touched" 
+                  class="error-message">
+                Last name is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input 
+                type="email" 
+                id="email"
+                formControlName="email" 
+              />
+              <div *ngIf="userEditForm.get('email')?.errors && userEditForm.get('email')?.touched" 
+                  class="error-message">
+                <span *ngIf="userEditForm.get('email')?.errors?.['required']">Email is required</span>
+                <span *ngIf="userEditForm.get('email')?.errors?.['email']">Valid email format is required</span>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+              <button type="submit" class="btn-save" [disabled]="userEditForm.invalid">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th class="status-column">Role</th>
+              <th class="status-column">Status</th>
+              <th class="date-column">Registration</th>
+              <th class="date-column">Last Login</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of filteredUsers">
+              <td>{{ user.firstname }} {{ user.lastname }}</td>
+              <td>{{ user.email }}</td>
+              <td class="status-column">
+                <span [class]="user.isAdmin ? 'badge admin' : 'badge regular'">
+                  {{ user.isAdmin ? 'Admin' : 'User' }}
+                </span>
+              </td>
+              <td class="status-column">
+                <span [class]="user.disabled ? 'badge disabled' : 'badge active'">
+                  {{ user.disabled ? 'Disabled' : 'Active' }}
+                </span>
+              </td>
+              <td class="date-column">{{ formatDate(user.createdAt) }}</td>
+              <td class="date-column">{{ user.lastLogin ? formatDate(user.lastLogin) : 'Never' }}</td>
+              <td class="actions-column">
+                <div class="actions">
+                  <button 
+                    class="btn-action edit"
+                    (click)="startEditUser(user)"
+                    [disabled]="editingUser !== null"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    class="btn-action toggle"
+                    (click)="toggleUserAdmin(user)"
+                    [disabled]="user._id === adminInfo?._id || editingUser !== null"
+                  >
+                    {{ user.isAdmin ? 'Remove Admin' : 'Make Admin' }}
+                  </button>
+                  <button 
+                    class="btn-action toggle-status"
+                    (click)="toggleUserDisabled(user)"
+                    [disabled]="user._id === adminInfo?._id || editingUser !== null"
+                  >
+                    {{ user.disabled ? 'Enable' : 'Disable' }}
+                  </button>
+                  <button 
+                    class="btn-action delete"
+                    (click)="deleteUser(user._id)"
+                    [disabled]="user._id === adminInfo?._id || editingUser !== null"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredUsers.length === 0">
+              <td colspan="7" class="no-data">No users found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Listings Tab with Standardized Structure -->
+    <div *ngIf="activeTab === 'listings'" class="tab-content">
+      <div class="section-header">
+        <h2>Listings Management</h2>
+        <div class="search-box">
+          <input
+            type="text"
+            placeholder="Search listings..."
+            [(ngModel)]="listingSearchTerm"
+            (input)="searchListings()"
+          />
+        </div>
+      </div>
+    
+      <!-- Listing Edit Form Modal -->
+      <div *ngIf="editingListing" class="edit-modal-overlay" (click)="cancelEdit()">
+        <div class="edit-modal" (click)="$event.stopPropagation()">
+          <h3>Edit Listing</h3>
+          <!-- Form content same as before -->
+        </div>
+      </div>
+    
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th class="title-column">Title</th>
+              <th>Brand</th>
+              <th class="user-column">Seller</th>
+              <th class="price-column">Price</th>
+              <th class="number-column">Stock</th>
+              <th class="status-column">Status</th>
+              <th class="date-column">Created</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let listing of filteredListings">
+              <td class="title-column">{{ listing.title }}</td>
+              <td>{{ listing.brand }}</td>
+              <td class="user-column">{{ getSellerName(listing) }}</td>
+              <td class="price-column">${{ listing.price }}</td>
+              <td class="number-column">{{ listing.stock }}</td>
+              <td class="status-column">
+                <span [class]="listing.disabled ? 'badge disabled' : 'badge active'">
+                  {{ listing.disabled ? 'Disabled' : 'Active' }}
+                </span>
+              </td>
+              <td class="date-column">{{ formatDate(listing.createdAt) }}</td>
+              <td class="actions-column">
+                <div class="actions">
+                  <button 
+                    class="btn-action edit"
+                    (click)="startEditListing(listing)"
+                    [disabled]="editingListing !== null"
+                  >
+                    Edit
+                  </button>
+                  <button 
+                    class="btn-action toggle-status"
+                    (click)="toggleListingStatus(listing)"
+                    [disabled]="editingListing !== null"
+                  >
+                    {{ listing.disabled ? 'Enable' : 'Disable' }}
+                  </button>
+                  <button 
+                    class="btn-action delete"
+                    (click)="deleteListing(listing._id)"
+                    [disabled]="editingListing !== null"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="filteredListings.length === 0">
+              <td colspan="8" class="no-data">No listings found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reviews Tab with Standardized Structure -->
+    <div *ngIf="activeTab === 'reviews'" class="tab-content">
+      <div class="section-header">
+        <h2>Reviews Management</h2>
+        <div class="search-box">
+          <input
+            type="text"
+            placeholder="Search reviews..."
+            [(ngModel)]="reviewSearchTerm"
+            (input)="searchReviews()"
+          />
+        </div>
+      </div>
+    
+      <!-- Reviews Table -->
+      <div class="data-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Listing</th>
+              <th class="reviewer-column">Reviewer</th>
+              <th class="rating-column">Rating</th>
+              <th>Comment</th>
+              <th class="status-column">Status</th>
+              <th class="date-column">Date</th>
+              <th class="actions-column">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let review of filteredReviews">
+              <td class="listing-column">
+                <span title="{{ review.listing.title }}">{{ review.listing.title }}</span>
+              </td>
+              <td class="reviewer-column">{{ getUserName(review.reviewer) }}</td>
+              <td class="rating-column">
+                <div class="stars">
+                  <span *ngFor="let star of [1,2,3,4,5]" 
+                       [class.filled]="star <= review.rating">★</span>
+                </div>
+              </td>
+              <td class="comment-column">
+                <div [class.hidden-comment]="review.hidden" class="comment-text">
+                  {{ review.comment }}
+                </div>
+              </td>
+              <td class="status-column">
+                <span [class]="review.hidden ? 'badge hidden' : 'badge visible'">
+                  {{ review.hidden ? 'Hidden' : 'Visible' }}
+                </span>
+              </td>
+              <td class="date-column">{{ formatDate(review.createdAt) }}</td>
+              <td class="actions-column">
+                <button 
+                  class="btn-action toggle"
+                  (click)="toggleReviewVisibility(review)"
+                >
+                  {{ review.hidden ? 'Show' : 'Hide' }}
+                </button>
+                <button 
+                  class="btn-action delete"
+                  (click)="deleteReview(review)"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredReviews.length === 0">
+              <td colspan="7" class="no-data">No reviews found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Orders Tab -->
+    <div *ngIf="activeTab === 'orders'" class="tab-content">
+      <div class="section-header">
+        <h2>Orders & Sales History</h2>
+      </div>
+      
+      <div class="coming-soon">
+        <h3>Coming Soon</h3>
+        <p>Order management and sales history will be available when the order system is implemented.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Loading Overlay -->
+  <div *ngIf="loading" class="loading-overlay">
+    <div class="loading-spinner"></div>
+  </div>
+</div>

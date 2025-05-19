@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const orderSchema = new mongoose.Schema({
   items: [
     {
-      phoneId: { type: mongoose.Schema.Types.ObjectId, ref: 'Phone' },
+      phoneId: { type: mongoose.Schema.Types.ObjectId, ref: 'PhoneListing' },
       title: String,
       price: Number,
       quantity: Number

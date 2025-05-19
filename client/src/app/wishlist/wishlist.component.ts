@@ -2,8 +2,8 @@ import { UserService } from './../user.service';
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { WishlistService } from './wishlist.service';
-import { Phone } from '../phone';
-import { PhoneService } from '../phone.service';
+import { PhoneListing } from '../phonelisting';
+import { PhoneListingService } from '../phonelisting.service';
 import { Router } from '@angular/router';
 
 @Component({
@@ -14,11 +14,11 @@ import { Router } from '@angular/router';
   styleUrls: ['./wishlist.component.css']
 })
 export class WishlistComponent implements OnInit {
-    wishlistItems: Phone[] = [];
+    wishlistItems: PhoneListing[] = [];
   
     constructor(
       private wishlistService: WishlistService,
-      private phoneService: PhoneService,
+      private phonelistingService: PhoneListingService,
       private userService: UserService,
       private router: Router
     ) {}
@@ -26,19 +26,19 @@ export class WishlistComponent implements OnInit {
     ngOnInit(): void {
       this.wishlistService.getWishlist(this.userService.user$()?._id!).subscribe({
         next: (list) => {
-          this.phoneService.getPhones('', 'All').subscribe((phones) => {
+          this.phonelistingService.getPhoneListings('', 'All').subscribe((phonelistings) => {
             this.wishlistItems = list
-              .map((entry) => phones.find((p) => p._id === entry.productId))
-              .filter((p): p is Phone => !!p);
+              .map((entry) => phonelistings.find((p) => p._id === entry.productId))
+              .filter((p): p is PhoneListing => !!p);
           });
         },
         error: (err) => console.error('Failed to load wishlist', err)
       });
     }
   
-    removeFromWishlist(phoneId: string): void {
-      this.wishlistService.removeFromWishlist(this.userService.user$()?._id!, phoneId).subscribe(() => {
-        this.wishlistItems = this.wishlistItems.filter(p => p._id !== phoneId);
+    removeFromWishlist(phonelistingId: string): void {
+      this.wishlistService.removeFromWishlist(this.userService.user$()?._id!, phonelistingId).subscribe(() => {
+        this.wishlistItems = this.wishlistItems.filter(p => p._id !== phonelistingId);
       });
     }
   
@@ -52,6 +52,6 @@ export class WishlistComponent implements OnInit {
       if(!brand){
         return null;
       }
-      return this.phoneService.brandImageMap[brand];
+      return this.phonelistingService.brandImageMap[brand];
     }
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CartService, CartItem } from './cart.service';
 import { Router } from '@angular/router';
-import { PhoneService } from '../phone.service';
+import { PhoneListingService } from '../phonelisting.service';
 
 @Component({
   selector: 'app-cart',
@@ -17,34 +17,34 @@ export class CartComponent implements OnInit {
   constructor(
     private cartService: CartService,
     private router: Router,
-    private phoneService: PhoneService
+    private phonelistingService: PhoneListingService
   ) {}
 
   ngOnInit(): void {
     this.cartItems = this.cartService.getItems();
   }
 
-  increase(phoneId: string): void {
-    this.cartService.increaseQuantity(phoneId);
+  increase(phonelistingId: string): void {
+    this.cartService.increaseQuantity(phonelistingId);
     this.cartItems = this.cartService.getItems();
   }
 
-  decrease(phoneId: string): void {
-    this.cartService.decreaseQuantity(phoneId);
+  decrease(phonelistingId: string): void {
+    this.cartService.decreaseQuantity(phonelistingId);
     this.cartItems = this.cartService.getItems();
   }
 
-  remove(phoneId: string): void {
-    this.cartService.removeFromCart(phoneId);
+  remove(phonelistingId: string): void {
+    this.cartService.removeFromCart(phonelistingId);
     this.cartItems = this.cartService.getItems();
   }
 
   getTotalPrice(item: CartItem): number {
-    return item.phone.price * item.quantity;
+    return item.phonelisting.price * item.quantity;
   }
 
   getTotal(): number {
-    return this.cartItems.reduce((total, item) => total + item.phone.price * item.quantity, 0);
+    return this.cartItems.reduce((total, item) => total + item.phonelisting.price * item.quantity, 0);
   }  
   
   goToCheckout(): void {
@@ -62,7 +62,7 @@ export class CartComponent implements OnInit {
     if(!brand){
       return null;
     }
-    return this.phoneService.brandImageMap[brand];
+    return this.phonelistingService.brandImageMap[brand];
   }
   
 }

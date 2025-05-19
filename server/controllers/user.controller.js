@@ -13,7 +13,7 @@ const EMAIL_PORT = parseInt(process.env.EMAIL_PORT, 10) || 465;
 const EMAIL_USER = process.env.EMAIL_USER || 'tut07g04.comp5347@gmail.com';
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD || 'ahxsrummwfkabydg';
 
-const User = require('../models/user');
+const User = require('../models/User');
 const Activity = require('../models/activity');
 
 // Mail service

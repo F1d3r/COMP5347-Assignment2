@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Phone } from '../phone';
+import { PhoneListing } from '../phonelisting';
 
 export interface WishlistItem {
   userId: string;

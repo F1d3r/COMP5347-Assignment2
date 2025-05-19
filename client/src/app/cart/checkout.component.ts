@@ -24,27 +24,27 @@ export class CheckoutComponent implements OnInit {
     this.cartItems = this.cartService.getItems();
   }
 
-  increase(phoneId: string): void {
-    this.cartService.increaseQuantity(phoneId);
+  increase(phonelistingId: string): void {
+    this.cartService.increaseQuantity(phonelistingId);
     this.cartItems = this.cartService.getItems();
   }
 
-  decrease(phoneId: string): void {
-    this.cartService.decreaseQuantity(phoneId);
+  decrease(phonelistingId: string): void {
+    this.cartService.decreaseQuantity(phonelistingId);
     this.cartItems = this.cartService.getItems();
   }
 
-  remove(phoneId: string): void {
-    this.cartService.removeFromCart(phoneId);
+  remove(phonelistingId: string): void {
+    this.cartService.removeFromCart(phonelistingId);
     this.cartItems = this.cartService.getItems();
   }
 
   getTotalPrice(item: CartItem): number {
-    return item.phone.price * item.quantity;
+    return item.phonelisting.price * item.quantity;
   }
 
   getTotal(): number {
-    return this.cartItems.reduce((total, item) => total + item.phone.price * item.quantity, 0);
+    return this.cartItems.reduce((total, item) => total + item.phonelisting.price * item.quantity, 0);
   }
 
   confirmOrder(): void {
