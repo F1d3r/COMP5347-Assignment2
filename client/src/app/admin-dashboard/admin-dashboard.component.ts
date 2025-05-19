@@ -53,6 +53,22 @@ interface Order {
   createdAt: string;
 }
 
+interface AdminLog {
+  _id: string;
+  adminId: {
+    _id: string;
+    firstname: string;
+    lastname: string;
+    email: string;
+  } | null;
+  actionType: string;
+  targetId?: string;
+  details?: any;
+  ipAddress: string;
+  userAgent: string;
+  timestamp: string;
+}
+
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
@@ -66,20 +82,25 @@ export class AdminDashboardComponent implements OnInit {
   listings: PhoneListing[] = [];
   reviews: any[] = [];
   orders: Order[] = [];
+  logs: AdminLog[] = [];
   
   // Search terms
   reviewSearchTerm = '';
   userSearchTerm = '';
   listingSearchTerm = '';
   orderSearchTerm = '';
+  logSearchTerm = '';
   
+  // Filters
   reviewSearchFilter = 'content'; // 'content', 'user', or 'listing'
+  logActionFilter = ''; // Filter by action type
   
   // Filtered lists
   filteredReviews: any[] = [];
   filteredUsers: User[] = [];
   filteredListings: PhoneListing[] = [];
   filteredOrders: Order[] = [];
+  filteredLogs: AdminLog[] = [];
   
   // Loading states
   loading = false;
@@ -89,6 +110,7 @@ export class AdminDashboardComponent implements OnInit {
   editingUser: User | null = null;
   editingListing: PhoneListing | null = null;
   selectedOrder: Order | null = null;
+  selectedLog: AdminLog | null = null;
   newStatus: string = 'pending';
   
   userEditForm: FormGroup;
@@ -130,6 +152,7 @@ export class AdminDashboardComponent implements OnInit {
     this.loadListings();
     this.loadReviews();
     this.loadOrders();
+    this.loadLogs();
   }
 
   loadReviews(): void {
@@ -281,6 +304,8 @@ export class AdminDashboardComponent implements OnInit {
       this.loadReviews();
     } else if (tab === 'orders') {
       this.loadOrders();
+    } else if (tab === 'logs') {
+      this.loadLogs();
     }
   }
 
@@ -442,6 +467,7 @@ export class AdminDashboardComponent implements OnInit {
     this.userEditForm.reset();
     this.listingEditForm.reset();
     this.selectedOrder = null;
+    this.selectedLog = null;
   }
   
   // Order Management Methods
@@ -660,5 +686,127 @@ export class AdminDashboardComponent implements OnInit {
 
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleDateString();
+  }
+  
+  formatDateTime(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+  }
+  
+  // Logs Management Methods
+  loadLogs(): void {
+    this.loading = true;
+    this.http.get<AdminLog[]>('/api/adminlogs/logs').subscribe({
+      next: (logs) => {
+        this.logs = logs;
+        this.filteredLogs = logs;
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error loading logs:', error);
+        this.loading = false;
+      }
+    });
+  }
+  
+  searchLogs(): void {
+    if (!this.logSearchTerm) {
+      this.filterLogs(); // Reset to filter-only
+      return;
+    }
+    
+    const term = this.logSearchTerm.toLowerCase();
+    
+    this.filteredLogs = this.logs.filter(log => {
+      // Search in admin name if available
+      const adminMatch = log.adminId && (
+        (log.adminId.firstname && log.adminId.firstname.toLowerCase().includes(term)) ||
+        (log.adminId.lastname && log.adminId.lastname.toLowerCase().includes(term)) ||
+        (log.adminId.email && log.adminId.email.toLowerCase().includes(term))
+      );
+      
+      // Search in action type
+      const actionMatch = log.actionType.toLowerCase().includes(term);
+      
+      // Search in target ID
+      const targetMatch = log.targetId && log.targetId.toLowerCase().includes(term);
+      
+      // Search in IP address
+      const ipMatch = log.ipAddress && log.ipAddress.toLowerCase().includes(term);
+      
+      // Search in details (if you want to search JSON content)
+      const detailsMatch = log.details && JSON.stringify(log.details).toLowerCase().includes(term);
+      
+      return adminMatch || actionMatch || targetMatch || ipMatch || detailsMatch;
+    });
+    
+    // Apply action type filter if selected
+    if (this.logActionFilter) {
+      this.filteredLogs = this.filteredLogs.filter(log => 
+        log.actionType === this.logActionFilter
+      );
+    }
+  }
+  
+  filterLogs(): void {
+    if (!this.logActionFilter) {
+      this.filteredLogs = [...this.logs];
+    } else {
+      this.filteredLogs = this.logs.filter(log => 
+        log.actionType === this.logActionFilter
+      );
+    }
+    
+    // Apply search term if there is one
+    if (this.logSearchTerm) {
+      this.searchLogs();
+    }
+  }
+  
+  viewLogDetails(log: AdminLog): void {
+    this.selectedLog = log;
+  }
+  
+  closeLogDetails(): void {
+    this.selectedLog = null;
+  }
+  
+  formatActionType(actionType: string): string {
+    // Convert action_type to display name
+    return actionType
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+  
+  formatLogDetails(details: any): string {
+    if (!details) return 'No details available';
+    return JSON.stringify(details, null, 2);
+  }
+  
+  exportLogs(): void {
+    this.loading = true;
+    this.http.get('/api/adminlogs/logs/export', { responseType: 'blob' })
+      .subscribe({
+        next: (blob) => {
+          // Create link element and trigger download
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `admin_logs_${new Date().toISOString().split('T')[0]}.csv`;
+          document.body.appendChild(a);
+          a.click();
+          
+          // Cleanup
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error exporting logs:', error);
+          alert('Error exporting logs: ' + (error.error?.message || 'Unknown error'));
+          this.loading = false;
+        }
+      });
   }
 }
