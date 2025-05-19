@@ -12,7 +12,6 @@ import { CheckoutComponent } from './cart/checkout.component';
 import { WishlistComponent } from './wishlist/wishlist.component';
 import { AdminComponent } from './admin/admin.component';
 import { AdminDashboardComponent } from './admin-dashboard/admin-dashboard.component';
-import { PhoneListingListComponent } from './phonelisting-list/phonelisting-list.component';
 
 export const routes: Routes = [
   { path: '', component:HomepageComponent, title: 'OldPhoneDeals' },

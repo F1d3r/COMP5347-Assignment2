@@ -29,100 +29,100 @@ import { MatIconModule } from '@angular/material/icon';
     MatIconModule
   ],
   template: `
-<mat-card class="listing-card">
-    <mat-card-header *ngIf="phonelistingSource !== 'search'">
-      <!-- The card title for best seller -->
-      <span *ngIf="phonelistingSource === 'bestSeller'">
-        <mat-card-title>Best Sellers</mat-card-title>
-        <mat-card-subtitle>Highest Rating</mat-card-subtitle>
-      </span>
-      <!-- The card title for sold out soon -->
-      <span *ngIf="phonelistingSource === 'soldOutSoon'">
-        <mat-card-title>Sold Out Soon</mat-card-title>
-        <mat-card-subtitle>Lowest stock</mat-card-subtitle>
-      </span>
-    </mat-card-header>
-    
-    <mat-card-content>
-        <div *ngIf="phonelistingSource === 'search'" id='sort_slider'>
-          <mat-form-field>
-            <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
-              <mat-option value="titleAsc">Title: A -> Z</mat-option>
-              <mat-option value="titleDesc">Title: Z -> A</mat-option>
-              <mat-option value="priceAsc">Price: Low to High</mat-option>
-              <mat-option value="priceDesc">Price: High to Low</mat-option>
-              <mat-option value="stockAsc">Stock: Low to High</mat-option>
-              <mat-option value="stockDesc">Stock: High to Low</mat-option>
-            </mat-select>
-          </mat-form-field>
+    <mat-card class="listing-card">
+        <mat-card-header *ngIf="phonelistingSource !== 'search'">
+          <!-- The card title for best seller -->
+          <span *ngIf="phonelistingSource === 'bestSeller'">
+            <mat-card-title>Best Sellers</mat-card-title>
+            <mat-card-subtitle>Highest Rating</mat-card-subtitle>
+          </span>
+          <!-- The card title for sold out soon -->
+          <span *ngIf="phonelistingSource === 'soldOutSoon'">
+            <mat-card-title>Sold Out Soon</mat-card-title>
+            <mat-card-subtitle>Lowest stock</mat-card-subtitle>
+          </span>
+        </mat-card-header>
+        
+        <mat-card-content>
+            <div *ngIf="phonelistingSource === 'search'" id='sort_slider'>
+              <mat-form-field>
+                <mat-select placeholder="Sort by:" (selectionChange)="onSortChange($event.value)">
+                  <mat-option value="titleAsc">Title: A -> Z</mat-option>
+                  <mat-option value="titleDesc">Title: Z -> A</mat-option>
+                  <mat-option value="priceAsc">Price: Low to High</mat-option>
+                  <mat-option value="priceDesc">Price: High to Low</mat-option>
+                  <mat-option value="stockAsc">Stock: Low to High</mat-option>
+                  <mat-option value="stockDesc">Stock: High to Low</mat-option>
+                </mat-select>
+              </mat-form-field>
 
-          <label>Price: </label>
-          <mat-slider discrete min=0 [max]="maxPrice$()" step=1>
-            <input #startInput matSliderStartThumb [value]="priceMin$()" (input)="priceMin$.set($any($event.target).value || 0)" />
-            <input #endInput matSliderEndThumb [value]="priceMax$()" (input)="priceMax$.set($any($event.target).value || 100)" />
-          </mat-slider>
-        </div>
+              <label>Price: </label>
+              <mat-slider discrete min=0 [max]="maxPrice$()" step=1>
+                <input #startInput matSliderStartThumb [value]="priceMin$()" (input)="priceMin$.set($any($event.target).value || 0)" />
+                <input #endInput matSliderEndThumb [value]="priceMax$()" (input)="priceMax$.set($any($event.target).value || 100)" />
+              </mat-slider>
+            </div>
 
-        <div class="table-container">
-          <table mat-table [dataSource]="filteredPhoneListingList$()" class="mat-elevation-z1">
-            <!-- For image -->
-            <ng-container matColumnDef="col-image">
-              <th mat-header-cell *matHeaderCellDef>Image</th>
-              <td mat-cell *matCellDef="let phonelisting">
-                <img matCardImage [src]='getBrandImages(phonelisting.brand)' alt="Phone Img">
-              </td>
-            </ng-container>
-            <!-- For title -->
-            <ng-container matColumnDef="col-title">
-              <th mat-header-cell *matHeaderCellDef>Title</th>
-              <td mat-cell *matCellDef="let phonelisting">{{phonelisting.title}}</td>
-            </ng-container>
-            <!-- For brand -->
-            <ng-container matColumnDef="col-brand">
-              <th mat-header-cell *matHeaderCellDef>Brand</th>
-              <td mat-cell *matCellDef="let phonelisting">{{phonelisting.brand}}</td>
-            </ng-container>
-            <!-- For rating -->
-            <ng-container matColumnDef="col-rating">
-              <th mat-header-cell *matHeaderCellDef class="rating-header">Rating</th>
-              <td mat-cell *matCellDef="let phonelisting" class="rating-cell">
-                <div class="rating-display">
-                  <span *ngFor="let star of getStars(phonelisting.avgRating)">
-                    <mat-icon class='star-icon' [ngStyle]="{'clip-path': 'inset(0 ' + (100 - star * 100) + '% 0 0)'}">star</mat-icon>
-                  </span>
-                </div>
-              </td>
-            </ng-container>
-            <!-- For price -->
-            <ng-container matColumnDef="col-price">
-              <th mat-header-cell *matHeaderCellDef class="price-header">Price</th>
-              <td mat-cell *matCellDef="let phonelisting" class="price-cell">{{formatPrice(phonelisting.price)}}</td>
-            </ng-container>
-            <!-- For stock -->
-            <ng-container matColumnDef="col-stock">
-              <th mat-header-cell *matHeaderCellDef>Stock</th>
-              <td mat-cell *matCellDef="let phonelisting">{{phonelisting.stock}}</td>
-            </ng-container>
-            <!-- For seller -->
-            <ng-container matColumnDef="col-seller">
-              <th mat-header-cell *matHeaderCellDef>Seller</th>
-              <td mat-cell *matCellDef="let phonelisting">
-                {{phonelisting.seller.firstname}} {{phonelisting.seller.lastname}}
-              </td>
-            </ng-container>
-            <!-- For review -->
-            <ng-container matColumnDef="col-reviews">
-              <th mat-header-cell *matHeaderCellDef>Reviews</th>
-              <td mat-cell *matCellDef="let phonelisting">{{phonelisting.reviews}}</td>
-            </ng-container>
+            <div class="table-container">
+              <table mat-table [dataSource]="filteredPhoneListingList$()" class="mat-elevation-z1">
+                <!-- For image -->
+                <ng-container matColumnDef="col-image">
+                  <th mat-header-cell *matHeaderCellDef>Image</th>
+                  <td mat-cell *matCellDef="let phonelisting">
+                    <img matCardImage [src]='getBrandImages(phonelisting.brand)' alt="Phone Img">
+                  </td>
+                </ng-container>
+                <!-- For title -->
+                <ng-container matColumnDef="col-title">
+                  <th mat-header-cell *matHeaderCellDef>Title</th>
+                  <td mat-cell *matCellDef="let phonelisting">{{phonelisting.title}}</td>
+                </ng-container>
+                <!-- For brand -->
+                <ng-container matColumnDef="col-brand">
+                  <th mat-header-cell *matHeaderCellDef>Brand</th>
+                  <td mat-cell *matCellDef="let phonelisting">{{phonelisting.brand}}</td>
+                </ng-container>
+                <!-- For rating -->
+                <ng-container matColumnDef="col-rating">
+                  <th mat-header-cell *matHeaderCellDef class="rating-header">Rating</th>
+                  <td mat-cell *matCellDef="let phonelisting" class="rating-cell">
+                    <div class="rating-display">
+                      <span *ngFor="let star of getStars(phonelisting.avgRating)">
+                        <mat-icon class='star-icon' [ngStyle]="{'clip-path': 'inset(0 ' + (100 - star * 100) + '% 0 0)'}">star</mat-icon>
+                      </span>
+                    </div>
+                  </td>
+                </ng-container>
+                <!-- For price -->
+                <ng-container matColumnDef="col-price">
+                  <th mat-header-cell *matHeaderCellDef class="price-header">Price</th>
+                  <td mat-cell *matCellDef="let phonelisting" class="price-cell">{{formatPrice(phonelisting.price)}}</td>
+                </ng-container>
+                <!-- For stock -->
+                <ng-container matColumnDef="col-stock">
+                  <th mat-header-cell *matHeaderCellDef>Stock</th>
+                  <td mat-cell *matCellDef="let phonelisting">{{phonelisting.stock}}</td>
+                </ng-container>
+                <!-- For seller -->
+                <ng-container matColumnDef="col-seller">
+                  <th mat-header-cell *matHeaderCellDef>Seller</th>
+                  <td mat-cell *matCellDef="let phonelisting">
+                    {{phonelisting.seller.firstname}} {{phonelisting.seller.lastname}}
+                  </td>
+                </ng-container>
+                <!-- For review -->
+                <ng-container matColumnDef="col-reviews">
+                  <th mat-header-cell *matHeaderCellDef>Reviews</th>
+                  <td mat-cell *matCellDef="let phonelisting">{{phonelisting.reviews}}</td>
+                </ng-container>
 
-            <!-- Add header and row definitions -->
-            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="itemClicked(row)"></tr>
-          </table>
-        </div>
-    </mat-card-content>
-</mat-card>
+                <!-- Add header and row definitions -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="itemClicked(row)"></tr>
+              </table>
+            </div>
+        </mat-card-content>
+    </mat-card>
   `,
   styles: [`
     .table-container {
