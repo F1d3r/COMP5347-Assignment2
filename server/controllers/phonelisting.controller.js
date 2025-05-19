@@ -1,4 +1,5 @@
-const PhoneListing = require('../models/PhoneListing');
+const PhoneListing  = require('../models/PhoneListing');
+const Review = require('../models/PhoneListing')
 const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 
@@ -132,6 +133,37 @@ module.exports.addReview = async function(req, res){
 	).then(phone => {
 		console.log(phone);
 		res.status(200).send(phone);
+	}).catch(error => {
+		console.log("Failed to add review to phone", error);
+		res.status(500).send("Server Error. Failed to add review to phone.");
+	});
+}
+
+
+module.exports.hideReview = async function(req, res){
+	review_id = req.body.review_id;
+	// Convert id string to id object.
+	reviewer = new mongoose.Types.ObjectId(reviewer);
+
+	console.log("Got review:", review_id, phone_id);
+
+	// Create review directly in the PhoneListing document
+	Review.findByIdAndUpdate(
+		review_id,
+		{ hidden: true },
+		{ new: true, useFindAndModify: false }
+	).then(result =>{
+		// TODO: consider the inconsistency here.
+		PhoneListing.findByIdAndUpdate(
+			phone_id,
+			{
+				$set: { "reviews.$[elem].hidden" : true }
+			},
+			{
+				arrayFilters: [{"elem._id": review_id}],
+				new: true
+			}
+		)
 	}).catch(error => {
 		console.log("Failed to add review to phone", error);
 		res.status(500).send("Server Error. Failed to add review to phone.");

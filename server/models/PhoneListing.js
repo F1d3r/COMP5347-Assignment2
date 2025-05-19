@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Review Schema (nested in PhoneListing)
+// Review Schema
 const reviewSchema = new mongoose.Schema({
   reviewer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -22,6 +22,8 @@ const reviewSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+module.exports = mongoose.model('Review', reviewSchema);
 
 const phoneListingSchema = new mongoose.Schema({
   title: {

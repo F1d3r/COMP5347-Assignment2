@@ -339,6 +339,23 @@ import { PhoneListing } from '../phonelisting';
       background-color: #95a5a6;
     }
 
+    button.showCompleteComment {
+      width: 150px;
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    button.hideReview {
+      height: 30px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
     /* Responsive Adjustments */
     @media (max-width: 768px) {
       .flex-row {
@@ -460,7 +477,6 @@ import { PhoneListing } from '../phonelisting';
                     <span *ngFor="let star of getStars(review.rating)">
                       <mat-icon class='star-icon' [ngStyle]="{'clip-path': 'inset(0 ' + (100 - star * 100) + '% 0 0)'}">star</mat-icon>
                     </span>
-                    {{review.rating}}
                   </div>
                 </td>
               </ng-container>
@@ -468,10 +484,28 @@ import { PhoneListing } from '../phonelisting';
               <!-- Comment -->
               <ng-container matColumnDef="col-comment">
                 <th mat-header-cell *matHeaderCellDef>Comment</th>
-                <td mat-cell *matCellDef="let review">
-                  <div class='review-comment'>
+                <td class='comment' mat-cell *matCellDef="let review">
+                  <!-- Not expanded -->
+                  <span *ngIf="!review.expanded">
+                    {{review.comment?.length > 200 ? 
+                    review.comment.substring(0, 200) + '...' : review.comment}}
+                  </span>
+                  <!-- Expanded comment -->
+                  <span *ngIf="review.expanded">
                     {{review.comment}}
-                  </div>
+                  </span>
+                  <button class="showCompleteComment" *ngIf="review.comment?.length > 200" 
+                  (click)="review.expanded = !review.expanded">
+                    {{review.expanded ? 'Hide' : 'Show All'}}
+                  </button>
+
+                  <!-- Additional Button to hide this review if the user is the reviewer/seller -->
+                  <button class="hideReview" 
+                  *ngIf="(review.reviewer._id === this.currentUser$?._id
+                  || this.currentUser$?._id === this.selectedPhoneListing$()?.seller?._id)" 
+                  (click)="hideReview(review._id)">
+                    <label>Hide this review</label>
+                  </button>
                 </td>
               </ng-container>
               
@@ -487,6 +521,16 @@ import { PhoneListing } from '../phonelisting';
               <tr mat-header-row *matHeaderRowDef="displayColumn"></tr>
               <tr mat-row *matRowDef="let row; columns: displayColumn;"></tr>
             </table>
+
+            <!-- Button to show all -->
+            <button mat-button (click)="showAllReviews()">
+              <span *ngIf="!showAll">
+                Show All {{selectedPhoneListing$()?.reviews?.length}} reviews
+              </span>
+              <span *ngIf="showAll">
+                Collapse Reviews
+              </span>
+            </button>
 
           </div>
         </div>
@@ -528,6 +572,7 @@ import { PhoneListing } from '../phonelisting';
 export class ItemComponent implements OnInit{
   phonelisting_id: string|null = null;
   selectedPhoneListing$ = inject(PhoneListingService).selected$;
+  currentUser$ = inject(UserService).user$();
   // Get the phonelisting brand.
   phonelistingBrand$ = computed(() => this.selectedPhoneListing$()?.brand);
   currentQuantity: number = 0;
@@ -553,12 +598,19 @@ export class ItemComponent implements OnInit{
 
   constructor(
     private route: ActivatedRoute,
-    private phonelistingService: PhoneListingService,
+    public phonelistingService: PhoneListingService,
     private userService: UserService,
     private router: Router,
     private wishlistService: WishlistService,
     private cartService: CartService
   ){}
+  
+
+  ngOnInit(): void {
+    this.phonelisting_id = this.route.snapshot.paramMap.get('id');
+    // Update the selected phonelisting.
+    this.phonelistingService.getPhoneListing(this.phonelisting_id);
+  }
 
   // Removed duplicate method
   formatPrice(price: any): string {
@@ -640,22 +692,20 @@ export class ItemComponent implements OnInit{
     return stars;
   }
 
+
   goBackHome(){
     this.userService.homeState$.set('home');
     this.router.navigate(['']);
   }
 
 
-  // Always show all reviews
-  ngOnInit(): void {
-    this.phonelisting_id = this.route.snapshot.paramMap.get('id');
-    // Update the selected phonelisting.
-    this.phonelistingService.getPhoneListing(this.phonelisting_id);
-    
-    // Show all reviews immediately
-    setTimeout(() => {
-      this.displayCount = 1000; // Set to a high number to show all reviews
-    }, 100);
+  showAllReviews(){
+    if(this.showAll){
+      this.displayCount = 3;
+    }else{
+      this.displayCount = this.selectedPhoneListing$()?.reviews?.length || 3;
+    }
+    this.showAll = !this.showAll
   }
 
 
@@ -672,8 +722,14 @@ export class ItemComponent implements OnInit{
       // Reset form after adding review success.
       this.reviewForm.reset();
     })
-
   }
+
+
+  hideReview(review_id: string){
+    this.phonelistingService.hideReview(review_id, this.phonelistingService.selected$()?._id!);
+  }
+
+
 
   goLogin(){
     this.userService.homeState$.set('home');

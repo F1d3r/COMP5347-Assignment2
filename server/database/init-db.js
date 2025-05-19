@@ -116,6 +116,7 @@ initializeDatabase = async function() {
     // Create a pool of valid seller IDs to use if original seller not found
     const validSellerIds = Array.from(userIdMap.values());
     
+
     // Process phone listings
     console.log('Inserting phones...');
     const processedPhones = await Promise.all(phoneListingsData.map(async(phone) => {
@@ -135,6 +136,7 @@ initializeDatabase = async function() {
         const randomIndex = Math.floor(Math.random() * validSellerIds.length);
         sellerId = validSellerIds[randomIndex];
       }
+      
       
       // Process reviews
       const processedReviews = (phone.reviews || []).map(review => {
