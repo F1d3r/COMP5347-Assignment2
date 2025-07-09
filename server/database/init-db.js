@@ -18,8 +18,8 @@ const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/OldPho
 console.log("URI: ", MONGODB_URI);
 
 // JSON File path.
-const user_path = path.join(process.cwd(), 'database/userlist.json');
-const phone_path = path.join(process.cwd(), 'database/phonelisting.json');
+const user_path = path.join(process.cwd(), 'database/userlist_demo.json');
+const phone_path = path.join(process.cwd(), 'database/phonelisting_demo.json');
 
 // Initialize the MongoDB with server's local json file.
 initializeDatabase = async function() {
